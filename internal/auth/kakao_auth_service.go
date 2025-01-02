@@ -54,13 +54,14 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		return nil, util.DBReadError{}
 	}
 
-	// generate application token
-	memberId := svc.jwtUtil.GenerateSubject(findMember)
-	key := os.Getenv("secretKey")
-	newToken := svc.jwtUtil.NewToken(memberId, key)
-
 	// findMember 가 존재하는 경우 DB 필드를 업데이트하고 이미 회원가입된 Member return
 	if findMember != nil {
+
+		// generate application token
+		memberId := svc.jwtUtil.GenerateSubject(findMember)
+		key := os.Getenv("secretKey")
+		newToken := svc.jwtUtil.NewToken(memberId, key)
+
 		findMember.AccessToken = kakaoToken.AccessToken
 		_, err := svc.memberRepository.SaveMember(findMember)
 		if err != nil {
@@ -90,6 +91,12 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
 			return nil, util.DBSaveError{}
 		}
+
+		// generate application token
+		memberId := svc.jwtUtil.GenerateSubject(newMember)
+		key := os.Getenv("secretKey")
+		newToken := svc.jwtUtil.NewToken(memberId, key)
+
 		result := &SignInRes{
 			Member:     newMember,
 			IsRegister: true,

@@ -7,12 +7,12 @@ import (
 )
 
 type KakaoOAuthToken struct {
-	AccessToken           *string `json:"accessToken"`
+	AccessToken           *string `json:"access_token"`
 	expiresAt             *time.Time
 	refreshToken          *string
 	refreshTokenExpiresAt *time.Time
 	scopes                *[]string
-	IdToken               *string `json:"idToken"`
+	IdToken               *string `json:"id_token"`
 }
 
 type CertResponse struct {

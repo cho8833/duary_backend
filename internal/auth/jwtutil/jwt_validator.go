@@ -123,7 +123,7 @@ func (validator *JWTValidatorImpl) VerifyRSA256(idToken string, value *Validatin
 		nonce := claims["nonce"].(string)
 		if value.Nonce != "" {
 			if nonce != value.Nonce {
-				return nil, fmt.Errorf("Nonce does not match")
+				return nil, fmt.Errorf("nonce does not match")
 			}
 		}
 	}
