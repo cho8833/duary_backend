@@ -20,7 +20,7 @@ type CertResponse struct {
 }
 
 type SignInRes struct {
-	IsRegister bool
-	Member     *member.Member
-	Token      *jwtutil.ApplicationJWT
+	IsRegister bool                    `json:"isRegister"`
+	Member     *member.Member          `json:"member"`
+	Token      *jwtutil.ApplicationJWT `json:"token"`
 }

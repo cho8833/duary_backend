@@ -7,8 +7,8 @@ type Member struct {
 	Birthday    *time.Time `json:"birthday" dynamodbav:"birthday"`
 	Gender      *string    `json:"gender" dynamodbav:"gender"` // man, woman, other
 	FcmToken    *string    `json:"fcmToken" dynamodbav:"fcmToken"`
-	AccessToken *string    `dynamodbav:"accessToken"`
-	Provider    string     `dynamodbav:"provider"`
+	AccessToken *string    `json:"accessToken" dynamodbav:"accessToken"`
+	Provider    string     `json:"provider" dynamodbav:"provider"`
 	SocialId    int64      `json:"socialId" dynamodbav:"socialId"`
 	Email       *string    `json:"email" dynamodbav:"email"`
 	CoupleId    *string    `json:"coupleId" dynamodbav:"coupleId"`

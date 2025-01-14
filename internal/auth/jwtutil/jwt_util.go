@@ -9,10 +9,10 @@ import (
 )
 
 type ApplicationJWT struct {
-	AccessToken          string
-	ExpireTime           int64
-	RefreshToken         string
-	RefreshTokenExpireAt int64
+	AccessToken          string `json:"accessToken"`
+	ExpireTime           int64  `json:"expireTime"`
+	RefreshToken         string `json:"refreshToken"`
+	RefreshTokenExpireAt int64  `json:"refreshTokenExpireAt"`
 }
 
 type JWTUtil interface {
