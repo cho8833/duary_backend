@@ -44,7 +44,7 @@ func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *util
 func (svc *ServiceImpl) GetMember(socialId int64, provider string) (*Member, util.ApplicationError) {
 	member, err := svc.repo.FindBySocialIdAndProvider(socialId, provider)
 	if err != nil {
-		log.Printf("failed to get member withsocialId: %d, provider: %s \nerror: %s", socialId, provider, err.Error())
+		log.Printf("failed to get member with socialId: %d, provider: %s \nerror: %s", socialId, provider, err.Error())
 		return nil, util.DBReadError{}
 	}
 	return member, nil
