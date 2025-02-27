@@ -13,6 +13,9 @@ type Member struct {
 	Email       *string    `json:"email" dynamodbav:"email"`
 	CoupleId    *string    `json:"coupleId" dynamodbav:"coupleId"`
 	Character   *string    `json:"character" dynamodbav:"character"`
+
+	// SOLO, COUPLE
+	Status *string `json:"status" dynamodbav:"status"`
 }
 
 type UpdateMemberReq struct {
