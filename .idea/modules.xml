@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/kakao_login_lambda.iml" filepath="$PROJECT_DIR$/.idea/kakao_login_lambda.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/duary_lambda.iml" filepath="$PROJECT_DIR$/.idea/duary_lambda.iml" />
     </modules>
   </component>
 </project>

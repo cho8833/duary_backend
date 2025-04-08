@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cmd/auth/main/get_event.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/cmd/auth/main/save_event.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/event/event_service.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/event/test/event_service_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/kakao_login_lambda.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/get_user_info.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/get_user_info.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/reissue_token_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/reissue_token_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/start_duary_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/start_duary_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/dto.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/event.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/event_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///usr/local/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="2uC6mnyyjR9VOO7q3F4kIppLMXY" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultGoTemplateProperty": "Go File",
+    "Go Test.Test_GetEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "/Users/johyeonbin/Desktop/duary_lambda",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm"
+  }
+}]]></component>
+  <component name="RunManager" selected="Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test">
+    <configuration name="Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/event/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/event/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_GetEvent2\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/event/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/event/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_GetEvent_match_couple_id_not_match_start_date_before\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/event/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/event/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_generateOccurrence_by_one_day\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/event/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/event/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_generateOccurrence_by_one_week\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/event/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/event/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_generateOccurrence_of_weekly_by_one_month\E$" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-d297c17c1fbd-57c114c3cede-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-243.25659.52" />
+        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-GO-243.25659.52" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VgoProject">
+    <settings-migrated>true</settings-migrated>
+  </component>
+</project>

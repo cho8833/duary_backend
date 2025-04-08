@@ -9,7 +9,34 @@ import (
 )
 
 type Service interface {
+
+	/*
+		Duary 시작하기
+
+		1. create Couple(Id, RelationDate, Add Member to Members, Code)
+			- put random generated Id
+			- put RelationDate from InitDuaryInfoReq
+			- add Member to Members
+			- put random generated Code
+		2. update Member
+			- put Character from InitDuaryInfoReq
+			- put name from InitDuaryInfoReq
+			- put CoupleId from (1)
+
+		return 생성된 Couple 정보
+	*/
 	InitDuaryInfo(request *InitDuaryInfoReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError)
+
+	/*
+		커플 연결
+
+		1. get Couple with ConnectCoupleReq.CoupleCode
+		2. delete existing Couple of LoginMember
+		3. put CoupleId of retrieved Couple to LoginMember.CoupleId
+		4. put LoginMember to Couple.Members
+
+		return 업데이트된 couple 정보
+	 */
 	ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq) (*InitDuaryInfoRes, util.ApplicationError)
 }
 
@@ -78,18 +105,16 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 
 	transaction.BeginTransaction()
 	// Update Couple
-	connected := true
-	findCouple.IsConnected = &connected
+	findCouple.Members = append(findCouple.Members, findMember)
 	_, svcError = svc.coupleSvc.UpdateCouple(findCouple, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}
 	// Update Member
 	updateReq := &member.UpdateMemberReq{
-		Provider:  loginMember.Provider,
-		SocialId:  loginMember.SocialId,
-		CoupleId:  findCouple.Id,
-		Character: findCouple.OtherCharacter,
+		Provider: loginMember.Provider,
+		SocialId: loginMember.SocialId,
+		CoupleId: findCouple.Id,
 	}
 	updatedMember, svcError := svc.memberSvc.UpdateMember(updateReq, transaction)
 	if svcError != nil {

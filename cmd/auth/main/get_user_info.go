@@ -10,7 +10,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/jwt_authorizer.go && chmod 755 bootstrap && zip  build/package/jwt_authorizer.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/get_user_info.go && chmod 755 bootstrap && zip  build/package/get_user_info.zip bootstrap && rm bootstrap
 */
 func getUserInfo(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 

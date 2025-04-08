@@ -2,12 +2,11 @@ package event
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	uuid2 "github.com/google/uuid"
 	"log"
 	"time"
 )
@@ -15,7 +14,8 @@ import (
 const tableName = "Event"
 
 type Repository interface {
-	FindByCoupleIdAndEndTime(coupleId *string, date *time.Time) ([]Event, error)
+	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]Event, error)
+	SaveEvent(event *Event) (*Event, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -27,20 +27,34 @@ func NewEventRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 }
 
 func (repo *RepositoryDynamoDB) SaveEvent(event *Event) (*Event, error) {
-	
+	if event.Id == nil {
+		event.Id = repo.generateUID()
+	}
+	item, err := attributevalue.MarshalMap(event)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = repo.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String("Event"),
+		Item:      item,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return event, nil
 }
 
-func (repo *RepositoryDynamoDB) FindByCoupleIdAndDate(coupleId *string, date *time.Time) ([]Event, error) {
-	keyEx := expression.Key("coupleId").Equal(expression.Value(*coupleId))
-	formattedDate := fmt.Sprintf("%d-%02d-%d", date.Year(), date.Month(), date.Day())
-	filterEx := expression.Name("endDateTime").BeginsWith(formattedDate)
-	expr, err := expression.NewBuilder().WithFilter(filterEx).WithKeyCondition(keyEx).Build()
+func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]Event, error) {
+	keyEx := expression.Key("coupleId").Equal(expression.Value(coupleId)).And(expression.Key("startDate").LessThan(expression.Value(startDate)))
+	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
 	if err != nil {
 		return nil, err
 	}
 	output, err := repo.client.Query(context.TODO(), &dynamodb.QueryInput{
 		TableName:                 aws.String(tableName),
-		FilterExpression:          expr.Filter(),
 		KeyConditionExpression:    expr.KeyCondition(),
 		ExpressionAttributeValues: expr.Values(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -57,9 +71,7 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndDate(coupleId *string, date *ti
 	return events, nil
 }
 
-func (repo *RepositoryDynamoDB) getKey(event *Event) map[string]types.AttributeValue {
-	return map[string]types.AttributeValue{
-		"coupleId":      &types.AttributeValueMemberS{Value: *event.CoupleId},
-		"startDateTime": &types.AttributeValueMemberS{Value: event.EndTime.String()},
-	}
+func (repo *RepositoryDynamoDB) generateUID() *string {
+	uuid := uuid2.New().String()
+	return &uuid
 }

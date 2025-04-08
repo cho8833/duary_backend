@@ -38,10 +38,6 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 		log.Printf(err.Error())
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
-	validateError := initDuaryReq.Validate()
-	if validateError != nil {
-		return util.LambdaAppErrorResponse(validateError), nil
-	}
 
 	lambdaMap := req.RequestContext.Authorizer["lambda"].(map[string]interface{})
 	initDuaryReq.Provider = lambdaMap["provider"].(string)

@@ -11,6 +11,10 @@ import (
 	"os"
 )
 
+/*
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/reissue_token_api.go && chmod 755 bootstrap && zip  build/package/reissue_token_api.zip bootstrap && rm bootstrap
+*/
+
 type ReissueTokenRequest struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`

@@ -22,12 +22,9 @@ func NewCoupleService(repository Repository) *ServiceImpl {
 }
 
 func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
-	isConnected := false
 	couple := &Couple{
-		IsConnected:    &isConnected,
-		RelationDate:   &req.RelationDate,
-		OtherCharacter: &req.OtherCharacter,
-		Code:           svc.generateCoupleCode(),
+		RelationDate: &req.RelationDate,
+		Code:         svc.generateCoupleCode(),
 	}
 
 	if transaction != nil {
