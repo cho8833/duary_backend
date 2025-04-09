@@ -13,8 +13,8 @@ type Service interface {
 	/*
 		Duary 시작하기
 
-		1. create Couple(Id, RelationDate, Add Member to Members, Code)
-			- put random generated Id
+		1. create Couple(CoupleId, RelationDate, Add Member to Members, Code)
+			- put random generated CoupleId
 			- put RelationDate from InitDuaryInfoReq
 			- add Member to Members
 			- put random generated Code
@@ -36,7 +36,7 @@ type Service interface {
 		4. put LoginMember to Couple.Members
 
 		return 업데이트된 couple 정보
-	 */
+	*/
 	ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq) (*InitDuaryInfoRes, util.ApplicationError)
 }
 

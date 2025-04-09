@@ -16,36 +16,34 @@ import (
 //}
 
 /*
-ensure dynamodb clean!!!!!!!!!
+ensure dynamodb clean before running save!!!!!!!!!
 */
 func Test_SaveEvent(t *testing.T) {
 	dynamodbClient := util.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
-	now := timePtr(time.Now())
-	eventReq := event.SaveEventReq{
-		Title:       "Team Meeting",
-		CoupleId:    ptr("couple1"),
-		CreatedBy:   ptr("user1"),
-		StartDate:   now,
-		EndDate:     timePtr(now.Add(2 * time.Hour)),
-		StartTime:   now,
-		EndTime:     timePtr(now.Add(2 * time.Hour)),
-		Content:     ptr("Discuss project updates"),
-		IsTogether:  true,
-		IsAllDay:    false,
-		Location:    ptr("Office"),
-		HangOutWith: ptr("Team"),
+	now := time.Now()
+	eventReq := event.SaveReq{
+		Title:         "Team Meeting",
+		CoupleId:      "couple1",
+		CreatedBy:     1,
+		StartDateTime: now,
+		EndDateTime:   now.Add(2 * time.Hour),
+		Content:       ptr("Discuss project updates"),
+		IsTogether:    true,
+		IsAllDay:      false,
+		Location:      ptr("Office"),
+		HangOutWith:   ptr("Team"),
 		Recurrence: &event.Recurrence{
 			Frequency:       "weekly",
 			Interval:        1,
-			RepeatStartDate: *now,
+			RepeatStartDate: now,
 			RepeatEndDate:   now.AddDate(0, 3, 0),
 		},
 	}
 
-	target := event.From(&eventReq)
+	target := event.FromReq(&eventReq, "event1")
 
 	saveEvent, err := eventRepo.SaveEvent(target)
 	if err != nil {
@@ -62,7 +60,7 @@ func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
 	now := timePtr(time.Now())
-	rangeStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	rangeStart := time.Date(now.Year(), now.Month()+1, now.Day(), 0, 0, 0, 0, now.Location())
 
 	events, err := eventRepo.FindByCoupleIdAndStartDateBefore("couple1", rangeStart)
 

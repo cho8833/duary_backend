@@ -1,6 +1,9 @@
 package event
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 /*
 StartDate, EndDate 의 값 중 Time.Year, Time.Month, Time.Day 만 쓰임
@@ -11,18 +14,18 @@ StartDateTime 과 Recurrence.RepeatStartDate(EndDateTime 과 Recurrence.RepeatEn
 	반복 이벤트에 대한 Occurrence 를 만들 때 StartDateTime(EndDateTime) 에 Occurrence 의 StartDateTime(EndDateTime) 가 들어감.
 */
 type Event struct {
-	Id            *string     `json:"id" dynamodbav:"id"`
-	CoupleId      *string     `json:"coupleId" dynamodbav:"coupleId"` // partitionKey
-	StartDateTime time.Time   `json:"startDateTime" dynamodbav:"startDateTime"`
-	EndDateTime   time.Time   `json:"endDateTime" dynamodbav:"endDateTime"`
-	Title         string      `json:"title" dynamodbav:"title"`
-	Content       *string     `json:"content" dynamodbav:"content"` // 메모
-	IsTogether    bool        `json:"isTogether" dynamodbav:"isTogether"`
-	CreatedBy     *int        `json:"createdBy" dynamodbav:"createdBy"`
-	IsAllDay      bool        `json:"isAllDay" dynamodbav:"isAllDay"`
-	Location      *string     `json:"location" dynamodbav:"location"`
-	HangOutWith   *string     `json:"hangOutWith" dynamodbav:"hangOutWith"`
-	Recurrence    *Recurrence `json:"recurrence" dynamodbav:"recurrence"`
+	CoupleId string `dynamodbav:"coupleId"` // partition key
+	// sort key format : {startDateTime}#{generated id}
+	StartDateTime string      `dynamodbav:"startDateTime"` // sort key
+	EndDateTime   time.Time   `dynamodbav:"endDateTime"`
+	Title         string      `dynamodbav:"title"`
+	Content       *string     `dynamodbav:"content"` // 메모
+	IsTogether    bool        `dynamodbav:"isTogether"`
+	CreatedBy     int         `dynamodbav:"createdBy"`
+	IsAllDay      bool        `dynamodbav:"isAllDay"`
+	Location      *string     `dynamodbav:"location"`
+	HangOutWith   *string     `dynamodbav:"hangOutWith"`
+	Recurrence    *Recurrence `dynamodbav:"recurrence"`
 }
 
 type Recurrence struct {
@@ -32,10 +35,11 @@ type Recurrence struct {
 	RepeatEndDate   time.Time `json:"repeatEndDate" dynamodbav:"repeatEndDate"`
 }
 
-func From(req *SaveEventReq) *Event {
+func FromReq(req *SaveReq, id string) *Event {
+	sortKey := req.StartDateTime.Format(time.RFC3339) + "#" + id
 	return &Event{
 		Title:         req.Title,
-		StartDateTime: req.StartDateTime,
+		StartDateTime: sortKey,
 		EndDateTime:   req.EndDateTime,
 		IsTogether:    req.IsTogether,
 		CoupleId:      req.CoupleId,
@@ -47,17 +51,61 @@ func From(req *SaveEventReq) *Event {
 	}
 }
 
-type SaveEventReq struct {
-	Title         string    `json:"title"`
-	CoupleId      *string   `json:"coupleId"`
-	CreatedBy     *int      `json:"createdBy"`
-	StartDateTime time.Time `json:"startDateTime"`
-	EndDateTime   time.Time `json:"endDateTime"`
-	Content       *string   `json:"content"`
-	IsTogether    bool      `json:"isTogether"`
-	IsAllDay      bool      `json:"isAllDay"`
-	Location      *string   `json:"location"`
-	HangOutWith   *string   `json:"hangOutWith"`
+type VO struct {
+	Id            string      `json:"id"`
+	Title         string      `json:"title"`
+	CoupleId      string      `json:"coupleId"`
+	CreatedBy     int         `json:"createdBy"`
+	StartDateTime time.Time   `json:"startDateTime"`
+	EndDateTime   time.Time   `json:"endDateTime"`
+	Content       *string     `json:"content"`
+	IsTogether    bool        `json:"isTogether"`
+	IsAllDay      bool        `json:"isAllDay"`
+	Location      *string     `json:"location"`
+	HangOutWith   *string     `json:"hangOutWith"`
+	Recurrence    *Recurrence `json:"recurrence"`
+}
 
-	Recurrence *Recurrence `json:"recurrence"`
+func FromEvent(event Event) VO {
+	sortKeySplit := strings.Split(event.StartDateTime, "#")
+	startDateTime, _ := time.Parse(time.RFC3339, sortKeySplit[0])
+	return VO{
+		Id:            sortKeySplit[1],
+		CoupleId:      event.CoupleId,
+		StartDateTime: startDateTime,
+		EndDateTime:   event.EndDateTime,
+		Content:       event.Content,
+		IsTogether:    event.IsTogether,
+		IsAllDay:      event.IsAllDay,
+		Location:      event.Location,
+		HangOutWith:   event.HangOutWith,
+		Recurrence:    event.Recurrence,
+	}
+}
+
+type SaveReq struct {
+	Title         string      `json:"title"`
+	CoupleId      string      `json:"coupleId"`
+	CreatedBy     int         `json:"createdBy"`
+	StartDateTime time.Time   `json:"startDateTime"`
+	EndDateTime   time.Time   `json:"endDateTime"`
+	Content       *string     `json:"content"`
+	IsTogether    bool        `json:"isTogether"`
+	IsAllDay      bool        `json:"isAllDay"`
+	Location      *string     `json:"location"`
+	HangOutWith   *string     `json:"hangOutWith"`
+	Recurrence    *Recurrence `json:"recurrence"`
+}
+
+type UpdateReq struct {
+	Id            *string     `json:"id" dynamodbav:",omitempty"`
+	Title         *string     `json:"title" dynamodbav:",omitempty"`
+	StartDateTime *time.Time  `json:"startDateTime" dynamodbav:",omitempty"`
+	EndDateTime   *time.Time  `json:"endDateTime" dynamodbav:",omitempty"`
+	Content       *string     `json:"content" dynamodbav:",omitempty"`
+	IsTogether    *bool       `json:"isTogether" dynamodbav:",omitempty"`
+	IsAllDay      *bool       `json:"isAllDay" dynamodbav:",omitempty"`
+	Location      *string     `json:"location" dynamodbav:",omitempty"`
+	HangOutWith   *string     `json:"hangOutWith" dynamodbav:",omitempty"`
+	Recurrence    *Recurrence `json:"recurrence" dynamodbav:",omitempty"`
 }

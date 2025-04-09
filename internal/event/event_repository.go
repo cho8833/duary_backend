@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	uuid2 "github.com/google/uuid"
 	"log"
 	"time"
 )
@@ -14,7 +13,7 @@ import (
 const tableName = "Event"
 
 type Repository interface {
-	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]Event, error)
+	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
 	SaveEvent(event *Event) (*Event, error)
 }
 
@@ -27,9 +26,7 @@ func NewEventRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 }
 
 func (repo *RepositoryDynamoDB) SaveEvent(event *Event) (*Event, error) {
-	if event.Id == nil {
-		event.Id = repo.generateUID()
-	}
+
 	item, err := attributevalue.MarshalMap(event)
 	if err != nil {
 		return nil, err
@@ -47,8 +44,9 @@ func (repo *RepositoryDynamoDB) SaveEvent(event *Event) (*Event, error) {
 	return event, nil
 }
 
-func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]Event, error) {
-	keyEx := expression.Key("coupleId").Equal(expression.Value(coupleId)).And(expression.Key("startDate").LessThan(expression.Value(startDate)))
+func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error) {
+	rangeStart := startDate.Format(time.RFC3339) + "#"
+	keyEx := expression.Key("coupleId").Equal(expression.Value(coupleId)).And(expression.Key("startDateTime").LessThan(expression.Value(rangeStart)))
 	expr, err := expression.NewBuilder().WithKeyCondition(keyEx).Build()
 	if err != nil {
 		return nil, err
@@ -68,10 +66,36 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 		log.Printf(err.Error())
 		return nil, err
 	}
-	return events, nil
+
+	var result []VO
+	for _, e := range events {
+		result = append(result, FromEvent(e))
+	}
+
+	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) generateUID() *string {
-	uuid := uuid2.New().String()
-	return &uuid
-}
+//func (repo *RepositoryDynamoDB) UpdateEvent(req *UpdateReq) (*Event, error) {
+//	av, err := attributevalue.MarshalMap(req)
+//	if err != nil {
+//		log.Printf(err.Error())
+//		return nil, err
+//	}
+//	builder := expression.UpdateBuilder{}
+//
+//	for k, v := range av {
+//		builder = builder.Set(expression.Name(k), expression.Value(v))
+//	}
+//
+//	expr, err := expression.NewBuilder().WithUpdate(builder).Build()
+//
+//	if err != nil {
+//		log.Printf(err.Error())
+//		return nil, err
+//	}
+//
+//	response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
+//		TableName: aws.String(tableName),
+//		Key:
+//	})
+//}

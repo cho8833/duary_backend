@@ -2,13 +2,14 @@ package event
 
 import (
 	"github.com/cho8833/duary_lambda/internal/util"
+	uuid2 "github.com/google/uuid"
 	"log"
 	"time"
 )
 
 type Service interface {
-	SaveEvent(req *SaveEventReq) (*Event, util.ApplicationError)
-	GetEventBetweenStartAndEndDate(coupleId *string, rangeStartDate time.Time, rangeEndDate time.Time) ([]Event, util.ApplicationError)
+	SaveEvent(req *SaveReq) (*Event, util.ApplicationError)
+	GetEventBetweenStartAndEndDate(coupleId *string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -19,8 +20,9 @@ func NewEventService(repository Repository) *ServiceImpl {
 	return &ServiceImpl{repository: repository}
 }
 
-func (service *ServiceImpl) SaveEvent(req *SaveEventReq) (*Event, util.ApplicationError) {
-	event := From(req)
+func (service *ServiceImpl) SaveEvent(req *SaveReq) (*Event, util.ApplicationError) {
+
+	event := FromReq(req, *service.generateUID())
 
 	event, err := service.repository.SaveEvent(event)
 	if err != nil {
@@ -31,7 +33,7 @@ func (service *ServiceImpl) SaveEvent(req *SaveEventReq) (*Event, util.Applicati
 	return event, nil
 }
 
-func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]Event, util.ApplicationError) {
+func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError) {
 
 	candidateEvents, err := service.repository.FindByCoupleIdAndStartDateBefore(coupleId, rangeEndDate)
 	if err != nil {
@@ -39,7 +41,7 @@ func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rang
 		return nil, util.DBReadError{}
 	}
 
-	var result []Event
+	var result []VO
 
 	for _, event := range candidateEvents {
 
@@ -62,39 +64,39 @@ func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rang
 	}
 
 	if len(result) == 0 {
-		result = make([]Event, 0)
+		result = make([]VO, 0)
 	}
 	return result, nil
 }
 
-func (service *ServiceImpl) GenerateOccurrence(event Event, rangeStartDate time.Time, rangeEndDate time.Time) ([]Event, util.ApplicationError) {
+func (service *ServiceImpl) GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError) {
 
-	var occurrences []Event
+	var occurrences []VO
 
-	currentDate := event.Recurrence.RepeatStartDate
+	currentDate := vo.Recurrence.RepeatStartDate
 
 	for {
-		// occurrence 의 날짜가 반복종료(event.Reccurrence.RepeatEndDate) 날짜 혹은 범위(rangeEndDate) 밖이면 종료
-		if currentDate.After(rangeEndDate) || currentDate.After(event.Recurrence.RepeatEndDate) {
+		// occurrence 의 날짜가 반복종료(vo.Reccurrence.RepeatEndDate) 날짜 혹은 범위(rangeEndDate) 밖이면 종료
+		if currentDate.After(rangeEndDate) || currentDate.After(vo.Recurrence.RepeatEndDate) {
 			break
 		}
 
 		if (currentDate.After(rangeStartDate) || currentDate.Equal(rangeStartDate)) && currentDate.Before(rangeEndDate) {
-			eventCopy := event
+			eventCopy := vo
 			eventCopy.StartDateTime = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, currentDate.Location())
 			eventCopy.EndDateTime = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, currentDate.Location())
 
 			occurrences = append(occurrences, eventCopy)
 		}
 
-		if event.Recurrence.Frequency == "DAILY" {
-			currentDate = currentDate.AddDate(0, 0, int(1*event.Recurrence.Interval))
-		} else if event.Recurrence.Frequency == "WEEKLY" {
-			currentDate = currentDate.AddDate(0, 0, int(7*event.Recurrence.Interval))
-		} else if event.Recurrence.Frequency == "MONTHLY" {
-			currentDate = currentDate.AddDate(0, int(event.Recurrence.Interval), 0)
-		} else if event.Recurrence.Frequency == "YEARLY" {
-			currentDate = currentDate.AddDate(int(event.Recurrence.Interval), 0, 0)
+		if vo.Recurrence.Frequency == "DAILY" {
+			currentDate = currentDate.AddDate(0, 0, int(1*vo.Recurrence.Interval))
+		} else if vo.Recurrence.Frequency == "WEEKLY" {
+			currentDate = currentDate.AddDate(0, 0, int(7*vo.Recurrence.Interval))
+		} else if vo.Recurrence.Frequency == "MONTHLY" {
+			currentDate = currentDate.AddDate(0, int(vo.Recurrence.Interval), 0)
+		} else if vo.Recurrence.Frequency == "YEARLY" {
+			currentDate = currentDate.AddDate(int(vo.Recurrence.Interval), 0, 0)
 		} else {
 			return nil, util.DBReadError{}
 		}
@@ -103,6 +105,7 @@ func (service *ServiceImpl) GenerateOccurrence(event Event, rangeStartDate time.
 	return occurrences, nil
 }
 
-func timePtr(time time.Time) *time.Time {
-	return &time
+func (service *ServiceImpl) generateUID() *string {
+	uuid := uuid2.New().String()
+	return &uuid
 }

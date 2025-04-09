@@ -26,19 +26,21 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 
 	eventSvc := event.NewEventService(eventRepo)
 
-	saveEventReq := &event.SaveEventReq{}
+	saveEventReq := &event.SaveReq{}
 	err = json.Unmarshal([]byte(req.Body), &saveEventReq)
 	if err != nil {
 		log.Printf(err.Error())
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	result, svcError := eventSvc.SaveEvent(saveEventReq)
+	savedEvent, svcError := eventSvc.SaveEvent(saveEventReq)
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	return util.LambdaResponseWithData(result), nil
+	res := event.FromEvent(*savedEvent)
+
+	return util.LambdaResponseWithData(res), nil
 }
 
 func main() {

@@ -28,12 +28,12 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 	startDate, _ := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])
 	endDate, _ := time.Parse(time.RFC3339, request.QueryStringParameters["endDate"])
 
-	result, svcErr := eventSvc.GetEventBetweenStartAndEndDate(coupleId, startDate, endDate)
+	res, svcErr := eventSvc.GetEventBetweenStartAndEndDate(coupleId, startDate, endDate)
 	if svcErr != nil {
 		return util.LambdaAppErrorResponse(svcErr), nil
 	}
 
-	return util.LambdaResponseWithData(result), nil
+	return util.LambdaResponseWithData(res), nil
 }
 
 func main() {

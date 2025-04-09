@@ -7,23 +7,22 @@ import (
 	"time"
 )
 
-func getDailyDummy() event.Event {
+func getDailyDummy() event.VO {
 
 	testDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.Local)
 
-	dummy := event.Event{
-		Title:       "Team Meeting",
-		CoupleId:    ptr("couple1"),
-		CreatedBy:   ptr("user1"),
-		StartDate:   timePtr(testDate),
-		EndDate:     timePtr(testDate.Add(2 * time.Hour)),
-		StartTime:   timePtr(testDate),
-		EndTime:     timePtr(testDate.Add(2 * time.Hour)),
-		Content:     ptr("Discuss project updates"),
-		IsTogether:  true,
-		IsAllDay:    false,
-		Location:    ptr("Office"),
-		HangOutWith: ptr("Team"),
+	dummy := event.VO{
+		Id:            "event1",
+		Title:         "Team Meeting",
+		CoupleId:      "couple1",
+		CreatedBy:     1,
+		StartDateTime: testDate,
+		EndDateTime:   testDate.Add(time.Hour * 2),
+		Content:       ptr("Discuss project updates"),
+		IsTogether:    true,
+		IsAllDay:      false,
+		Location:      ptr("Office"),
+		HangOutWith:   ptr("Team"),
 		Recurrence: &event.Recurrence{
 			Frequency:       "daily",
 			Interval:        1,
@@ -34,21 +33,20 @@ func getDailyDummy() event.Event {
 	return dummy
 }
 
-func getWeeklyDummy() event.Event {
+func getWeeklyDummy() event.VO {
 	testDate := time.Date(2025, 4, 1, 0, 0, 0, 0, time.Local)
-	dummy := event.Event{
-		Title:       "Team Meeting",
-		CoupleId:    ptr("couple1"),
-		CreatedBy:   ptr("user1"),
-		StartDate:   timePtr(testDate),
-		EndDate:     timePtr(testDate.Add(2 * time.Hour)),
-		StartTime:   timePtr(testDate),
-		EndTime:     timePtr(testDate.Add(2 * time.Hour)),
-		Content:     ptr("Discuss project updates"),
-		IsTogether:  true,
-		IsAllDay:    false,
-		Location:    ptr("Office"),
-		HangOutWith: ptr("Team"),
+	dummy := event.VO{
+		Id:            "event2",
+		Title:         "Team Meeting",
+		CoupleId:      "couple1",
+		CreatedBy:     1,
+		StartDateTime: testDate,
+		EndDateTime:   testDate.Add(time.Hour * 2),
+		Content:       ptr("Discuss project updates"),
+		IsTogether:    true,
+		IsAllDay:      false,
+		Location:      ptr("Office"),
+		HangOutWith:   ptr("Team"),
 		Recurrence: &event.Recurrence{
 			Frequency:       "weekly",
 			Interval:        1,
