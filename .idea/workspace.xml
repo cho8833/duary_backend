@@ -5,16 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/dev/dto.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dev/dummy_member_service.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dev/main/dummy_sign_in_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/auth/main/get_test_token_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/get_test_token_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/test/common_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/test/common_service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/couple.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/couple_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/dto.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/connect_couple_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/main/connect_couple_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/get_test_token_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/main/get_test_token_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/on_connect_couple_ws.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/main/on_connect_couple_ws.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/auth/main/on_disconnect_couple_ws.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/main/on_disconnect_couple_ws.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/auth/kakao_auth_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/kakao_auth_service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,11 +70,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/dev/main" />
       <recent name="$PROJECT_DIR$/internal/common/main" />
       <recent name="$PROJECT_DIR$/internal/auth/main" />
       <recent name="$PROJECT_DIR$/internal/member/main" />
       <recent name="$PROJECT_DIR$/internal/event/main" />
-      <recent name="$PROJECT_DIR$/internal/event" />
     </key>
   </component>
   <component name="RunManager" selected="Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test">

@@ -21,7 +21,7 @@ type ApplicationJWT struct {
 }
 
 type JWTUtil interface {
-	NewToken(id string, coupleId string, key string) *ApplicationJWT
+	NewToken(id string, coupleId *string, key string) *ApplicationJWT
 	ValidateApplicationJWT(tokenString string, key string) (*JWTInfo, error)
 	GenerateSubject(member *member.Member) string
 }
@@ -29,7 +29,7 @@ type JWTUtil interface {
 type Impl struct {
 }
 
-func (util *Impl) NewToken(id string, coupleId string, key string) *ApplicationJWT {
+func (util *Impl) NewToken(id string, coupleId *string, key string) *ApplicationJWT {
 	secretKey := []byte(key)
 	// accessToken: 1일 후 expire
 	expireTime := time.Now().AddDate(0, 0, 1).Unix()

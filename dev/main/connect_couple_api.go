@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/internal/auth"
 	"github.com/cho8833/duary_lambda/internal/common"
-	"github.com/cho8833/duary_lambda/internal/connectcouple"
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
@@ -24,13 +23,11 @@ func connectCouple(_ context.Context, request events.APIGatewayProxyRequest) (ev
 	transaction := util.NewWriteTransaction(dynamodbClient)
 	memberRepo := member.NewMemberRepository(dynamodbClient)
 	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
-	sessionRepo := connectcouple.NewConnectCoupleRepository(dynamodbClient)
 
 	memberSvc := member.NewMemberService(memberRepo)
 	coupleSvc := couple.NewCoupleService(coupleRepo)
-	sessionSvc := connectcouple.NewConnectCoupleService(sessionRepo)
 
-	commonSvc := common.NewCommonService(memberSvc, coupleSvc, sessionSvc)
+	commonSvc := common.NewCommonService(memberSvc, coupleSvc)
 
 	loginMember := auth.FromRequestContext(request)
 

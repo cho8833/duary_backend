@@ -60,7 +60,7 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		// generate application token
 		memberId := svc.jwtUtil.GenerateSubject(findMember)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, *findMember.CoupleId, key)
+		newToken := svc.jwtUtil.NewToken(memberId, findMember.CoupleId, key)
 
 		findMember.AccessToken = kakaoToken.AccessToken
 		_, err := svc.memberRepository.SaveMember(findMember)
@@ -77,7 +77,7 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 	} else {
 		// findMember 가 존재하지 않는 경우 Member 생성, 최초 회원가입
 		newMember := &member.Member{
-			Name:        payload.NickName,
+			Name:        nil,
 			Birthday:    nil,
 			AccessToken: kakaoToken.AccessToken,
 			Provider:    "kakao",
@@ -95,7 +95,7 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		// generate application token
 		memberId := svc.jwtUtil.GenerateSubject(newMember)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, *newMember.CoupleId, key)
+		newToken := svc.jwtUtil.NewToken(memberId, newMember.CoupleId, key)
 
 		result := &SignInRes{
 			Member:     newMember,
