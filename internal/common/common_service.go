@@ -2,7 +2,6 @@ package common
 
 import (
 	"github.com/cho8833/duary_lambda/internal/auth"
-	"github.com/cho8833/duary_lambda/internal/connectcouple"
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
@@ -15,17 +14,17 @@ type Service interface {
 
 		1. create Couple(CoupleId, RelationDate, Add Member to Members, Code)
 			- put random generated CoupleId
-			- put RelationDate from InitDuaryInfoReq
+			- put RelationDate from StartDuaryReq
 			- add Member to Members
 			- put random generated Code
 		2. update Member
-			- put Character from InitDuaryInfoReq
-			- put name from InitDuaryInfoReq
+			- put Character from StartDuaryReq
+			- put name from StartDuaryReq
 			- put CoupleId from (1)
 
 		return 생성된 Couple 정보
 	*/
-	InitDuaryInfo(request *InitDuaryInfoReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError)
+	InitDuaryInfo(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError)
 
 	/*
 		커플 연결
@@ -41,23 +40,21 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	memberSvc  member.Service
-	coupleSvc  couple.Service
-	sessionSvc connectcouple.Service
+	memberSvc member.Service
+	coupleSvc couple.Service
 }
 
-func NewCommonService(memberSvc member.Service, coupleSvc couple.Service, sessionSvc connectcouple.Service) *ServiceImpl {
-	return &ServiceImpl{memberSvc: memberSvc, coupleSvc: coupleSvc, sessionSvc: sessionSvc}
+func NewCommonService(memberSvc member.Service, coupleSvc couple.Service) *ServiceImpl {
+	return &ServiceImpl{memberSvc: memberSvc, coupleSvc: coupleSvc}
 }
 
-func (svc *ServiceImpl) InitDuaryInfo(request *InitDuaryInfoReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError) {
+func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError) {
 	// begin transaction
 	transaction.BeginTransaction()
 
 	// create new couple
 	coupleReq := &couple.CreateCoupleReq{
-		RelationDate:   *request.RelationDate,
-		OtherCharacter: *request.OtherCharacter,
+		RelationDate: *request.RelationDate,
 	}
 	newCouple, err := svc.coupleSvc.CreateCouple(coupleReq, transaction)
 	if err != nil {
@@ -74,6 +71,15 @@ func (svc *ServiceImpl) InitDuaryInfo(request *InitDuaryInfoReq, transaction *ut
 		Provider:  request.Provider,
 	}
 	updatedMember, err := svc.memberSvc.UpdateMember(memberReq, transaction)
+	if err != nil {
+		return nil, err
+	}
+
+	// put updated Member in Couple.Members
+	updateCoupleReq := &couple.UpdateCoupleReq{
+		Members: []*member.Member{updatedMember},
+	}
+	err = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +109,20 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		return nil, svcError
 	}
 
+	findMember.CoupleId = findCouple.Id
+
 	transaction.BeginTransaction()
-	// Update Couple
-	findCouple.Members = append(findCouple.Members, findMember)
-	_, svcError = svc.coupleSvc.UpdateCouple(findCouple, transaction)
+
+	// Couple.Members 에 member 추가
+	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
+	updateCoupleReq := &couple.UpdateCoupleReq{
+		Members: append(findCouple.Members, findMember),
+	}
+	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}
+
 	// Update Member
 	updateReq := &member.UpdateMemberReq{
 		Provider: loginMember.Provider,
@@ -120,15 +133,11 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	if svcError != nil {
 		return nil, svcError
 	}
+
+	// execute transaction
 	_, err := transaction.Execute()
 	if err != nil {
 		return nil, util.DBUpdateError{}
-	}
-
-	// send couple connect message to websocket
-	session, svcError := svc.sessionSvc.FindSession(req.CoupleCode)
-	if svcError == nil {
-		_ = svc.sessionSvc.NotifyCoupleConnected(session, findMember)
 	}
 
 	result := &InitDuaryInfoRes{

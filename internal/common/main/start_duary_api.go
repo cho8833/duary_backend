@@ -30,9 +30,9 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 	coupleSvc := couple.NewCoupleService(coupleRepo)
 	memberSvc := member.NewMemberService(memberRepo)
 
-	commonSvc := common.NewCommonService(memberSvc, coupleSvc, nil)
+	commonSvc := common.NewCommonService(memberSvc, coupleSvc)
 
-	initDuaryReq := &common.InitDuaryInfoReq{}
+	initDuaryReq := &common.StartDuaryReq{}
 	err = json.Unmarshal([]byte(req.Body), &initDuaryReq)
 	if err != nil {
 		log.Printf(err.Error())
@@ -43,7 +43,7 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 	initDuaryReq.Provider = lambdaMap["provider"].(string)
 	initDuaryReq.SocialId, _ = strconv.ParseInt(lambdaMap["socialId"].(string), 10, 64)
 
-	result, svcError := commonSvc.InitDuaryInfo(initDuaryReq, transaction)
+	result, svcError := commonSvc.StartDuary(initDuaryReq, transaction)
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(svcError), nil
 	}

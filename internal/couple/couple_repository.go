@@ -18,6 +18,7 @@ type Repository interface {
 	GetSaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
+	GetUpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -47,28 +48,6 @@ func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error
 	}
 
 	return couple, nil
-}
-
-func (repository *RepositoryDynamoDB) UpdateCouple(req *UpdateCoupleReq) (*Couple, error) {
-	updateExpr, err := repository.updateCoupleExpression(req)
-	if err != nil {
-		return nil, err
-	}
-	response, err := repository.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-		TableName:                 aws.String(tableName),
-		Key:                       repository.getKey(*req.Id),
-		ExpressionAttributeValues: updateExpr.Values(),
-		ExpressionAttributeNames:  updateExpr.Names(),
-		UpdateExpression:          updateExpr.Update(),
-		ReturnValues:              types.ReturnValueAllNew,
-	})
-	if err != nil {
-		log.Printf("failed to update item. Req: %+v, error: %s", req, err.Error())
-		return nil, err
-	}
-	result := &Couple{}
-	_ = attributevalue.UnmarshalMap(response.Attributes, result)
-	return result, nil
 }
 
 func (repository *RepositoryDynamoDB) FindByCoupleCode(coupleCode *string) ([]Couple, error) {
@@ -126,6 +105,42 @@ func (repository *RepositoryDynamoDB) GetSaveCoupleTransaction(couple *Couple) (
 	return transaction, nil
 }
 
+func (repository *RepositoryDynamoDB) GetUpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error) {
+	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
+	// partitionKey 임시 저장
+	partitionKey := req.Id
+	req.Id = nil
+
+	av, err := attributevalue.MarshalMap(req)
+	if err != nil {
+		return nil, err
+	}
+
+	builder := expression.UpdateBuilder{}
+
+	for k, v := range av {
+		builder = builder.Set(expression.Name(k), expression.Value(v))
+	}
+
+	expr, err := expression.NewBuilder().WithUpdate(builder).Build()
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	transaction := &types.TransactWriteItem{
+		Update: &types.Update{
+			TableName:                 aws.String(tableName),
+			Key:                       repository.getKey(*partitionKey),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			UpdateExpression:          expr.Update(),
+		},
+	}
+
+	return transaction, nil
+}
+
 func (repository *RepositoryDynamoDB) generateUID() *string {
 	uuid := uuid2.New().String()
 	return &uuid
@@ -135,19 +150,4 @@ func (repository *RepositoryDynamoDB) getKey(id string) map[string]types.Attribu
 	return map[string]types.AttributeValue{
 		"id": &types.AttributeValueMemberS{Value: id},
 	}
-}
-
-func (repository *RepositoryDynamoDB) updateCoupleExpression(req *UpdateCoupleReq) (*expression.Expression, error) {
-	update := expression.UpdateBuilder{}
-	if req.IsConnected != nil {
-		update = update.Set(expression.Name("isConnected"), expression.Value(*req.IsConnected))
-	}
-
-	expr, err := expression.NewBuilder().WithUpdate(update).Build()
-
-	if err != nil {
-		log.Printf("failed to build update expression : %s", err.Error())
-		return nil, err
-	}
-	return &expr, nil
 }

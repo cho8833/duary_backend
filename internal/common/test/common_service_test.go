@@ -27,7 +27,7 @@ func Test_InitDuary_Local(t *testing.T) {
 	birthday := time.Now()
 	relationDate := time.Now()
 	myCharacter := "yellow"
-	req := &common.InitDuaryInfoReq{
+	req := &common.StartDuaryReq{
 		Birthday:       &birthday,
 		RelationDate:   &relationDate,
 		Name:           &name,
@@ -36,7 +36,7 @@ func Test_InitDuary_Local(t *testing.T) {
 		Provider:       "kakao",
 		SocialId:       1,
 	}
-	res, err := commonSvc.InitDuaryInfo(req, transaction)
+	res, err := commonSvc.StartDuary(req, transaction)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}

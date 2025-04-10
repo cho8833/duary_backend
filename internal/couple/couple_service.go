@@ -9,7 +9,7 @@ import (
 
 type Service interface {
 	CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
-	UpdateCouple(couple *Couple, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
+	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
 	FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError)
 }
 
@@ -45,22 +45,13 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.Dyn
 	}
 }
 
-func (svc *ServiceImpl) UpdateCouple(couple *Couple, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
-	if transaction != nil {
-		writeTransaction, err := svc.repository.GetSaveCoupleTransaction(couple)
-		if err != nil {
-			return nil, util.DBUpdateError{}
-		}
-		transaction.AddTransaction(writeTransaction)
-		return couple, nil
-	} else {
-		updatedCouple, err := svc.repository.SaveCouple(couple)
-		if err != nil {
-			return nil, util.DBUpdateError{}
-		}
-		return updatedCouple, nil
+func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
+	writeTransaction, err := svc.repository.GetUpdateCoupleTransaction(couple)
+	if err != nil {
+		return util.DBUpdateError{}
 	}
-
+	transaction.AddTransaction(writeTransaction)
+	return nil
 }
 
 func (svc *ServiceImpl) FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError) {
