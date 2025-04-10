@@ -60,7 +60,7 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		// generate application token
 		memberId := svc.jwtUtil.GenerateSubject(findMember)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, key)
+		newToken := svc.jwtUtil.NewToken(memberId, *findMember.CoupleId, key)
 
 		findMember.AccessToken = kakaoToken.AccessToken
 		_, err := svc.memberRepository.SaveMember(findMember)
@@ -95,7 +95,7 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		// generate application token
 		memberId := svc.jwtUtil.GenerateSubject(newMember)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, key)
+		newToken := svc.jwtUtil.NewToken(memberId, *newMember.CoupleId, key)
 
 		result := &SignInRes{
 			Member:     newMember,

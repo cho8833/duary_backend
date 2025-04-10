@@ -12,7 +12,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/reissue_token_api.go && chmod 755 bootstrap && zip  build/package/reissue_token_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/auth/main/reissue_token_api.go && chmod 755 bootstrap && zip  build/package/auth/reissue_token_api.zip bootstrap && rm bootstrap
 */
 
 type ReissueTokenRequest struct {
@@ -29,12 +29,12 @@ func reissueTokenAPI(ctx context.Context, request events.APIGatewayProxyRequest)
 	if err != nil {
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
-	memberId, err := jwtUtil.ValidateApplicationJWT(req.RefreshToken, key)
+	jwtInfo, err := jwtUtil.ValidateApplicationJWT(req.RefreshToken, key)
 	if err != nil {
 		return util.LambdaErrorResponse(fmt.Errorf("세션이 만료되었습니다"), 400), nil
 	}
 
-	applicationJWT := jwtUtil.NewToken(*memberId, key)
+	applicationJWT := jwtUtil.NewToken(*jwtInfo.Sub, *jwtInfo.CoupleId, key)
 	return util.LambdaResponseWithData(applicationJWT), nil
 }
 

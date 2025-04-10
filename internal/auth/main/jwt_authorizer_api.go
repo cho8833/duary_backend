@@ -8,11 +8,12 @@ import (
 	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/jwt_authorizer.go && chmod 755 bootstrap && zip  build/package/jwt_authorizer.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/auth/main/jwt_authorizer.go && chmod 755 bootstrap && zip  build/package/auth/jwt_authorizer.zip bootstrap && rm bootstrap
 */
 func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayV2CustomAuthorizerIAMPolicyResponse, error) {
 	key := os.Getenv("secretKey")
@@ -22,20 +23,21 @@ func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (
 
 	check := strings.Split(header, " ")
 	token := check[1]
-	id, err := jwtUtil.ValidateApplicationJWT(token, key)
+	jwtInfo, err := jwtUtil.ValidateApplicationJWT(token, key)
 	if err != nil {
 		log.Printf("Authorization: fail to authorize. token: %s, error: %s", token, err.Error())
 		return denyResponse(), nil
 	}
 
-	loginMember := auth.FromMemberId(id)
+	loginMember := auth.FromMemberId(jwtInfo.Sub)
 
-	log.Printf("authorized %s", *id)
+	log.Printf("authorized %#v", *jwtInfo)
 	return events.APIGatewayV2CustomAuthorizerIAMPolicyResponse{
-		PrincipalID: *id,
+		PrincipalID: strconv.FormatInt(loginMember.SocialId, 10),
 		Context: map[string]interface{}{
 			"socialId": loginMember.SocialId,
 			"provider": loginMember.Provider,
+			"coupleId": jwtInfo.CoupleId,
 		},
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",

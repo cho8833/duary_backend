@@ -12,17 +12,17 @@ func Test_NewToken(t *testing.T) {
 	os.Setenv("secretKey", key)
 	jwtUtil := jwtutil.Impl{}
 
-	applicationJwt := jwtUtil.NewToken("1-kakao", key)
-	id, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
+	applicationJwt := jwtUtil.NewToken("1-kakao", "coupleId", key)
+	jwtInfo, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	assert.Equal(t, "1-kakao", *id)
-	id, err = jwtUtil.ValidateApplicationJWT(applicationJwt.RefreshToken, key)
+	assert.Equal(t, "1-kakao", *jwtInfo.Sub)
+	jwtInfo, err = jwtUtil.ValidateApplicationJWT(applicationJwt.RefreshToken, key)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	assert.Equal(t, "1-kakao", *id)
+	assert.Equal(t, "1-kakao", *jwtInfo.Sub)
 }
 
 func Test_ValidateApplicationJWT(t *testing.T) {
@@ -30,11 +30,11 @@ func Test_ValidateApplicationJWT(t *testing.T) {
 	os.Setenv("secretKey", key)
 	jwtUtil := jwtutil.Impl{}
 
-	applicationJwt := jwtUtil.NewToken("1-kakao", key)
+	applicationJwt := jwtUtil.NewToken("1-kakao", "coupleId", key)
 
-	id, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
+	jwtInfo, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	assert.Equal(t, "1kakao", *id)
+	assert.Equal(t, "1-kakao", *jwtInfo.Sub)
 }

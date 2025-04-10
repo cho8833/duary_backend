@@ -10,7 +10,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/get_event.go && chmod 755 bootstrap && zip  build/package/get_event.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/event/main/get_event.go && chmod 755 bootstrap && zip  build/package/event/get_event.zip bootstrap && rm bootstrap
 */
 func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
@@ -25,8 +25,14 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 	eventSvc := event.NewEventService(eventRepo)
 
 	coupleId := request.QueryStringParameters["coupleId"]
-	startDate, _ := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])
-	endDate, _ := time.Parse(time.RFC3339, request.QueryStringParameters["endDate"])
+	startDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])
+	if err != nil {
+		return util.LambdaErrorResponse(util.NewCustomApplicationError("startDate must be provided"), 400), nil
+	}
+	endDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["endDate"])
+	if err != nil {
+		return util.LambdaErrorResponse(util.NewCustomApplicationError("endDate must be provided"), 400), nil
+	}
 
 	res, svcErr := eventSvc.GetEventBetweenStartAndEndDate(coupleId, startDate, endDate)
 	if svcErr != nil {
