@@ -15,7 +15,7 @@ StartDateTime 과 Recurrence.RepeatStartDate(EndDateTime 과 Recurrence.RepeatEn
 */
 type Event struct {
 	CoupleId string `dynamodbav:"coupleId"` // partition key
-	// sort key format : {startDateTime}#{generated id}
+	// sort key format : {startDateTime(ISO8601)}#{generated id}
 	StartDateTime string      `dynamodbav:"startDateTime"` // sort key
 	EndDateTime   time.Time   `dynamodbav:"endDateTime"`
 	Title         string      `dynamodbav:"title"`
@@ -52,6 +52,7 @@ func FromReq(req *SaveReq, id string) *Event {
 }
 
 type VO struct {
+	// id format : {startDateTime(ISO8601)}#{generatedId}
 	Id            string      `json:"id"`
 	Title         string      `json:"title"`
 	CoupleId      string      `json:"coupleId"`
@@ -70,8 +71,9 @@ func FromEvent(event Event) VO {
 	sortKeySplit := strings.Split(event.StartDateTime, "#")
 	startDateTime, _ := time.Parse(time.RFC3339, sortKeySplit[0])
 	return VO{
-		Id:            sortKeySplit[1],
+		Id:            event.StartDateTime,
 		CoupleId:      event.CoupleId,
+		Title:         event.Title,
 		StartDateTime: startDateTime,
 		EndDateTime:   event.EndDateTime,
 		Content:       event.Content,
@@ -98,14 +100,15 @@ type SaveReq struct {
 }
 
 type UpdateReq struct {
-	Id            *string     `json:"id" dynamodbav:",omitempty"`
-	Title         *string     `json:"title" dynamodbav:",omitempty"`
-	StartDateTime *time.Time  `json:"startDateTime" dynamodbav:",omitempty"`
-	EndDateTime   *time.Time  `json:"endDateTime" dynamodbav:",omitempty"`
-	Content       *string     `json:"content" dynamodbav:",omitempty"`
-	IsTogether    *bool       `json:"isTogether" dynamodbav:",omitempty"`
-	IsAllDay      *bool       `json:"isAllDay" dynamodbav:",omitempty"`
-	Location      *string     `json:"location" dynamodbav:",omitempty"`
-	HangOutWith   *string     `json:"hangOutWith" dynamodbav:",omitempty"`
-	Recurrence    *Recurrence `json:"recurrence" dynamodbav:",omitempty"`
+	Id            *string     `json:"id" dynamodbav:"id,omitempty"`
+	CoupleId      *string     `json:"coupleId" dynamodbav:"coupleId,omitempty"`
+	Title         *string     `json:"title" dynamodbav:"title,omitempty"`
+	StartDateTime *time.Time  `json:"startDateTime" dynamodbav:"startDateTime,omitempty"`
+	EndDateTime   *time.Time  `json:"endDateTime" dynamodbav:"endDateTime,omitempty"`
+	Content       *string     `json:"content" dynamodbav:"content,omitempty"`
+	IsTogether    *bool       `json:"isTogether" dynamodbav:"isTogether,omitempty"`
+	IsAllDay      *bool       `json:"isAllDay" dynamodbav:"isAllDay,omitempty"`
+	Location      *string     `json:"location" dynamodbav:"location,omitempty"`
+	HangOutWith   *string     `json:"hangOutWith" dynamodbav:"hangOutWith,omitempty"`
+	Recurrence    *Recurrence `json:"recurrence" dynamodbav:"recurrence,omitempty"`
 }

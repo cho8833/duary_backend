@@ -18,6 +18,35 @@ import (
 /*
 ensure dynamodb clean before running save!!!!!!!!!
 */
+
+func Test_UpdateEvent(t *testing.T) {
+	dynamodbClient := util.CreateLocalDynamoDBClient()
+
+	eventRepo := event.NewEventRepository(dynamodbClient)
+
+	startRange := time.Now()
+	events, _ := eventRepo.FindByCoupleIdAndStartDateBefore("couple1", startRange)
+
+	vo := events[0]
+	updateReq := event.UpdateReq{
+		Id:       &vo.Id,
+		CoupleId: &vo.CoupleId,
+		Content:  ptr("updated content"),
+	}
+
+	updatedVO, err := eventRepo.UpdateEvent(&updateReq)
+	if err != nil {
+		t.Fatalf("%+v", err)
+	}
+
+	if *updatedVO.Content != "updated content" {
+		t.Fatalf("%+v", updatedVO.Content)
+	}
+}
+
+func Test_UpdateEvent_updateStartDateTime(t *testing.T) {
+
+}
 func Test_SaveEvent(t *testing.T) {
 	dynamodbClient := util.CreateLocalDynamoDBClient()
 
@@ -67,7 +96,7 @@ func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	fmt.Printf("%+v", events)
+	fmt.Printf("%#v", events)
 }
 
 func Test_GetEvent_not_match_couple_id(t *testing.T) {
@@ -85,7 +114,7 @@ func Test_GetEvent_not_match_couple_id(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 
-	fmt.Printf("%+v", events)
+	fmt.Printf("%#v", events)
 }
 
 func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {

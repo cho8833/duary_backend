@@ -5,15 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/cmd/auth/main/update_event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/auth/main/get_event.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/get_event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/auth/main/save_event.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/auth/main/save_event.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/event.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/event_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_repository.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/event_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/test/event_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/test/event_service_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,6 +46,7 @@
     "Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
@@ -65,7 +64,7 @@
     "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RunManager" selected="Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test">
+  <component name="RunManager" selected="Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test">
     <configuration name="Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="duary_lambda" />
       <working_directory value="$PROJECT_DIR$/internal/event/test" />
@@ -114,7 +113,7 @@
       <pattern value="^\QTest_SaveEvent\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="duary_lambda" />
       <working_directory value="$PROJECT_DIR$/internal/event/test" />
       <root_directory value="$PROJECT_DIR$" />
@@ -123,16 +122,16 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTest_generateOccurrence_of_weekly_by_one_month\E$" />
+      <pattern value="^\QTest_UpdateEvent\E$" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test" />
         <item itemvalue="Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" />
         <item itemvalue="Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test" />
         <item itemvalue="Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" />
-        <item itemvalue="Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test" />
       </list>
     </recent_temporary>
   </component>

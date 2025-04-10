@@ -33,14 +33,12 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	savedEvent, svcError := eventSvc.SaveEvent(saveEventReq)
+	vo, svcError := eventSvc.SaveEvent(saveEventReq)
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	res := event.FromEvent(*savedEvent)
-
-	return util.LambdaResponseWithData(res), nil
+	return util.LambdaResponseWithData(vo), nil
 }
 
 func main() {

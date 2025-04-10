@@ -8,8 +8,9 @@ import (
 )
 
 type Service interface {
-	SaveEvent(req *SaveReq) (*Event, util.ApplicationError)
+	SaveEvent(req *SaveReq) (*VO, util.ApplicationError)
 	GetEventBetweenStartAndEndDate(coupleId *string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError)
+	UpdateEvent(req *UpdateReq) (*VO, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -20,17 +21,29 @@ func NewEventService(repository Repository) *ServiceImpl {
 	return &ServiceImpl{repository: repository}
 }
 
-func (service *ServiceImpl) SaveEvent(req *SaveReq) (*Event, util.ApplicationError) {
+func (service *ServiceImpl) SaveEvent(req *SaveReq) (*VO, util.ApplicationError) {
 
 	event := FromReq(req, *service.generateUID())
 
-	event, err := service.repository.SaveEvent(event)
+	vo, err := service.repository.SaveEvent(event)
 	if err != nil {
 		log.Printf("save event error\nreq: %+v\nerror: %s", req, err)
 		return nil, util.DBSaveError{}
 	}
 
-	return event, nil
+	return vo, nil
+}
+
+func (service *ServiceImpl) UpdateEvent(req *UpdateReq) (*VO, util.ApplicationError) {
+
+	vo, err := service.repository.UpdateEvent(req)
+
+	if err != nil {
+		log.Printf("update event error\nreq: %+v\nerror: %s", req, err)
+		return nil, util.DBSaveError{}
+	}
+
+	return vo, nil
 }
 
 func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError) {
