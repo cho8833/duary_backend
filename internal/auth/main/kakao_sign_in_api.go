@@ -39,7 +39,8 @@ func kakaoSignInAPI(ctx context.Context, request events.APIGatewayProxyRequest) 
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(svcError), nil
 	}
-	return util.LambdaResponseWithData(result), nil
+
+	return util.LambdaResponseWithDataAndHeader(result, jwtutil.ApplicationJWTToHeader(*result.Token)), nil
 }
 
 func main() {

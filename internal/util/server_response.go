@@ -56,6 +56,16 @@ func LambdaResponseWithData(data any) events.APIGatewayProxyResponse {
 	}
 }
 
+func LambdaResponseWithDataAndHeader(data any, header map[string]string) events.APIGatewayProxyResponse {
+	res := ResponseWithData(data)
+	b, _ := json.Marshal(res)
+	return events.APIGatewayProxyResponse{
+		Headers:    header,
+		StatusCode: 200,
+		Body:       string(b),
+	}
+}
+
 func LambdaAppErrorResponse(err ApplicationError) events.APIGatewayProxyResponse {
 	return LambdaErrorResponse(err, err.StatusCode())
 }

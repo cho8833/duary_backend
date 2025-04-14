@@ -6,6 +6,7 @@ import (
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/golang-jwt/jwt/v5"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -18,6 +19,16 @@ type ApplicationJWT struct {
 	ExpireTime           int64  `json:"expireTime"`
 	RefreshToken         string `json:"refreshToken"`
 	RefreshTokenExpireAt int64  `json:"refreshTokenExpireAt"`
+}
+
+// header 는 snake case
+func ApplicationJWTToHeader(token ApplicationJWT) map[string]string {
+	return map[string]string{
+		"access_token":            token.AccessToken,
+		"expire_time":             strconv.FormatInt(token.ExpireTime, 10),
+		"refresh_token":           token.RefreshToken,
+		"refresh_token_expire_at": strconv.FormatInt(token.RefreshTokenExpireAt, 10),
+	}
 }
 
 type JWTUtil interface {

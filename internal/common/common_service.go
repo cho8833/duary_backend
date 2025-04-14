@@ -2,9 +2,11 @@ package common
 
 import (
 	"github.com/cho8833/duary_lambda/internal/auth"
+	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
+	"os"
 )
 
 type Service interface {
@@ -90,9 +92,14 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 		return nil, util.DBError{}
 	}
 
+	jwtUtil := &jwtutil.Impl{}
+	key := os.Getenv("secretKey")
+	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(updatedMember), updatedMember.CoupleId, key)
+
 	res := &InitDuaryInfoRes{
 		Member: updatedMember,
 		Couple: newCouple,
+		Token:  appToken,
 	}
 	return res, nil
 }

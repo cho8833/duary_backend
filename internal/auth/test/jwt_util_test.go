@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/aws/smithy-go/ptr"
 	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/stretchr/testify/assert"
 	"os"
@@ -12,7 +13,7 @@ func Test_NewToken(t *testing.T) {
 	os.Setenv("secretKey", key)
 	jwtUtil := jwtutil.Impl{}
 
-	applicationJwt := jwtUtil.NewToken("1-kakao", "coupleId", key)
+	applicationJwt := jwtUtil.NewToken("1-kakao", ptr.String("coupleId"), key)
 	jwtInfo, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -30,7 +31,7 @@ func Test_ValidateApplicationJWT(t *testing.T) {
 	os.Setenv("secretKey", key)
 	jwtUtil := jwtutil.Impl{}
 
-	applicationJwt := jwtUtil.NewToken("1-kakao", "coupleId", key)
+	applicationJwt := jwtUtil.NewToken("1-kakao", ptr.String("coupleId"), key)
 
 	jwtInfo, err := jwtUtil.ValidateApplicationJWT(applicationJwt.AccessToken, key)
 	if err != nil {

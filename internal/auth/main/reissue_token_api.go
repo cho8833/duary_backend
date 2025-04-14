@@ -34,8 +34,8 @@ func reissueTokenAPI(ctx context.Context, request events.APIGatewayProxyRequest)
 		return util.LambdaErrorResponse(fmt.Errorf("세션이 만료되었습니다"), 400), nil
 	}
 
-	applicationJWT := jwtUtil.NewToken(*jwtInfo.Sub, *jwtInfo.CoupleId, key)
-	return util.LambdaResponseWithData(applicationJWT), nil
+	applicationJWT := jwtUtil.NewToken(*jwtInfo.Sub, jwtInfo.CoupleId, key)
+	return util.LambdaResponseWithDataAndHeader(applicationJWT, jwtutil.ApplicationJWTToHeader(*applicationJWT)), nil
 }
 
 func main() {
