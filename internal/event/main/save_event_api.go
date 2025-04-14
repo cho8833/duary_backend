@@ -11,7 +11,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/event/main/save_event.go && chmod 755 bootstrap && zip  build/package/event/save_event.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/event/main/save_event_api.go && chmod 755 bootstrap && zip  build/package/event/save_event_api.zip bootstrap && rm bootstrap
 */
 
 func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
@@ -30,6 +30,13 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 	err = json.Unmarshal([]byte(req.Body), &saveEventReq)
 	if err != nil {
 		log.Printf(err.Error())
+		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
+	}
+
+	// jwt 의 coupleId 와 생성 요청 event 의 coupleId 가 동일하지 않으면 잘못된 요청
+	lambdaMap := req.RequestContext.Authorizer["lambda"].(map[string]interface{})
+	coupleId := lambdaMap["coupleId"].(string)
+	if saveEventReq.CoupleId != coupleId {
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 

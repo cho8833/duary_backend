@@ -6,13 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_util.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_util.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/main/kakao_sign_in_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/kakao_sign_in_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/main/reissue_token_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/reissue_token_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/test/jwt_util_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/jwt_util_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/util/server_response.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/server_response.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/main/save_event_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/main/save_event_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/main/update_event_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/main/update_event_api.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
