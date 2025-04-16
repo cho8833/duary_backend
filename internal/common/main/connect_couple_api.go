@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/internal/auth"
+	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/cho8833/duary_lambda/internal/common"
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
@@ -14,7 +15,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap cmd/auth/main/connect_couple_api.go && chmod 755 bootstrap && zip  build/package/connect_couple_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/common/main/connect_couple_api.go && chmod 755 bootstrap && zip  build/package/common/connect_couple_api.zip bootstrap && rm bootstrap
 */
 func connectCouple(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	cacheClient := util.GetCacheClient()
@@ -42,7 +43,8 @@ func connectCouple(_ context.Context, request events.APIGatewayProxyRequest) (ev
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(svcError), nil
 	}
-	return util.LambdaResponseWithData(res), nil
+
+	return util.LambdaResponseWithDataAndHeader(res, jwtutil.ApplicationJWTToHeader(*res.Token)), nil
 }
 
 func main() {

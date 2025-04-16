@@ -26,7 +26,7 @@ type Service interface {
 
 		return 생성된 Couple 정보
 	*/
-	InitDuaryInfo(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError)
+	InitDuaryInfo(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError)
 
 	/*
 		커플 연결
@@ -38,7 +38,7 @@ type Service interface {
 
 		return 업데이트된 couple 정보
 	*/
-	ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq) (*InitDuaryInfoRes, util.ApplicationError)
+	ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq) (*StartDuaryRes, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -50,7 +50,7 @@ func NewCommonService(memberSvc member.Service, coupleSvc couple.Service) *Servi
 	return &ServiceImpl{memberSvc: memberSvc, coupleSvc: coupleSvc}
 }
 
-func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError) {
+func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError) {
 	// begin transaction
 	transaction.BeginTransaction()
 
@@ -96,7 +96,7 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	key := os.Getenv("secretKey")
 	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(updatedMember), updatedMember.CoupleId, key)
 
-	res := &InitDuaryInfoRes{
+	res := &StartDuaryRes{
 		Member: updatedMember,
 		Couple: newCouple,
 		Token:  appToken,
@@ -104,7 +104,7 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	return res, nil
 }
 
-func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq, transaction *util.DynamoDBWriteTransaction) (*InitDuaryInfoRes, util.ApplicationError) {
+func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError) {
 	findMember, svcError := svc.memberSvc.GetMember(loginMember.SocialId, loginMember.Provider)
 	if svcError != nil {
 		return nil, svcError
@@ -147,9 +147,15 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		return nil, util.DBUpdateError{}
 	}
 
-	result := &InitDuaryInfoRes{
+	// generate new token with couple id
+	jwtUtil := &jwtutil.Impl{}
+	key := os.Getenv("secretKey")
+	newToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(findMember), findCouple.Id, key)
+
+	result := &StartDuaryRes{
 		Member: updatedMember,
 		Couple: findCouple,
+		Token:  newToken,
 	}
 
 	return result, nil

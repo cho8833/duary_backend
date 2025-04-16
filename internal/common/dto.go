@@ -16,7 +16,7 @@ type StartDuaryReq struct {
 	SocialId     int64
 }
 
-type InitDuaryInfoRes struct {
+type StartDuaryRes struct {
 	Member *member.Member          `json:"member"`
 	Couple *couple.Couple          `json:"couple"`
 	Token  *jwtutil.ApplicationJWT `json:"token"`

@@ -40,19 +40,19 @@ type JWTUtil interface {
 type Impl struct {
 }
 
-func (util *Impl) NewToken(id string, coupleId *string, key string) *ApplicationJWT {
+func (util *Impl) NewToken(subject string, coupleId *string, key string) *ApplicationJWT {
 	secretKey := []byte(key)
 	// accessToken: 1일 후 expire
 	expireTime := time.Now().AddDate(0, 0, 1).Unix()
 	// refreshToken: 7일 후 expire
 	refreshTokenExpireAt := time.Now().AddDate(0, 0, 7).Unix()
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":      id,
+		"sub":      subject,
 		"coupleId": coupleId,
 		"exp":      expireTime,
 	})
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": id,
+		"sub": subject,
 		"exp": refreshTokenExpireAt,
 	})
 
