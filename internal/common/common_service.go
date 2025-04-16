@@ -39,6 +39,8 @@ type Service interface {
 		return 업데이트된 couple 정보
 	*/
 	ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq) (*StartDuaryRes, util.ApplicationError)
+
+	CheckConnected(loginMember *auth.LoginMember) (*CheckConnectedRes, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -159,4 +161,26 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	}
 
 	return result, nil
+}
+
+func (svc *ServiceImpl) CheckConnected(loginMember *auth.LoginMember) (*CheckConnectedRes, util.ApplicationError) {
+	findMember, err := svc.memberSvc.GetMember(loginMember.SocialId, loginMember.Provider)
+	if err != nil {
+		return nil, err
+	}
+	if findMember.CoupleId == nil {
+		return &CheckConnectedRes{}, nil
+	}
+
+	findCouple, err := svc.coupleSvc.FindById(*findMember.CoupleId)
+	if err != nil {
+		return nil, err
+	}
+	jwtUtil := &jwtutil.Impl{}
+	key := os.Getenv("secretKey")
+	newToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(findMember), findCouple.Id, key)
+
+	return &CheckConnectedRes{
+		Token: newToken, Couple: findCouple,
+	}, nil
 }

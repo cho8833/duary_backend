@@ -29,16 +29,21 @@ func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (
 		return denyResponse(), nil
 	}
 
-	loginMember := auth.FromMemberId(jwtInfo.Sub)
+	loginMember := auth.FromSubject(jwtInfo.Sub)
 
 	log.Printf("authorized %#v", *jwtInfo)
+
+	lambdaContext := map[string]interface{}{
+		"socialId": loginMember.SocialId,
+		"provider": loginMember.Provider,
+	}
+	if jwtInfo.CoupleId != nil {
+		lambdaContext["coupleId"] = *jwtInfo.CoupleId
+	}
+
 	return events.APIGatewayV2CustomAuthorizerIAMPolicyResponse{
 		PrincipalID: strconv.FormatInt(loginMember.SocialId, 10),
-		Context: map[string]interface{}{
-			"socialId": loginMember.SocialId,
-			"provider": loginMember.Provider,
-			"coupleId": jwtInfo.CoupleId,
-		},
+		Context:     lambdaContext,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",
 			Statement: []events.IAMPolicyStatement{

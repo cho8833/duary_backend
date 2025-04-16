@@ -11,8 +11,8 @@ type LoginMember struct {
 	Provider string
 }
 
-func FromMemberId(memberId *string) *LoginMember {
-	s := strings.Split(*memberId, "-")
+func FromSubject(subject *string) *LoginMember {
+	s := strings.Split(*subject, "-")
 	socialId, _ := strconv.ParseInt(s[0], 10, 64)
 	return &LoginMember{Provider: s[1], SocialId: socialId}
 }

@@ -25,3 +25,8 @@ type StartDuaryRes struct {
 type ConnectCoupleReq struct {
 	CoupleCode *string `json:"coupleCode"`
 }
+
+type CheckConnectedRes struct {
+	Token  *jwtutil.ApplicationJWT `json:"token"`
+	Couple *couple.Couple          `json:"couple"`
+}

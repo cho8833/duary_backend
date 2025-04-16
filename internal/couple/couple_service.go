@@ -11,6 +11,7 @@ type Service interface {
 	CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
 	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
 	FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError)
+	FindById(coupleId string) (*Couple, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -52,6 +53,14 @@ func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.
 	}
 	transaction.AddTransaction(writeTransaction)
 	return nil
+}
+
+func (svc *ServiceImpl) FindById(coupleId string) (*Couple, util.ApplicationError) {
+	couple, err := svc.FindById(coupleId)
+	if err != nil {
+		return nil, util.CoupleNotFound{}
+	}
+	return couple, nil
 }
 
 func (svc *ServiceImpl) FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError) {
