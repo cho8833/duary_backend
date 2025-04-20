@@ -56,7 +56,7 @@ func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.
 }
 
 func (svc *ServiceImpl) FindById(coupleId string) (*Couple, util.ApplicationError) {
-	couple, err := svc.FindById(coupleId)
+	couple, err := svc.repository.FindById(&coupleId)
 	if err != nil {
 		return nil, util.CoupleNotFound{}
 	}
@@ -66,13 +66,17 @@ func (svc *ServiceImpl) FindById(coupleId string) (*Couple, util.ApplicationErro
 func (svc *ServiceImpl) FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError) {
 	couples, err := svc.repository.FindByCoupleCode(coupleCode)
 	if err != nil {
-		return nil, util.CoupleNotFound{}
+		return nil, util.DBReadError{}
 	}
-	if len(couples) != 1 {
+	if len(couples) > 1 {
 		log.Printf("Couple with coupleCode: %s invalid. Found %d", *coupleCode, len(couples))
 		return nil, util.InternalServerError{}
+	} else if len(couples) == 0 {
+		return nil, util.CoupleNotFound{}
+	} else {
+		return &couples[0], nil
 	}
-	return &couples[0], nil
+
 }
 
 func (svc *ServiceImpl) generateCoupleCode() *string {

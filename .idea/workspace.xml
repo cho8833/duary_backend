@@ -5,12 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/common/main/check_connected_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/login_member.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/login_member.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev/main/get_test_token_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/main/get_test_token_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/dto.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_repository.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

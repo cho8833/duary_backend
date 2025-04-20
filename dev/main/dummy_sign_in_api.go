@@ -35,7 +35,8 @@ func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (even
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(svcError), nil
 	}
-	return util.LambdaResponseWithData(res), nil
+
+	return util.LambdaResponseWithDataAndHeader(res, jwtutil.ApplicationJWTToHeader(*res.Token)), nil
 }
 
 func main() {

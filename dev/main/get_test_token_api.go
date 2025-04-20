@@ -41,7 +41,7 @@ func getTestToken(ctx context.Context, request events.APIGatewayProxyRequest) (e
 		return util.LambdaErrorResponse(err, 500), nil
 	}
 
-	token := jwtUtil.NewToken(jwtUtil.GenerateSubject(findMember), *findMember.CoupleId, key)
+	token := jwtUtil.NewToken(jwtUtil.GenerateSubject(findMember), findMember.CoupleId, key)
 
 	return util.LambdaResponseWithData(token), nil
 }

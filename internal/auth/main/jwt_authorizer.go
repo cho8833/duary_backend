@@ -37,6 +37,8 @@ func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (
 		"socialId": loginMember.SocialId,
 		"provider": loginMember.Provider,
 	}
+
+	// values of context map seem not to be nil
 	if jwtInfo.CoupleId != nil {
 		lambdaContext["coupleId"] = *jwtInfo.CoupleId
 	}

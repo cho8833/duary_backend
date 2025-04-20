@@ -2,6 +2,7 @@ package couple
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -84,8 +85,16 @@ func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
 	if err != nil {
 		return nil, err
 	}
+	if response.Item == nil {
+		return nil, &types.ResourceNotFoundException{
+			Message: aws.String(fmt.Sprintf("resource not found for id: %s", *id)),
+		}
+	}
 	result := &Couple{}
-	_ = attributevalue.UnmarshalMap(response.Item, result)
+	err = attributevalue.UnmarshalMap(response.Item, result)
+	if err != nil {
+		return nil, err
+	}
 	return result, nil
 }
 
