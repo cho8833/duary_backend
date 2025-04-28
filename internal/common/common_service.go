@@ -104,6 +104,7 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	if err != nil {
 		return nil, err
 	}
+	tempMember.CoupleId = newCouple.Id
 
 	// update member
 	memberReq := &member.UpdateMemberReq{
@@ -115,7 +116,7 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 		Provider:  *provider,
 	}
 
-	updatedMember, err := svc.memberSvc.UpdateMember(memberReq, transaction)
+	_, err = svc.memberSvc.UpdateMember(memberReq, transaction)
 	if err != nil {
 		return nil, err
 	}
@@ -126,12 +127,13 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 		return nil, util.DBError{}
 	}
 
+	// generate new token: add coupleId in token
 	jwtUtil := &jwtutil.Impl{}
 	key := os.Getenv("secretKey")
-	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(updatedMember), updatedMember.CoupleId, key)
+	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(tempMember), tempMember.CoupleId, key)
 
 	res := &StartDuaryRes{
-		Member: updatedMember,
+		Member: tempMember,
 		Couple: newCouple,
 		Token:  appToken,
 	}

@@ -22,7 +22,7 @@ func Test_InitDuary_Local(t *testing.T) {
 
 	commonSvc := common.NewCommonService(memberSvc, coupleSvc)
 
-	socialId := int64(2)
+	socialId := int64(3)
 	provider := "kakao"
 	test.CreateTestAuthContext(&socialId, &provider, nil)
 
