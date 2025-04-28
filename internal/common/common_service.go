@@ -56,6 +56,7 @@ func NewCommonService(memberSvc member.Service, coupleSvc couple.Service) *Servi
 func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError) {
 	// validate request
 	if request.Name == nil || request.Birthday == nil || request.MyCharacter == nil || request.RelationDate == nil {
+		log.Printf("invalid request. request %+v", request)
 		return nil, util.BadRequestError{}
 	}
 
@@ -66,10 +67,11 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 
 	if coupleId != nil {
 		log.Printf("couple already exists, coupleId: %s", *coupleId)
-		return nil, util.BadRequestError{}
+		return nil, util.CoupleAlreadyExists{}
 	}
 
 	if socialId == nil || provider == nil {
+		log.Printf("socialId or provider is nil. socialId: %v, provider: %v", socialId, provider)
 		return nil, util.BadRequestError{}
 	}
 
@@ -78,14 +80,14 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	if err != nil {
 		return nil, util.UserNotFound{}
 	}
-	
+
 	tempMember.Name = request.Name
 	tempMember.Birthday = request.Birthday
 	tempMember.Character = request.MyCharacter
 
 	if tempMember.CoupleId != nil {
 		log.Printf("couple already exists, coupleId: %s", *tempMember.CoupleId)
-		return nil, util.BadRequestError{}
+		return nil, util.CoupleAlreadyExists{}
 	}
 
 	// begin transaction

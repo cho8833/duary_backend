@@ -1,6 +1,9 @@
 package util
 
-import "github.com/aws/aws-lambda-go/events"
+import (
+	"github.com/aws/aws-lambda-go/events"
+	"strconv"
+)
 
 type AuthContext struct {
 	CoupleId *string
@@ -13,10 +16,24 @@ var singleInstance *AuthContext
 func NewAuthContext(request events.APIGatewayProxyRequest) *AuthContext {
 	lambdaMap := request.RequestContext.Authorizer["lambda"].(map[string]interface{})
 
-	singleInstance = &AuthContext{
-		CoupleId: lambdaMap["coupleId"].(*string),
-		SocialId: lambdaMap["socialId"].(*int64),
-		Provider: lambdaMap["provider"].(*string),
+	singleInstance = &AuthContext{}
+
+	coupleId := lambdaMap["coupleId"]
+	if coupleId != nil {
+		parsedCoupleId := coupleId.(string)
+		singleInstance.CoupleId = &parsedCoupleId
+	}
+
+	socialId := lambdaMap["socialId"]
+	if socialId != nil {
+		parsedSocialId, _ := strconv.ParseInt(socialId.(string), 10, 64)
+		singleInstance.SocialId = &parsedSocialId
+	}
+
+	provider := lambdaMap["provider"]
+	if provider != nil {
+		parsedProvider := provider.(string)
+		singleInstance.Provider = &parsedProvider
 	}
 
 	return singleInstance

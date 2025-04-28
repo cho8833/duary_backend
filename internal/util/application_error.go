@@ -81,3 +81,8 @@ type UserNotFound struct{}
 
 func (err UserNotFound) Error() string   { return "사용자를 찾을 수 없습니다" }
 func (err UserNotFound) StatusCode() int { return 400 }
+
+type CoupleAlreadyExists struct{}
+
+func (err CoupleAlreadyExists) Error() string   { return "커플이 이미 존재합니다" }
+func (err CoupleAlreadyExists) StatusCode() int { return 400 }

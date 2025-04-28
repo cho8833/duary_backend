@@ -5,23 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/dev/test/dummy_sign_in_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/test/oidc_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/oidc_service_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/common/test/common_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/test/common_service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/couple_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/couple/test/couple_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/test/couple_repository_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/event_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/main/delete_event_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/main/delete_event_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/test/member_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/test/member_repository_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/test/util/test_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/test/test_util.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/util/application_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/application_error.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/util/auth_context.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/auth_context.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -62,7 +47,7 @@
     "Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test.executor": "Run",
-    "Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test.executor": "Debug",
+    "Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test.executor": "Run",
     "Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
