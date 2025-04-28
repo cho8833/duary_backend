@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/smithy-go/ptr"
+	"github.com/cho8833/duary_lambda/internal/util"
 	"log"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
 	SaveEvent(event *Event) (*VO, error)
 	UpdateEvent(req *UpdateReq) (*VO, error)
+	DeleteEvent(coupleId string, id string) error
 }
 
 type RepositoryDynamoDB struct {
@@ -136,7 +138,28 @@ func (repo *RepositoryDynamoDB) UpdateEvent(req *UpdateReq) (*VO, error) {
 	result := FromEvent(*updated)
 
 	return &result, nil
+}
 
+func (repo *RepositoryDynamoDB) DeleteEvent(coupleId string, id string) error {
+
+	deleteInput := &dynamodb.DeleteItemInput{
+		TableName:    aws.String(tableName),
+		Key:          repo.getKey(coupleId, id),
+		ReturnValues: types.ReturnValueAllOld,
+	}
+	response, err := repo.client.DeleteItem(context.TODO(), deleteInput)
+
+	if err != nil {
+		log.Printf("failed to delete item. coupleId: %s, id: %s, error: %s", coupleId, id, err.Error())
+		return err
+	}
+	if response.Attributes == nil {
+		log.Printf("failed to delete item. item doesn't exist. coupleId: %s, id: %s", coupleId, id)
+		return util.DBDeleteError{}
+	}
+	log.Printf("deleted item. coupleId: %s, id: %s, response: %+v", coupleId, id, response)
+
+	return nil
 }
 
 func (repo *RepositoryDynamoDB) getKey(coupleId string, id string) map[string]types.AttributeValue {

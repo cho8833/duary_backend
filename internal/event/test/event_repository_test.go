@@ -133,6 +133,19 @@ func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
 	fmt.Printf("%+v", events)
 }
 
+func Test_DeleteEvent_there_is_event_matching_id(t *testing.T) {
+	dynamodbClient := util.CreateLocalDynamoDBClient()
+
+	eventRepo := event.NewEventRepository(dynamodbClient)
+
+	err := eventRepo.DeleteEvent("couple1", "2025-04-28T15:26:09+09:00#event1")
+
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+}
+
 func ptr(s string) *string {
 	return &s
 }

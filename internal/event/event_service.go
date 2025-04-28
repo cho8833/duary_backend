@@ -46,6 +46,22 @@ func (service *ServiceImpl) UpdateEvent(req *UpdateReq) (*VO, util.ApplicationEr
 	return vo, nil
 }
 
+func (service *ServiceImpl) DeleteEvent(coupleId string, id string) util.ApplicationError {
+
+	authContext := util.GetAuthContext()
+	if coupleId != *authContext.CoupleId {
+		log.Printf("unauthorized request : coupleId not matched\n user coupleId: %s, request coupleId: %s", *authContext.CoupleId, coupleId)
+		return util.BadRequestError{}
+	}
+
+	err := service.repository.DeleteEvent(coupleId, id)
+
+	if err != nil {
+		return util.DBDeleteError{}
+	}
+	return nil
+}
+
 func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, util.ApplicationError) {
 
 	candidateEvents, err := service.repository.FindByCoupleIdAndStartDateBefore(coupleId, rangeEndDate)
