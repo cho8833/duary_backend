@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/cho8833/duary_lambda/internal/member"
-	"github.com/cho8833/duary_lambda/internal/test/util"
+	"github.com/cho8833/duary_lambda/internal/test"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
 func Test_FindById(t *testing.T) {
-	client := util.CreateLocalDynamoDBClient()
+	client := test.CreateLocalDynamoDBClient()
 	repository := member.NewMemberRepository(client)
 
 	member, err := repository.FindBySocialIdAndProvider(1, "")
@@ -22,7 +22,7 @@ func Test_FindById(t *testing.T) {
 }
 
 func Test_saveMember(t *testing.T) {
-	client := util.CreateLocalDynamoDBClient()
+	client := test.CreateLocalDynamoDBClient()
 	repository := member.NewMemberRepository(client)
 	name := "test"
 	now := time.Now()
@@ -44,7 +44,7 @@ func Test_saveMember(t *testing.T) {
 }
 
 func Test_findBySocialIdAndProvider(t *testing.T) {
-	client := util.CreateLocalDynamoDBClient()
+	client := test.CreateLocalDynamoDBClient()
 	repo := member.NewMemberRepository(client)
 
 	member, err := repo.FindBySocialIdAndProvider(1, "kakao")
@@ -55,7 +55,7 @@ func Test_findBySocialIdAndProvider(t *testing.T) {
 }
 
 func Test_updateItem(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 	repo := member.NewMemberRepository(dynamodbClient)
 
 	dummyUpdate := &member.UpdateMemberReq{

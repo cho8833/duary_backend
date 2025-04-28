@@ -6,6 +6,7 @@ import (
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
+	"log"
 	"os"
 )
 
@@ -53,12 +54,49 @@ func NewCommonService(memberSvc member.Service, coupleSvc couple.Service) *Servi
 }
 
 func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError) {
+	// validate request
+	if request.Name == nil || request.Birthday == nil || request.MyCharacter == nil || request.RelationDate == nil {
+		return nil, util.BadRequestError{}
+	}
+
+	authContext := util.GetAuthContext()
+	socialId := authContext.SocialId
+	provider := authContext.Provider
+	coupleId := authContext.CoupleId
+
+	if coupleId != nil {
+		log.Printf("couple already exists, coupleId: %s", *coupleId)
+		return nil, util.BadRequestError{}
+	}
+
+	if socialId == nil || provider == nil {
+		return nil, util.BadRequestError{}
+	}
+
+	// couple.Members 에 넣어주기 위한 Member
+	tempMember, err := svc.memberSvc.GetMember(*socialId, *provider)
+	if err != nil {
+		return nil, util.UserNotFound{}
+	}
+	
+	tempMember.Name = request.Name
+	tempMember.Birthday = request.Birthday
+	tempMember.Character = request.MyCharacter
+
+	if tempMember.CoupleId != nil {
+		log.Printf("couple already exists, coupleId: %s", *tempMember.CoupleId)
+		return nil, util.BadRequestError{}
+	}
+
 	// begin transaction
 	transaction.BeginTransaction()
 
 	// create new couple
 	coupleReq := &couple.CreateCoupleReq{
 		RelationDate: *request.RelationDate,
+		Members: []*member.Member{
+			tempMember,
+		},
 	}
 	newCouple, err := svc.coupleSvc.CreateCouple(coupleReq, transaction)
 	if err != nil {
@@ -70,20 +108,12 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 		CoupleId:  newCouple.Id,
 		Name:      request.Name,
 		Birthday:  request.Birthday,
-		SocialId:  request.SocialId,
+		SocialId:  *socialId,
 		Character: request.MyCharacter,
-		Provider:  request.Provider,
-	}
-	updatedMember, err := svc.memberSvc.UpdateMember(memberReq, transaction)
-	if err != nil {
-		return nil, err
+		Provider:  *provider,
 	}
 
-	// put updated Member in Couple.Members
-	updateCoupleReq := &couple.UpdateCoupleReq{
-		Members: []*member.Member{updatedMember},
-	}
-	err = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
+	updatedMember, err := svc.memberSvc.UpdateMember(memberReq, transaction)
 	if err != nil {
 		return nil, err
 	}

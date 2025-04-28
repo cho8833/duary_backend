@@ -13,13 +13,13 @@ var singleInstance *AuthContext
 func NewAuthContext(request events.APIGatewayProxyRequest) *AuthContext {
 	lambdaMap := request.RequestContext.Authorizer["lambda"].(map[string]interface{})
 
-	authContext := &AuthContext{
+	singleInstance = &AuthContext{
 		CoupleId: lambdaMap["coupleId"].(*string),
 		SocialId: lambdaMap["socialId"].(*int64),
 		Provider: lambdaMap["provider"].(*string),
 	}
 
-	return authContext
+	return singleInstance
 }
 
 func GetAuthContext() *AuthContext {

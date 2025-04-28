@@ -5,7 +5,7 @@ import (
 	"github.com/cho8833/duary_lambda/internal/auth"
 	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/cho8833/duary_lambda/internal/member"
-	"github.com/cho8833/duary_lambda/internal/test/util"
+	"github.com/cho8833/duary_lambda/internal/test"
 	"testing"
 )
 
@@ -18,7 +18,7 @@ func Test_KakaoSignIn(t *testing.T) {
 		AccessToken: &accessToken,
 	}
 
-	memberRepository := member.NewMemberRepository(util.CreateLocalDynamoDBClient())
+	memberRepository := member.NewMemberRepository(test.CreateLocalDynamoDBClient())
 	svc := auth.NewKakaoAuthService(&jwtutil.JWTValidatorImpl{}, &jwtutil.Impl{}, memberRepository)
 
 	result, svcError := svc.SignIn(reqToken)

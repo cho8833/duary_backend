@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	oidcService "github.com/cho8833/duary_lambda/internal/auth"
-	testUtil "github.com/cho8833/duary_lambda/internal/test/util"
+	testUtil "github.com/cho8833/duary_lambda/internal/test"
 	"github.com/cho8833/duary_lambda/internal/util"
 	"testing"
 )

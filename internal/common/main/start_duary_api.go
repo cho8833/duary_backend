@@ -11,7 +11,6 @@ import (
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
 	"log"
-	"strconv"
 )
 
 /*
@@ -40,9 +39,7 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	lambdaMap := req.RequestContext.Authorizer["lambda"].(map[string]interface{})
-	initDuaryReq.Provider = lambdaMap["provider"].(string)
-	initDuaryReq.SocialId, _ = strconv.ParseInt(lambdaMap["socialId"].(string), 10, 64)
+	util.NewAuthContext(req)
 
 	result, svcError := commonSvc.StartDuary(initDuaryReq, transaction)
 

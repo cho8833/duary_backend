@@ -5,14 +5,14 @@ import (
 	"github.com/cho8833/duary_lambda/internal/common"
 	"github.com/cho8833/duary_lambda/internal/couple"
 	"github.com/cho8833/duary_lambda/internal/member"
-	"github.com/cho8833/duary_lambda/internal/test/util"
+	"github.com/cho8833/duary_lambda/internal/test"
 	util2 "github.com/cho8833/duary_lambda/internal/util"
 	"testing"
 	"time"
 )
 
 func Test_InitDuary_Local(t *testing.T) {
-	client := util.CreateLocalDynamoDBClient()
+	client := test.CreateLocalDynamoDBClient()
 
 	transaction := util2.NewWriteTransaction(client)
 	coupleRepo := couple.NewCoupleRepository(client)
@@ -20,21 +20,21 @@ func Test_InitDuary_Local(t *testing.T) {
 	coupleSvc := couple.NewCoupleService(coupleRepo)
 	memberSvc := member.NewMemberService(memberRepo)
 
-	commonSvc := common.NewCommonService(memberSvc, coupleSvc, nil)
+	commonSvc := common.NewCommonService(memberSvc, coupleSvc)
+
+	socialId := int64(2)
+	provider := "kakao"
+	test.CreateTestAuthContext(&socialId, &provider, nil)
 
 	name := "test"
-	otherCharacter := "blue"
 	birthday := time.Now()
 	relationDate := time.Now()
 	myCharacter := "yellow"
 	req := &common.StartDuaryReq{
-		Birthday:       &birthday,
-		RelationDate:   &relationDate,
-		Name:           &name,
-		OtherCharacter: &otherCharacter,
-		MyCharacter:    &myCharacter,
-		Provider:       "kakao",
-		SocialId:       1,
+		Birthday:     &birthday,
+		RelationDate: &relationDate,
+		Name:         &name,
+		MyCharacter:  &myCharacter,
 	}
 	res, err := commonSvc.StartDuary(req, transaction)
 	if err != nil {

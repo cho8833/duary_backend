@@ -76,3 +76,8 @@ type CoupleNotFound struct{}
 
 func (err CoupleNotFound) Error() string   { return "커플 정보가 없습니다" }
 func (err CoupleNotFound) StatusCode() int { return 400 }
+
+type UserNotFound struct{}
+
+func (err UserNotFound) Error() string   { return "사용자를 찾을 수 없습니다" }
+func (err UserNotFound) StatusCode() int { return 400 }

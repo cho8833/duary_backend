@@ -12,8 +12,6 @@ type StartDuaryReq struct {
 	Birthday     *time.Time `json:"birthday"`
 	RelationDate *time.Time `json:"relationDate"`
 	MyCharacter  *string    `json:"myCharacter"`
-	Provider     string
-	SocialId     int64
 }
 
 type StartDuaryRes struct {

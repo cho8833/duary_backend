@@ -1,4 +1,4 @@
-package util
+package test
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/cho8833/duary_lambda/internal/util"
 )
 
 func CreateLocalDynamoDBClient() *dynamodb.Client {
@@ -26,4 +27,13 @@ func CreateLocalDynamoDBClient() *dynamodb.Client {
 	}
 
 	return dynamodb.NewFromConfig(cfg)
+}
+
+func CreateTestAuthContext(socialId *int64, provider *string, coupleId *string) *util.AuthContext {
+	authContext := util.GetAuthContext()
+	authContext.CoupleId = coupleId
+	authContext.Provider = provider
+	authContext.SocialId = socialId
+
+	return authContext
 }

@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/cho8833/duary_lambda/internal/event"
-	"github.com/cho8833/duary_lambda/internal/test/util"
+	"github.com/cho8833/duary_lambda/internal/test"
 	"testing"
 	"time"
 )
@@ -20,7 +20,7 @@ ensure dynamodb clean before running save!!!!!!!!!
 */
 
 func Test_UpdateEvent(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -48,7 +48,7 @@ func Test_UpdateEvent_updateStartDateTime(t *testing.T) {
 
 }
 func Test_SaveEvent(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -84,7 +84,7 @@ func Test_SaveEvent(t *testing.T) {
 }
 
 func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -100,7 +100,7 @@ func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 }
 
 func Test_GetEvent_not_match_couple_id(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -118,7 +118,7 @@ func Test_GetEvent_not_match_couple_id(t *testing.T) {
 }
 
 func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -134,7 +134,7 @@ func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
 }
 
 func Test_DeleteEvent_there_is_event_matching_id(t *testing.T) {
-	dynamodbClient := util.CreateLocalDynamoDBClient()
+	dynamodbClient := test.CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 

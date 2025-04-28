@@ -5,12 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/event/main/delete_event_api.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/util/auth_context.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dev/test/dummy_sign_in_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/event_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/auth/test/oidc_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/oidc_service_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/dto.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/main/start_duary_api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/common/test/common_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/test/common_service_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/test/couple_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/test/couple_repository_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/event_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/event/main/delete_event_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/main/delete_event_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/test/event_repository_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/member/test/member_repository_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/test/member_repository_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/test/util/test_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/test/test_util.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/util/application_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/application_error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/util/auth_context.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/auth_context.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,16 +51,18 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "DefaultGoTemplateProperty": "Go File",
-    "Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Debug",
+    "Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_GetEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Debug",
+    "Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Debug",
     "Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
+    "Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test.executor": "Run",
     "Go Test.Test_NewToken in github.com/cho8833/duary_lambda/internal/auth/test.executor": "Debug",
     "Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test.executor": "Run",
+    "Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test.executor": "Debug",
     "Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
     "Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
@@ -68,14 +82,14 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/dev/test" />
+      <recent name="$PROJECT_DIR$/internal/test" />
       <recent name="$PROJECT_DIR$/internal/common/main" />
       <recent name="$PROJECT_DIR$/dev/main" />
       <recent name="$PROJECT_DIR$/internal/auth/main" />
-      <recent name="$PROJECT_DIR$/internal/member/main" />
-      <recent name="$PROJECT_DIR$/internal/event/main" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test">
+  <component name="RunManager" selected="Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test">
     <configuration name="Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="duary_lambda" />
       <working_directory value="$PROJECT_DIR$/internal/event/test" />
@@ -100,7 +114,19 @@
       <pattern value="^\QTest_GetEvent_match_couple_id_match_start_date_before\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="duary_lambda" />
+      <working_directory value="$PROJECT_DIR$/internal/common/test" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="github.com/cho8833/duary_lambda/internal/common/test" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTest_InitDuary_Local\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="duary_lambda" />
       <working_directory value="$PROJECT_DIR$/internal/event/test" />
       <root_directory value="$PROJECT_DIR$" />
@@ -109,40 +135,28 @@
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTest_GetEvent_match_couple_id_not_match_start_date_before\E$" />
+      <pattern value="^\QTest_UpdateEvent\E$" />
       <method v="2" />
     </configuration>
-    <configuration name="Test_NewToken in github.com/cho8833/duary_lambda/internal/auth/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+    <configuration name="Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="duary_lambda" />
-      <working_directory value="$PROJECT_DIR$/internal/auth/test" />
+      <working_directory value="$PROJECT_DIR$/dev/test" />
       <root_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <package value="github.com/cho8833/duary_lambda/internal/auth/test" />
+      <package value="github.com/cho8833/duary_lambda/dev/test" />
       <directory value="$PROJECT_DIR$" />
       <filePath value="$PROJECT_DIR$" />
       <framework value="gotest" />
-      <pattern value="^\QTest_NewToken\E$" />
-      <method v="2" />
-    </configuration>
-    <configuration name="Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="duary_lambda" />
-      <working_directory value="$PROJECT_DIR$/internal/auth/test" />
-      <root_directory value="$PROJECT_DIR$" />
-      <kind value="PACKAGE" />
-      <package value="github.com/cho8833/duary_lambda/internal/auth/test" />
-      <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$" />
-      <framework value="gotest" />
-      <pattern value="^\QTest_ValidateApplicationJWT\E$" />
+      <pattern value="^\QTest_dummySignIn_Local\E$" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test" />
+        <item itemvalue="Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test" />
         <item itemvalue="Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" />
-        <item itemvalue="Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test" />
-        <item itemvalue="Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test" />
-        <item itemvalue="Go Test.Test_NewToken in github.com/cho8833/duary_lambda/internal/auth/test" />
+        <item itemvalue="Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test" />
+        <item itemvalue="Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test" />
       </list>
     </recent_temporary>
   </component>
@@ -177,23 +191,28 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/event/event_repository.go</url>
-          <line>151</line>
+          <line>152</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/event/event_repository.go</url>
-          <line>160</line>
+          <line>161</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/event/event_repository.go</url>
-          <line>158</line>
+          <line>159</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DlvLineBreakpoint">
           <url>file://$PROJECT_DIR$/internal/event/event_repository.go</url>
-          <line>155</line>
+          <line>156</line>
           <option name="timeStamp" value="9" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/internal/event/event_repository.go</url>
+          <line>149</line>
+          <option name="timeStamp" value="10" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

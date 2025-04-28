@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	uuid2 "github.com/google/uuid"
 	"log"
 )
 
@@ -16,10 +15,10 @@ const tableName = "Couple"
 
 type Repository interface {
 	SaveCouple(couple *Couple) (*Couple, error)
-	GetSaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
+	SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
-	GetUpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error)
+	UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -31,9 +30,6 @@ func NewCoupleRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 }
 
 func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error) {
-	if couple.Id == nil {
-		couple.Id = repository.generateUID()
-	}
 	item, err := attributevalue.MarshalMap(couple)
 	if err != nil {
 		return nil, err
@@ -98,10 +94,7 @@ func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
 	return result, nil
 }
 
-func (repository *RepositoryDynamoDB) GetSaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error) {
-	if couple.Id == nil {
-		couple.Id = repository.generateUID()
-	}
+func (repository *RepositoryDynamoDB) SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error) {
 	item, err := attributevalue.MarshalMap(couple)
 	if err != nil {
 		return nil, err
@@ -114,7 +107,7 @@ func (repository *RepositoryDynamoDB) GetSaveCoupleTransaction(couple *Couple) (
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) GetUpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error) {
+func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error) {
 	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
 	// partitionKey 임시 저장
 	partitionKey := req.Id
@@ -148,11 +141,6 @@ func (repository *RepositoryDynamoDB) GetUpdateCoupleTransaction(req *UpdateCoup
 	}
 
 	return transaction, nil
-}
-
-func (repository *RepositoryDynamoDB) generateUID() *string {
-	uuid := uuid2.New().String()
-	return &uuid
 }
 
 func (repository *RepositoryDynamoDB) getKey(id string) map[string]types.AttributeValue {

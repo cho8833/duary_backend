@@ -49,6 +49,7 @@ func (service *ServiceImpl) UpdateEvent(req *UpdateReq) (*VO, util.ApplicationEr
 func (service *ServiceImpl) DeleteEvent(coupleId string, id string) util.ApplicationError {
 
 	authContext := util.GetAuthContext()
+
 	if coupleId != *authContext.CoupleId {
 		log.Printf("unauthorized request : coupleId not matched\n user coupleId: %s, request coupleId: %s", *authContext.CoupleId, coupleId)
 		return util.BadRequestError{}

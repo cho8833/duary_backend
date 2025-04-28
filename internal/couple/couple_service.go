@@ -2,6 +2,7 @@ package couple
 
 import (
 	"github.com/cho8833/duary_lambda/internal/util"
+	uuid2 "github.com/google/uuid"
 	"log"
 	"math/rand"
 	"time"
@@ -24,12 +25,14 @@ func NewCoupleService(repository Repository) *ServiceImpl {
 
 func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
 	couple := &Couple{
+		Id:           svc.generateUID(),
 		RelationDate: &req.RelationDate,
 		Code:         svc.generateCoupleCode(),
+		Members:      req.Members,
 	}
 
 	if transaction != nil {
-		input, err := svc.repository.GetSaveCoupleTransaction(couple)
+		input, err := svc.repository.SaveCoupleTransaction(couple)
 		if err != nil {
 			log.Printf("failed to get saveCoupleTransaction. error:%s", err.Error())
 			return nil, util.DBSaveError{}
@@ -47,7 +50,7 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.Dyn
 }
 
 func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
-	writeTransaction, err := svc.repository.GetUpdateCoupleTransaction(couple)
+	writeTransaction, err := svc.repository.UpdateCoupleTransaction(couple)
 	if err != nil {
 		return util.DBUpdateError{}
 	}
@@ -88,4 +91,9 @@ func (svc *ServiceImpl) generateCoupleCode() *string {
 	}
 	result := string(b)
 	return &result
+}
+
+func (svc *ServiceImpl) generateUID() *string {
+	uuid := uuid2.New().String()
+	return &uuid
 }
