@@ -164,10 +164,17 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 
 	transaction.BeginTransaction()
 
+	// 기존의 Couple 삭제
+	svcErr := svc.coupleSvc.DeleteCouple(*findMember.CoupleId, transaction)
+	if svcErr != nil {
+		return nil, util.DBUpdateError{}
+	}
+
 	// Couple.Members 에 member 추가
 	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
 	findMember.CoupleId = findCouple.Id
 	updateCoupleReq := &couple.UpdateCoupleReq{
+		Id:      findCouple.Id,
 		Members: append(findCouple.Members, findMember),
 	}
 	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)

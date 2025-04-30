@@ -19,6 +19,7 @@ type Repository interface {
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
 	UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error)
+	DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -107,10 +108,19 @@ func (repository *RepositoryDynamoDB) SaveCoupleTransaction(couple *Couple) (*ty
 	return transaction, nil
 }
 
+func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error) {
+	transaction := &types.TransactWriteItem{
+		Delete: &types.Delete{
+			TableName: aws.String(tableName),
+			Key:       repository.getKey(id),
+		}}
+	return transaction, nil
+}
+
 func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error) {
 	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
 	// partitionKey 임시 저장
-	partitionKey := req.Id
+	partitionKey := *req.Id
 	req.Id = nil
 
 	av, err := attributevalue.MarshalMap(req)
@@ -133,7 +143,7 @@ func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleR
 	transaction := &types.TransactWriteItem{
 		Update: &types.Update{
 			TableName:                 aws.String(tableName),
-			Key:                       repository.getKey(*partitionKey),
+			Key:                       repository.getKey(partitionKey),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			UpdateExpression:          expr.Update(),

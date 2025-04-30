@@ -13,6 +13,7 @@ type Service interface {
 	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
 	FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError)
 	FindById(coupleId string) (*Couple, util.ApplicationError)
+	DeleteCouple(id string, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
 }
 
 type ServiceImpl struct {
@@ -55,6 +56,15 @@ func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.
 		return util.DBUpdateError{}
 	}
 	transaction.AddTransaction(writeTransaction)
+	return nil
+}
+
+func (svc *ServiceImpl) DeleteCouple(id string, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
+	deleteTransaction, err := svc.repository.DeleteCoupleTransaction(id)
+	if err != nil {
+		return util.DBDeleteError{}
+	}
+	transaction.AddTransaction(deleteTransaction)
 	return nil
 }
 
