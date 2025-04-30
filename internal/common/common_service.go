@@ -1,6 +1,7 @@
 package common
 
 import (
+	"github.com/aws/smithy-go/ptr"
 	"github.com/cho8833/duary_lambda/internal/auth"
 	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/cho8833/duary_lambda/internal/couple"
@@ -141,9 +142,18 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 }
 
 func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *ConnectCoupleReq, transaction *util.DynamoDBWriteTransaction) (*StartDuaryRes, util.ApplicationError) {
+	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
+		return nil, util.BadRequestError{}
+	}
+
 	findMember, svcError := svc.memberSvc.GetMember(loginMember.SocialId, loginMember.Provider)
 	if svcError != nil {
 		return nil, svcError
+	}
+
+	// findMember.coupleId == nil 은 startDuary 를 거치지 않았다는 의미 => bad request
+	if findMember.CoupleId == nil {
+		return nil, util.BadRequestError{}
 	}
 
 	// Find Couple
@@ -153,7 +163,7 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	}
 
 	// 자신의 coupleId 와 CoupleCode 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
-	if findMember.CoupleId == findCouple.Id {
+	if *findMember.CoupleId == *findCouple.Id {
 		return nil, util.BadRequestError{}
 	}
 
@@ -174,8 +184,9 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
 	findMember.CoupleId = findCouple.Id
 	updateCoupleReq := &couple.UpdateCoupleReq{
-		Id:      findCouple.Id,
-		Members: append(findCouple.Members, findMember),
+		Id:         findCouple.Id,
+		Members:    append(findCouple.Members, findMember),
+		CoupleCode: ptr.String(""),
 	}
 	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
 	if svcError != nil {
@@ -188,10 +199,11 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		SocialId: loginMember.SocialId,
 		CoupleId: findCouple.Id,
 	}
-	updatedMember, svcError := svc.memberSvc.UpdateMember(updateReq, transaction)
+	_, svcError = svc.memberSvc.UpdateMember(updateReq, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}
+	updatedMember := findMember
 
 	// execute transaction
 	_, err := transaction.Execute()
