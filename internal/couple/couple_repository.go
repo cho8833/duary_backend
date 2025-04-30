@@ -80,6 +80,7 @@ func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
 		Key:       repository.getKey(*id),
 	})
 	if err != nil {
+		log.Printf(err.Error())
 		return nil, err
 	}
 	if response.Item == nil {
@@ -90,6 +91,7 @@ func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
 	result := &Couple{}
 	err = attributevalue.UnmarshalMap(response.Item, result)
 	if err != nil {
+		log.Printf(err.Error())
 		return nil, err
 	}
 	return result, nil

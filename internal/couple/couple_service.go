@@ -71,7 +71,7 @@ func (svc *ServiceImpl) DeleteCouple(id string, transaction *util.DynamoDBWriteT
 func (svc *ServiceImpl) FindById(coupleId string) (*Couple, util.ApplicationError) {
 	couple, err := svc.repository.FindById(&coupleId)
 	if err != nil {
-		return nil, util.CoupleNotFound{}
+		return nil, util.DBReadError{}
 	}
 	return couple, nil
 }
