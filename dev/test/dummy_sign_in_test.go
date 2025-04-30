@@ -18,7 +18,7 @@ func Test_dummySignIn_Local(t *testing.T) {
 	dummySvc := dev.NewDummyMemberService(jwtUtil, memberRepository)
 
 	req := &dev.DummySignInReq{
-		Username: int64(3),
+		Username: int64(4),
 	}
 
 	res, svcError := dummySvc.SignIn(req)

@@ -9,9 +9,7 @@
       <change beforePath="$PROJECT_DIR$/dev/test/dummy_sign_in_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/test/dummy_sign_in_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/common/test/common_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/test/common_service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/util/application_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/application_error.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,38 +35,38 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultGoTemplateProperty": "Go File",
-    "Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_GetEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor": "Debug",
-    "Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test.executor": "Debug",
-    "Go Test.Test_NewToken in github.com/cho8833/duary_lambda/internal/auth/test.executor": "Debug",
-    "Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test.executor": "Run",
-    "Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test.executor": "Debug",
-    "Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "main",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "/Users/johyeonbin/Desktop/duary_lambda",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultGoTemplateProperty&quot;: &quot;Go File&quot;,
+    &quot;Go Test.Test_DeleteEvent_there_is_event_matching_id in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_GetEvent in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_GetEvent2 in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_GetEvent_match_couple_id_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_GetEvent_match_couple_id_not_match_start_date_before in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Debug&quot;,
+    &quot;Go Test.Test_GetEvent_not_match_couple_id in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_NewToken in github.com/cho8833/duary_lambda/internal/auth/test.executor&quot;: &quot;Debug&quot;,
+    &quot;Go Test.Test_SaveEvent in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_UpdateEvent in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_ValidateApplicationJWT in github.com/cho8833/duary_lambda/internal/auth/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_dummySignIn_Local in github.com/cho8833/duary_lambda/dev/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_generateOccurrence_by_one_day in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_generateOccurrence_by_one_week in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.Test_generateOccurrence_of_weekly_by_one_month in github.com/cho8833/duary_lambda/internal/event/test.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/johyeonbin/Desktop/duary_lambda&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/dev/test" />
@@ -203,17 +201,10 @@
           <line>149</line>
           <option name="timeStamp" value="10" />
         </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/internal/common/common_service.go</url>
-          <line>131</line>
-          <option name="timeStamp" value="17" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
-          <url>file://$PROJECT_DIR$/internal/common/common_service.go</url>
-          <line>128</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="DlvErrorBreakpoint" />
+      </default-breakpoints>
     </breakpoint-manager>
   </component>
 </project>

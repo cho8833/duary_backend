@@ -152,12 +152,21 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		return nil, svcError
 	}
 
-	findMember.CoupleId = findCouple.Id
+	// 자신의 coupleId 와 CoupleCode 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
+	if findMember.CoupleId == findCouple.Id {
+		return nil, util.BadRequestError{}
+	}
+
+	// Couple 이 이미 연결되어 있는 경우 Bad Request
+	if len(findCouple.Members) >= 2 {
+		return nil, util.BadRequestError{}
+	}
 
 	transaction.BeginTransaction()
 
 	// Couple.Members 에 member 추가
 	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
+	findMember.CoupleId = findCouple.Id
 	updateCoupleReq := &couple.UpdateCoupleReq{
 		Members: append(findCouple.Members, findMember),
 	}

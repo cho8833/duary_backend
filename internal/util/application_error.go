@@ -86,3 +86,8 @@ type CoupleAlreadyExists struct{}
 
 func (err CoupleAlreadyExists) Error() string   { return "커플이 이미 존재합니다" }
 func (err CoupleAlreadyExists) StatusCode() int { return 400 }
+
+type CoupleAlreadyConnected struct{}
+
+func (err CoupleAlreadyConnected) Error() string   { return "이미 연결된 커플입니다" }
+func (err CoupleAlreadyConnected) StatusCode() int { return 400 }
