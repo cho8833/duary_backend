@@ -11,23 +11,23 @@ import (
 	"os"
 )
 
-type KakaoAuthService interface {
+type Service interface {
 	SignIn(token *KakaoOAuthToken) (SignInRes, util.ApplicationError)
 }
 
-type KakaoAuthServiceImpl struct {
+type ServiceImpl struct {
 	memberRepository member.Repository
 	jwtValidator     jwtutil.JWTValidator
 	jwtUtil          jwtutil.JWTUtil
 }
 
-func NewKakaoAuthService(jwtValidator jwtutil.JWTValidator,
+func NewAuthService(jwtValidator jwtutil.JWTValidator,
 	jwtUtil jwtutil.JWTUtil,
-	memberRepository member.Repository) *KakaoAuthServiceImpl {
-	return &KakaoAuthServiceImpl{jwtValidator: jwtValidator, jwtUtil: jwtUtil, memberRepository: memberRepository}
+	memberRepository member.Repository) *ServiceImpl {
+	return &ServiceImpl{jwtValidator: jwtValidator, jwtUtil: jwtUtil, memberRepository: memberRepository}
 }
 
-func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes, util.ApplicationError) {
+func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken) (*SignInRes, util.ApplicationError) {
 
 	aud := os.Getenv("aud")
 	nonce := os.Getenv("nonce")
@@ -45,6 +45,42 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		return nil, util.BadRequestError{}
 	}
 
+	res, svcError := svc.onSignInSuccess(payload, "kakao")
+	if svcError != nil {
+		return nil, svcError
+	}
+
+	return res, nil
+
+}
+
+const appId = "com.ivis.duary"
+
+func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken) (*SignInRes, util.ApplicationError) {
+	nonce := os.Getenv("nonce")
+
+	validateValue := &jwtutil.ValidatingValue{
+		Url:      "https://appleid.apple.com/auth/oauth2/v2/keys",
+		Nonce:    nonce,
+		Iss:      "https://appleid.apple.com",
+		Provider: "apple",
+		Aud:      appId,
+	}
+	payload, err := svc.jwtValidator.VerifyRSA256(*token.IdentityToken, validateValue)
+	if err != nil {
+		log.Printf("failed to verify token. idToken: %s, error: %s", *token.IdentityToken, err.Error())
+		return nil, util.BadRequestError{}
+	}
+
+	res, svcError := svc.onSignInSuccess(payload, "apple")
+	if svcError != nil {
+		return nil, svcError
+	}
+	return res, nil
+
+}
+
+func (svc *ServiceImpl) onSignInSuccess(payload *jwtutil.DecodedPayload, provider string) (*SignInRes, util.ApplicationError) {
 	// 카카오 회원 ID 와 카카오 ServiceProvider 로 Member 검색
 	// Member 가 없을 경우 ResourceNotFoundException 발생, 해당 Exception 은 오류가 아님
 	findMember, err := svc.memberRepository.FindBySocialIdAndProvider(payload.SocialId, "kakao")
@@ -62,7 +98,6 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 		key := os.Getenv("secretKey")
 		newToken := svc.jwtUtil.NewToken(memberId, findMember.CoupleId, key)
 
-		findMember.AccessToken = kakaoToken.AccessToken
 		_, err := svc.memberRepository.SaveMember(findMember)
 		if err != nil {
 			log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, err.Error())
@@ -77,14 +112,13 @@ func (svc *KakaoAuthServiceImpl) SignIn(kakaoToken *KakaoOAuthToken) (*SignInRes
 	} else {
 		// findMember 가 존재하지 않는 경우 Member 생성, 최초 회원가입
 		newMember := &member.Member{
-			Name:        nil,
-			Birthday:    nil,
-			AccessToken: kakaoToken.AccessToken,
-			Provider:    "kakao",
-			Gender:      nil,
-			SocialId:    payload.SocialId,
-			FcmToken:    nil,
-			Email:       payload.Email,
+			Name:     payload.NickName,
+			Birthday: nil,
+			Provider: provider,
+			Gender:   nil,
+			SocialId: payload.SocialId,
+			FcmToken: nil,
+			Email:    payload.Email,
 		}
 		_, err := svc.memberRepository.SaveMember(newMember)
 		if err != nil {

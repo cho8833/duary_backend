@@ -8,7 +8,6 @@ import (
 	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -44,7 +43,7 @@ func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (
 	}
 
 	return events.APIGatewayV2CustomAuthorizerIAMPolicyResponse{
-		PrincipalID: strconv.FormatInt(loginMember.SocialId, 10),
+		PrincipalID: loginMember.SocialId,
 		Context:     lambdaContext,
 		PolicyDocument: events.APIGatewayCustomAuthorizerPolicy{
 			Version: "2012-10-17",

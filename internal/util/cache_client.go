@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"net/http"
 	"sync"
 )
@@ -15,6 +16,7 @@ type CacheClient struct {
 	httpClient     *http.Client
 	dynamoDBClient *dynamodb.Client
 	lambdaClient   *lambda.Client
+	s3Client       *s3.Client
 }
 
 var httpClientInstance *CacheClient
@@ -56,4 +58,15 @@ func (cacheClient *CacheClient) GetLambdaClient() (*lambda.Client, error) {
 		cacheClient.lambdaClient = lambda.NewFromConfig(cfg)
 	}
 	return cacheClient.lambdaClient, nil
+}
+
+func (cacheClient *CacheClient) GetS3Client() (*s3.Client, error) {
+	if cacheClient.s3Client == nil {
+		cfg, err := config.LoadDefaultConfig(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+		cacheClient.s3Client = s3.NewFromConfig(cfg)
+	}
+	return cacheClient.s3Client, nil
 }

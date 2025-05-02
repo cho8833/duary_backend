@@ -25,7 +25,7 @@ func (_m *KakaoAuthService) SignIn(token dto.KakaoOAuthToken) (dto.SignInRes, er
 	ret := _m.Called(token)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SignIn")
+		panic("no return value specified for KakaoSignIn")
 	}
 
 	var r0 dto.SignInRes
@@ -48,7 +48,7 @@ func (_m *KakaoAuthService) SignIn(token dto.KakaoOAuthToken) (dto.SignInRes, er
 	return r0, r1
 }
 
-// KakaoAuthService_SignIn_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SignIn'
+// KakaoAuthService_SignIn_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'KakaoSignIn'
 type KakaoAuthService_SignIn_Call struct {
 	*mock.Call
 }
@@ -56,7 +56,7 @@ type KakaoAuthService_SignIn_Call struct {
 // SignIn is a helper method to define mock.On call
 //   - token dto.KakaoOAuthToken
 func (_e *KakaoAuthService_Expecter) SignIn(token interface{}) *KakaoAuthService_SignIn_Call {
-	return &KakaoAuthService_SignIn_Call{Call: _e.mock.On("SignIn", token)}
+	return &KakaoAuthService_SignIn_Call{Call: _e.mock.On("KakaoSignIn", token)}
 }
 
 func (_c *KakaoAuthService_SignIn_Call) Run(run func(token dto.KakaoOAuthToken)) *KakaoAuthService_SignIn_Call {

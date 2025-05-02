@@ -100,5 +100,5 @@ func (util *Impl) ValidateApplicationJWT(tokenString string, key string) (*JWTIn
 }
 
 func (util *Impl) GenerateSubject(member *member.Member) string {
-	return fmt.Sprintf("%d-%s", member.SocialId, member.Provider)
+	return fmt.Sprintf("%s-%s", member.SocialId, member.Provider)
 }

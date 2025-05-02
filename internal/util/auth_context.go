@@ -2,12 +2,11 @@ package util
 
 import (
 	"github.com/aws/aws-lambda-go/events"
-	"strconv"
 )
 
 type AuthContext struct {
 	CoupleId *string
-	SocialId *int64
+	SocialId *string
 	Provider *string
 }
 
@@ -26,7 +25,7 @@ func NewAuthContext(request events.APIGatewayProxyRequest) *AuthContext {
 
 	socialId := lambdaMap["socialId"]
 	if socialId != nil {
-		parsedSocialId, _ := strconv.ParseInt(socialId.(string), 10, 64)
+		parsedSocialId := socialId.(string)
 		singleInstance.SocialId = &parsedSocialId
 	}
 

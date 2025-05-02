@@ -10,7 +10,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/event/main/get_event.go && chmod 755 bootstrap && zip  build/package/event/get_event.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/event/main/get_event_api.go && chmod 755 bootstrap && zip  build/package/event/get_event.zip bootstrap && rm bootstrap
 */
 func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 

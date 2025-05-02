@@ -9,7 +9,7 @@ type Member struct {
 	FcmToken    *string    `json:"fcmToken" dynamodbav:"fcmToken"`
 	AccessToken *string    `json:"accessToken" dynamodbav:"accessToken"`
 	Provider    string     `json:"provider" dynamodbav:"provider"`
-	SocialId    int64      `json:"socialId" dynamodbav:"socialId"`
+	SocialId    string     `json:"socialId" dynamodbav:"socialId"`
 	Email       *string    `json:"email" dynamodbav:"email"`
 	CoupleId    *string    `json:"coupleId" dynamodbav:"coupleId"`
 	Character   *string    `json:"character" dynamodbav:"character"`
@@ -25,7 +25,7 @@ type UpdateMemberReq struct {
 	FcmToken    *string    `dynamodbav:"fcmToken"`
 	AccessToken *string    `dynamodbav:"accessToken"`
 	Provider    string     `dynamodbav:"provider"`
-	SocialId    int64      `dynamodbav:"socialId"`
+	SocialId    string     `dynamodbav:"socialId"`
 	Email       *string    `dynamodbav:"email"`
 	CoupleId    *string    `dynamodbav:"coupleId"`
 	Character   *string    `dynamodbav:"character"`

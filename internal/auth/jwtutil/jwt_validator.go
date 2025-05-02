@@ -12,7 +12,6 @@ import (
 	"github.com/cho8833/duary_lambda/internal/util"
 	"github.com/golang-jwt/jwt/v5"
 	"math/big"
-	"strconv"
 	"time"
 )
 
@@ -43,10 +42,11 @@ type ValidatingValue struct {
 }
 
 type DecodedPayload struct {
-	SocialId int64
+	SocialId string
 	Exp      time.Time
 	Email    *string
 	NickName *string
+	Name     *string
 }
 
 type JWTValidator interface {
@@ -128,17 +128,17 @@ func (validator *JWTValidatorImpl) VerifyRSA256(idToken string, value *Validatin
 		}
 	}
 
-	socialId, err := strconv.ParseInt(claims["sub"].(string), 10, 64)
-	if err != nil {
-		return nil, err
-	}
-	email := claims["email"].(string)
-	nickName := claims["nickname"].(string)
+	socialId := claims["sub"].(string)
+
+	email := toStringPointer(claims["email"])
+
+	nickName := toStringPointer(claims["nickname"])
+
 	result := &DecodedPayload{
 		SocialId: socialId,
 		Exp:      expireTime,
-		Email:    &email,
-		NickName: &nickName,
+		Email:    email,
+		NickName: nickName,
 	}
 	return result, nil
 }
@@ -157,6 +157,10 @@ func getPublicKey(kid string, url string, provider string) (*JWK, error) {
 		return nil, err
 	}
 	client, err := util.GetCacheClient().GetLambdaClient()
+	if err != nil {
+		return nil, err
+	}
+
 	invokeInput := lambda.InvokeInput{
 		FunctionName: aws.String("get_oidc_public_key"),
 		LogType:      types.LogTypeTail,
@@ -179,4 +183,25 @@ func getPublicKey(kid string, url string, provider string) (*JWK, error) {
 	}
 
 	return &jwkResponse.Data, nil
+}
+
+func toStringPointer(val interface{}) *string {
+	if val == nil {
+		return nil
+	}
+
+	// Check for string
+	if str, ok := val.(string); ok {
+		return &str
+	}
+
+	// Check for *string
+	if strPtr, ok := val.(*string); ok {
+		return strPtr
+	}
+
+	// If it's something else (like a []byte or fmt.Stringer), handle as needed
+	// Example: convert using fmt.Sprintf or reflect if required
+
+	return nil // or panic/log if you want to catch type mismatches
 }

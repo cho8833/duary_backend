@@ -19,9 +19,9 @@ func Test_KakaoSignIn(t *testing.T) {
 	}
 
 	memberRepository := member.NewMemberRepository(test.CreateLocalDynamoDBClient())
-	svc := auth.NewKakaoAuthService(&jwtutil.JWTValidatorImpl{}, &jwtutil.Impl{}, memberRepository)
+	svc := auth.NewAuthService(&jwtutil.JWTValidatorImpl{}, &jwtutil.Impl{}, memberRepository)
 
-	result, svcError := svc.SignIn(reqToken)
+	result, svcError := svc.KakaoSignIn(reqToken)
 	if svcError != nil {
 		t.Fatalf(svcError.Error())
 	}

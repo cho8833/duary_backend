@@ -30,6 +30,7 @@ func (svc *OIDCServiceImpl) GetPublicKey(url string, provider string, kid string
 	// kid 가 일치하는 Public Key 찾기
 	jwk := findMatchingKey(kid, certRes.Keys)
 
+	// kid 가 일치하는 Public Key 가 DB 에 없으면 다시 받아옴
 	if jwk == nil {
 		log.Printf("there's no matching key with kid: %s, provider: %s, url: %s. Update Public Key", kid, provider, url)
 		newCert, err := svc.repository.GetPublicJWK(url)

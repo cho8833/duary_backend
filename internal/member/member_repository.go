@@ -9,13 +9,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"log"
-	"strconv"
 )
 
 const tableName = "Member"
 
 type Repository interface {
-	FindBySocialIdAndProvider(socialId int64, provider string) (*Member, error)
+	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
 	SaveMember(member *Member) (*Member, error)
 	UpdateMember(member *UpdateMemberReq) (*Member, error)
 	GetUpdateMemberTransaction(member *UpdateMemberReq) (*types.TransactWriteItem, error)
@@ -29,7 +28,7 @@ func NewMemberRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 	return &RepositoryDynamoDB{client: *client}
 }
 
-func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId int64, provider string) (*Member, error) {
+func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provider string) (*Member, error) {
 
 	result, err := repo.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
@@ -141,9 +140,9 @@ func (repo *RepositoryDynamoDB) GetUpdateMemberTransaction(member *UpdateMemberR
 	return result, err
 }
 
-func (repo *RepositoryDynamoDB) getKey(socialId int64, provider string) map[string]types.AttributeValue {
+func (repo *RepositoryDynamoDB) getKey(socialId string, provider string) map[string]types.AttributeValue {
 	return map[string]types.AttributeValue{
-		"socialId": &types.AttributeValueMemberN{Value: strconv.FormatInt(socialId, 10)},
+		"socialId": &types.AttributeValueMemberS{Value: socialId},
 		"provider": &types.AttributeValueMemberS{Value: provider},
 	}
 }

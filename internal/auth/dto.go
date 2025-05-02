@@ -15,6 +15,16 @@ type KakaoOAuthToken struct {
 	IdToken               *string `json:"id_token"`
 }
 
+type AppleOAuthToken struct {
+	UserIdentifier    *string `json:"userIdentifier"`
+	GivenName         *string `json:"givenName"`
+	FamilyName        *string `json:"familyName"`
+	Email             *string `json:"email"`
+	AuthorizationCode string  `json:"authorizationCode"`
+	IdentityToken     *string `json:"identityToken"`
+	State             *string `json:"state"`
+}
+
 type CertResponse struct {
 	Keys []jwtutil.JWK `json:"keys"`
 }

@@ -7,7 +7,7 @@ import (
 
 type Service interface {
 	UpdateMember(request *UpdateMemberReq, transaction *util.DynamoDBWriteTransaction) (*Member, util.ApplicationError)
-	GetMember(socialId int64, provider string) (*Member, util.ApplicationError)
+	GetMember(socialId string, provider string) (*Member, util.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -36,7 +36,7 @@ func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *util
 	return member, nil
 }
 
-func (svc *ServiceImpl) GetMember(socialId int64, provider string) (*Member, util.ApplicationError) {
+func (svc *ServiceImpl) GetMember(socialId string, provider string) (*Member, util.ApplicationError) {
 	member, err := svc.repo.FindBySocialIdAndProvider(socialId, provider)
 	if err != nil {
 		log.Printf("failed to get member with socialId: %d, provider: %s \nerror: %s", socialId, provider, err.Error())

@@ -13,36 +13,36 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/auth/main/kakao_sign_in_api.go && chmod 755 bootstrap && zip  build/package/auth/kakao_sign_in_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap internal/auth/main/apple_sign_in_api.go && chmod 755 bootstrap && zip  build/package/auth/apple_sign_in_api.zip bootstrap && rm bootstrap
 */
-func kakaoSignInAPI(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// init
-	cacheClient := util.GetCacheClient()
+func appleSignIn(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+	cacheClient := util.CacheClient{}
 	dynamoDBClient, err := cacheClient.GetDynamoDBClient()
+
 	if err != nil {
 		log.Printf(err.Error())
 		return util.LambdaAppErrorResponse(util.InternalServerError{}), nil
 	}
+
 	memberRepository := member.NewMemberRepository(dynamoDBClient)
 	svc := auth.NewAuthService(&jwtutil.JWTValidatorImpl{}, &jwtutil.Impl{}, memberRepository)
 
-	// parse request
-	kakaoToken := &auth.KakaoOAuthToken{}
-	err = json.Unmarshal([]byte(request.Body), &kakaoToken)
+	appleToken := &auth.AppleOAuthToken{}
+	err = json.Unmarshal([]byte(request.Body), &appleToken)
 	if err != nil {
 		log.Printf(err.Error())
 		return util.LambdaAppErrorResponse(util.BadRequestError{}), nil
 	}
 
-	// process
-	result, svcError := svc.KakaoSignIn(kakaoToken)
+	result, svcError := svc.AppleSignIn(appleToken)
 	if svcError != nil {
 		return util.LambdaAppErrorResponse(svcError), nil
 	}
 
 	return util.LambdaResponseWithDataAndHeader(result, jwtutil.ApplicationJWTToHeader(*result.Token)), nil
+
 }
 
 func main() {
-	lambda.Start(kakaoSignInAPI)
+	lambda.Start(appleSignIn)
 }
