@@ -21,5 +21,5 @@ type UpdateCoupleReq struct {
 	Id           *string          `json:"id" dynamodbav:"id,omitempty"`
 	Members      []*member.Member `json:"members" dynamodbav:"members,omitempty"`
 	RelationDate *time.Time       `json:"relationDate" dynamodbav:"relationDate,omitempty"`
-	CoupleCode   *string          `json:"coupleCode" dynamodbav:"coupleCode,omitempty"`
+	Code         *string          `json:"code" dynamodbav:"code,omitempty"`
 }

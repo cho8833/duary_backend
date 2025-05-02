@@ -160,7 +160,7 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		return nil, svcError
 	}
 
-	// 자신의 coupleId 와 CoupleCode 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
+	// 자신의 coupleId 와 Code 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
 	if *findMember.CoupleId == *findCouple.Id {
 		return nil, util.BadRequestError{}
 	}
@@ -182,9 +182,9 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
 	findMember.CoupleId = findCouple.Id
 	updateCoupleReq := &couple.UpdateCoupleReq{
-		Id:         findCouple.Id,
-		Members:    append(findCouple.Members, findMember),
-		CoupleCode: ptr.String(""),
+		Id:      findCouple.Id,
+		Members: append(findCouple.Members, findMember),
+		Code:    ptr.String(""),
 	}
 	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
 	if svcError != nil {
