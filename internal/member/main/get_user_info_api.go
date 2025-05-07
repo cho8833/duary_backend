@@ -4,8 +4,10 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
 	"github.com/cho8833/duary_lambda/internal/member"
 	"github.com/cho8833/duary_lambda/internal/util"
+	"os"
 )
 
 /*
@@ -24,12 +26,18 @@ func getUserInfo(ctx context.Context, req events.APIGatewayProxyRequest) (events
 	socialId, _ := lambdaMap["socialId"].(string)
 
 	memberInfo, err := memberSvc.GetMember(socialId, provider)
-
 	if err != nil {
 		return util.LambdaAppErrorResponse(err), nil
 	}
 
-	return util.LambdaResponseWithData(memberInfo), nil
+	// generate application Token
+	jwtUtil := &jwtutil.Impl{}
+
+	memberId := jwtUtil.GenerateSubject(memberInfo)
+	key := os.Getenv("secretKey")
+	newToken := jwtUtil.NewToken(memberId, memberInfo.CoupleId, key)
+
+	return util.LambdaResponseWithDataAndHeader(memberInfo, jwtutil.ApplicationJWTToHeader(*newToken)), nil
 
 }
 

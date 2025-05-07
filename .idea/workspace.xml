@@ -5,30 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/internal/auth/apple_auth_helper.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/internal/auth/main/apple_sign_in_api.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/common/main/send_notification.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/event/event_scheduler_helper.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/internal/util/fcm_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/dev/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev/main/get_test_token_api.go" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/dto.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/dto.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_util.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_util.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_validator.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/jwtutil/jwt_validator.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/kakao_auth_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/auth_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/login_member.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/login_member.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/jwt_authorizer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/main/kakao_sign_in_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/main/kakao_sign_in_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/oidc_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/oidc_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/auth/test/kakao_auth_service_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/main/get_event_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/main/get_event_api.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/member/main/get_user_info_api.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/main/get_user_info_api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/member/member_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/util/auth_context.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/auth_context.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/util/cache_client.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/cache_client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mocks/internal_/auth/service/KakaoAuthService_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/mocks/internal_/auth/service/KakaoAuthService_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -88,11 +73,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/internal/common/main" />
+      <recent name="$PROJECT_DIR$/internal/event" />
       <recent name="$PROJECT_DIR$/dev/main" />
       <recent name="$PROJECT_DIR$/dev/test" />
-      <recent name="$PROJECT_DIR$/internal/test" />
-      <recent name="$PROJECT_DIR$/internal/common/main" />
-      <recent name="$PROJECT_DIR$/internal/auth/main" />
     </key>
   </component>
   <component name="RunManager" selected="Go Test.Test_InitDuary_Local in github.com/cho8833/duary_lambda/internal/common/test">
