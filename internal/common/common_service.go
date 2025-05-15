@@ -93,6 +93,7 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	transaction.BeginTransaction()
 
 	// create new couple
+	// TODO: tempMember.CoupleId 에 값이 들어가지 않음
 	coupleReq := &couple.CreateCoupleReq{
 		RelationDate: *request.RelationDate,
 		Members: []*member.Member{
@@ -157,7 +158,7 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	// Find Couple
 	findCouple, svcError := svc.coupleSvc.FindByCoupleCode(req.CoupleCode)
 	if svcError != nil {
-		return nil, svcError
+		return nil, util.CoupleCodeNotFound{}
 	}
 
 	// 자신의 coupleId 와 Code 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
@@ -181,9 +182,10 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	// Couple.Members 에 member 추가
 	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
 	findMember.CoupleId = findCouple.Id
+	findCouple.Members = append(findCouple.Members, findMember)
 	updateCoupleReq := &couple.UpdateCoupleReq{
 		Id:      findCouple.Id,
-		Members: append(findCouple.Members, findMember),
+		Members: findCouple.Members,
 		Code:    ptr.String(""),
 	}
 	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
