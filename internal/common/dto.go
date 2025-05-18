@@ -28,3 +28,13 @@ type CheckConnectedRes struct {
 	Token  *jwtutil.ApplicationJWT `json:"token"`
 	Couple *couple.Couple          `json:"couple"`
 }
+
+type UpdateMemberReq struct {
+	Birthday *time.Time `json:"birthday"`
+	Name     *string    `json:"name"`
+}
+
+type UpdateMemberRes struct {
+	Member *member.Member `json:"member"`
+	Couple *couple.Couple `json:"couple"`
+}

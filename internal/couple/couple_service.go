@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
+	CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction, id ...string) (*Couple, util.ApplicationError)
 	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
 	FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError)
 	FindById(coupleId string) (*Couple, util.ApplicationError)
@@ -58,6 +58,20 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.Dyn
 	}
 }
 
+func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
+	if transaction != nil {
+		updatedCouple, err := svc.repository.UpdateCoupleTransaction(req, transaction)
+		if err != nil {
+			log.Printf("failed to update couple. req: %+v, error: %s", req, err.Error())
+			return nil, util.DBUpdateError{}
+		}
+		return updatedCouple, nil
+	} else {
+		// TODO : 구현 필요
+		return nil, util.DBUpdateError{}
+	}
+}
+
 func (svc *ServiceImpl) DeleteCouple(id string, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
 	deleteTransaction, err := svc.repository.DeleteCoupleTransaction(id)
 	if err != nil {
@@ -91,6 +105,15 @@ func (svc *ServiceImpl) FindByCoupleCode(coupleCode *string) (*Couple, util.Appl
 
 }
 
+func (svc *ServiceImpl) CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
+	return svc.CreateCouple(req, transaction, id)
+}
+
+func (svc *ServiceImpl) GenerateUID() *string {
+	uuid := uuid2.New().String()
+	return &uuid
+}
+
 func (svc *ServiceImpl) generateCoupleCode() *string {
 	const charset = "abcdefghijklmnopqrstuvwxyz0123456789"
 	seededRand := rand.New(rand.NewSource(time.Now().UnixNano())) // 현재 시간을 시드로 설정
@@ -100,13 +123,4 @@ func (svc *ServiceImpl) generateCoupleCode() *string {
 	}
 	result := string(b)
 	return &result
-}
-
-func (svc *ServiceImpl) CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
-	return svc.CreateCouple(req, transaction, id)
-}
-
-func (svc *ServiceImpl) GenerateUID() *string {
-	uuid := uuid2.New().String()
-	return &uuid
 }

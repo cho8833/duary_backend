@@ -2,12 +2,12 @@ package couple
 
 import (
 	"context"
-	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/cho8833/duary_lambda/internal/base"
 	"github.com/cho8833/duary_lambda/internal/util"
 	"log"
 )
@@ -24,11 +24,12 @@ type Repository interface {
 }
 
 type RepositoryDynamoDB struct {
+	*base.DynamoDBRepository[Couple]
 	client *dynamodb.Client
 }
 
 func NewCoupleRepository(client *dynamodb.Client) *RepositoryDynamoDB {
-	return &RepositoryDynamoDB{client: client}
+	return &RepositoryDynamoDB{client: client, DynamoDBRepository: base.NewBaseDynamoRepository[Couple](client, tableName)}
 }
 
 func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error) {
@@ -45,6 +46,9 @@ func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error
 	if err != nil {
 		return nil, err
 	}
+
+	// caching
+	repository.SetToCache(*couple.Id, couple)
 
 	return couple, nil
 }
@@ -72,27 +76,17 @@ func (repository *RepositoryDynamoDB) FindByCoupleCode(coupleCode *string) ([]Co
 	if err := attributevalue.UnmarshalListOfMaps(result.Items, &couples); err != nil {
 		return nil, err
 	}
+
+	// caching
+	for _, item := range couples {
+		repository.SetToCache(*item.Id, &item)
+	}
 	return couples, nil
 }
 
 func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
-	response, err := repository.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String(tableName),
-		Key:       repository.getKey(*id),
-	})
+	result, err := repository.FindByIdCaching(context.TODO(), *id)
 	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-	if response.Item == nil {
-		return nil, &types.ResourceNotFoundException{
-			Message: aws.String(fmt.Sprintf("resource not found for id: %s", *id)),
-		}
-	}
-	result := &Couple{}
-	err = attributevalue.UnmarshalMap(response.Item, result)
-	if err != nil {
-		log.Printf(err.Error())
 		return nil, err
 	}
 	return result, nil
@@ -108,6 +102,7 @@ func (repository *RepositoryDynamoDB) SaveCoupleTransaction(couple *Couple) (*ty
 		Item:      item,
 	}}
 
+	repository.SetToCache(*couple.Id, couple)
 	return transaction, nil
 }
 
@@ -117,12 +112,13 @@ func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types
 			TableName: aws.String(tableName),
 			Key:       repository.getKey(id),
 		}}
+
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction util.DynamoDBWriteTransaction) (*Couple, error) {
+func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, error) {
 	// Application 단에서 업데이트 값 예측
-	cacheCouple, err := repository.FindById(req.Id)
+	cacheCouple, err := repository.FindByIdCaching(context.TODO(), *req.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -160,6 +156,8 @@ func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleR
 		},
 	}
 	transaction.AddTransaction(transactionItem)
+
+	repository.SetToCache(*cacheCouple.Id, cacheCouple)
 
 	return cacheCouple, nil
 }

@@ -12,7 +12,7 @@ type Couple struct {
 	Code         *string          `json:"code" dynamodbav:"code"`
 }
 
-func (c Couple) ApplyFrom(req UpdateCoupleReq) {
+func (c *Couple) ApplyFrom(req UpdateCoupleReq) {
 	if req.RelationDate != nil {
 		c.RelationDate = req.RelationDate
 	}

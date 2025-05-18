@@ -15,7 +15,7 @@ type Member struct {
 	Character   *string    `json:"character" dynamodbav:"character"`
 }
 
-func (m Member) ApplyFrom(req UpdateMemberReq) {
+func (m *Member) ApplyFrom(req UpdateMemberReq) {
 	if req.Name != nil {
 		m.Name = req.Name
 	}
