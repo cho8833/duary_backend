@@ -13,20 +13,36 @@ type Member struct {
 	Email       *string    `json:"email" dynamodbav:"email"`
 	CoupleId    *string    `json:"coupleId" dynamodbav:"coupleId"`
 	Character   *string    `json:"character" dynamodbav:"character"`
+}
 
-	// SOLO, COUPLE
-	Status *string `json:"status" dynamodbav:"status"`
+func (m Member) ApplyFrom(req UpdateMemberReq) {
+	if req.Name != nil {
+		m.Name = req.Name
+	}
+	if req.Birthday != nil {
+		m.Birthday = req.Birthday
+	}
+	if req.FcmToken != nil {
+		m.FcmToken = req.FcmToken
+	}
+	if req.AccessToken != nil {
+		m.AccessToken = req.AccessToken
+	}
+	if req.CoupleId != nil {
+		m.CoupleId = req.CoupleId
+	}
+	if req.Character != nil {
+		m.Character = req.Character
+	}
 }
 
 type UpdateMemberReq struct {
 	Name        *string    `dynamodbav:"name"`
 	Birthday    *time.Time `dynamodbav:"birthday"`
-	Gender      *string    `dynamodbav:"gender"` // man, woman, other
 	FcmToken    *string    `dynamodbav:"fcmToken"`
 	AccessToken *string    `dynamodbav:"accessToken"`
 	Provider    string     `dynamodbav:"provider"`
 	SocialId    string     `dynamodbav:"socialId"`
-	Email       *string    `dynamodbav:"email"`
 	CoupleId    *string    `dynamodbav:"coupleId"`
 	Character   *string    `dynamodbav:"character"`
 }

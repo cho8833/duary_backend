@@ -10,10 +10,12 @@ import (
 
 type Service interface {
 	CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
-	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
+	UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
 	FindByCoupleCode(coupleCode *string) (*Couple, util.ApplicationError)
 	FindById(coupleId string) (*Couple, util.ApplicationError)
 	DeleteCouple(id string, transaction *util.DynamoDBWriteTransaction) util.ApplicationError
+	CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError)
+	GenerateUID() *string
 }
 
 type ServiceImpl struct {
@@ -24,9 +26,15 @@ func NewCoupleService(repository Repository) *ServiceImpl {
 	return &ServiceImpl{repository: repository}
 }
 
-func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
+func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction, id ...string) (*Couple, util.ApplicationError) {
+	var coupleId *string
+	if len(id) == 0 {
+		coupleId = svc.GenerateUID()
+	} else {
+		coupleId = &id[0]
+	}
 	couple := &Couple{
-		Id:           svc.generateUID(),
+		Id:           coupleId,
 		RelationDate: &req.RelationDate,
 		Code:         svc.generateCoupleCode(),
 		Members:      req.Members,
@@ -48,15 +56,6 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *util.Dyn
 		}
 		return couple, nil
 	}
-}
-
-func (svc *ServiceImpl) UpdateCouple(couple *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
-	writeTransaction, err := svc.repository.UpdateCoupleTransaction(couple)
-	if err != nil {
-		return util.DBUpdateError{}
-	}
-	transaction.AddTransaction(writeTransaction)
-	return nil
 }
 
 func (svc *ServiceImpl) DeleteCouple(id string, transaction *util.DynamoDBWriteTransaction) util.ApplicationError {
@@ -103,7 +102,11 @@ func (svc *ServiceImpl) generateCoupleCode() *string {
 	return &result
 }
 
-func (svc *ServiceImpl) generateUID() *string {
+func (svc *ServiceImpl) CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, util.ApplicationError) {
+	return svc.CreateCouple(req, transaction, id)
+}
+
+func (svc *ServiceImpl) GenerateUID() *string {
 	uuid := uuid2.New().String()
 	return &uuid
 }

@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/cho8833/duary_lambda/internal/util"
 	"log"
 )
 
@@ -18,7 +19,7 @@ type Repository interface {
 	SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
-	UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error)
+	UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *util.DynamoDBWriteTransaction) (*Couple, error)
 	DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error)
 }
 
@@ -119,7 +120,14 @@ func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq) (*types.TransactWriteItem, error) {
+func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction util.DynamoDBWriteTransaction) (*Couple, error) {
+	// Application 단에서 업데이트 값 예측
+	cacheCouple, err := repository.FindById(req.Id)
+	if err != nil {
+		return nil, err
+	}
+	cacheCouple.ApplyFrom(*req)
+
 	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
 	// partitionKey 임시 저장
 	partitionKey := *req.Id
@@ -142,7 +150,7 @@ func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleR
 		return nil, err
 	}
 
-	transaction := &types.TransactWriteItem{
+	transactionItem := &types.TransactWriteItem{
 		Update: &types.Update{
 			TableName:                 aws.String(tableName),
 			Key:                       repository.getKey(partitionKey),
@@ -151,8 +159,9 @@ func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleR
 			UpdateExpression:          expr.Update(),
 		},
 	}
+	transaction.AddTransaction(transactionItem)
 
-	return transaction, nil
+	return cacheCouple, nil
 }
 
 func (repository *RepositoryDynamoDB) getKey(id string) map[string]types.AttributeValue {

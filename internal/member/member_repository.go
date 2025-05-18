@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/cho8833/duary_lambda/internal/util"
 	"log"
 )
 
@@ -17,7 +18,7 @@ type Repository interface {
 	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
 	SaveMember(member *Member) (*Member, error)
 	UpdateMember(member *UpdateMemberReq) (*Member, error)
-	GetUpdateMemberTransaction(member *UpdateMemberReq) (*types.TransactWriteItem, error)
+	UpdateMemberTransaction(member *UpdateMemberReq, transaction *util.DynamoDBWriteTransaction) (*Member, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -89,6 +90,31 @@ func (repo *RepositoryDynamoDB) UpdateMember(member *UpdateMemberReq) (*Member, 
 	return result, nil
 }
 
+func (repo *RepositoryDynamoDB) UpdateMemberTransaction(req *UpdateMemberReq, transaction *util.DynamoDBWriteTransaction) (*Member, error) {
+	// Application 단에서 업데이트 값 예측
+	cacheMember, err := repo.FindBySocialIdAndProvider(req.SocialId, req.Provider)
+	if err != nil {
+		return nil, err
+	}
+	cacheMember.ApplyFrom(*req)
+
+	// transaction
+	expr, err := repo.updateMemberExpression(req)
+	if err != nil {
+		return nil, err
+	}
+	transactionItem := &types.TransactWriteItem{Update: &types.Update{
+		TableName:                 aws.String(tableName),
+		Key:                       repo.getKey(req.SocialId, req.Provider),
+		ExpressionAttributeValues: expr.Values(),
+		ExpressionAttributeNames:  expr.Names(),
+		UpdateExpression:          expr.Update(),
+	}}
+	transaction.AddTransaction(transactionItem)
+
+	return cacheMember, nil
+}
+
 func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*expression.Expression, error) {
 	update := expression.UpdateBuilder{}
 	if req.Name != nil {
@@ -96,12 +122,6 @@ func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*e
 	}
 	if req.AccessToken != nil {
 		update = update.Set(expression.Name("accessToken"), expression.Value(req.AccessToken))
-	}
-	if req.Email != nil {
-		update = update.Set(expression.Name("email"), expression.Value(req.Email))
-	}
-	if req.Gender != nil {
-		update = update.Set(expression.Name("gender"), expression.Value(req.Gender))
 	}
 	if req.Birthday != nil {
 		update = update.Set(expression.Name("birthday"), expression.Value(req.Birthday))
@@ -123,21 +143,6 @@ func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*e
 		return nil, err
 	}
 	return &expr, nil
-}
-
-func (repo *RepositoryDynamoDB) GetUpdateMemberTransaction(member *UpdateMemberReq) (*types.TransactWriteItem, error) {
-	expr, err := repo.updateMemberExpression(member)
-	if err != nil {
-		return nil, err
-	}
-	result := &types.TransactWriteItem{Update: &types.Update{
-		TableName:                 aws.String(tableName),
-		Key:                       repo.getKey(member.SocialId, member.Provider),
-		ExpressionAttributeValues: expr.Values(),
-		ExpressionAttributeNames:  expr.Names(),
-		UpdateExpression:          expr.Update(),
-	}}
-	return result, err
 }
 
 func (repo *RepositoryDynamoDB) getKey(socialId string, provider string) map[string]types.AttributeValue {

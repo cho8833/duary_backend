@@ -74,49 +74,33 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 		return nil, util.BadRequestError{}
 	}
 
-	// couple.Members 에 넣어주기 위한 Member
-	tempMember, err := svc.memberSvc.GetMember(*socialId, *provider)
-	if err != nil {
-		return nil, util.UserNotFound{}
-	}
-
-	tempMember.Name = request.Name
-	tempMember.Birthday = request.Birthday
-	tempMember.Character = request.MyCharacter
-
-	if tempMember.CoupleId != nil {
-		log.Printf("couple already exists, coupleId: %s", *tempMember.CoupleId)
-		return nil, util.CoupleAlreadyExists{}
-	}
-
 	// begin transaction
 	transaction.BeginTransaction()
 
-	// create new couple
-	// TODO: tempMember.CoupleId 에 값이 들어가지 않음
-	coupleReq := &couple.CreateCoupleReq{
-		RelationDate: *request.RelationDate,
-		Members: []*member.Member{
-			tempMember,
-		},
-	}
-	newCouple, err := svc.coupleSvc.CreateCouple(coupleReq, transaction)
-	if err != nil {
-		return nil, err
-	}
-	tempMember.CoupleId = newCouple.Id
+	newCoupleId := svc.coupleSvc.GenerateUID()
 
 	// update member
 	memberReq := &member.UpdateMemberReq{
-		CoupleId:  newCouple.Id,
+		CoupleId:  newCoupleId,
 		Name:      request.Name,
 		Birthday:  request.Birthday,
 		SocialId:  *socialId,
 		Character: request.MyCharacter,
 		Provider:  *provider,
 	}
+	updatedMember, svcErr := svc.memberSvc.UpdateMember(memberReq, transaction)
+	if svcErr != nil {
+		return nil, svcErr
+	}
 
-	_, err = svc.memberSvc.UpdateMember(memberReq, transaction)
+	// create Couple
+	coupleReq := &couple.CreateCoupleReq{
+		RelationDate: *request.RelationDate,
+		Members: []*member.Member{
+			updatedMember,
+		},
+	}
+	newCouple, err := svc.coupleSvc.CreateCoupleWithId(*newCoupleId, coupleReq, transaction)
 	if err != nil {
 		return nil, err
 	}
@@ -130,10 +114,10 @@ func (svc *ServiceImpl) StartDuary(request *StartDuaryReq, transaction *util.Dyn
 	// generate new token: add coupleId in token
 	jwtUtil := &jwtutil.Impl{}
 	key := os.Getenv("secretKey")
-	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(tempMember), tempMember.CoupleId, key)
+	appToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(updatedMember), updatedMember.CoupleId, key)
 
 	res := &StartDuaryRes{
-		Member: tempMember,
+		Member: updatedMember,
 		Couple: newCouple,
 		Token:  appToken,
 	}
@@ -145,65 +129,58 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 		return nil, util.BadRequestError{}
 	}
 
-	findMember, svcError := svc.memberSvc.GetMember(loginMember.SocialId, loginMember.Provider)
-	if svcError != nil {
-		return nil, svcError
-	}
+	authContext := util.GetAuthContext()
 
 	// findMember.coupleId == nil 은 startDuary 를 거치지 않았다는 의미 => bad request
-	if findMember.CoupleId == nil {
+	if authContext.CoupleId == nil {
 		return nil, util.BadRequestError{}
 	}
 
 	// Find Couple
-	findCouple, svcError := svc.coupleSvc.FindByCoupleCode(req.CoupleCode)
+	targetCouple, svcError := svc.coupleSvc.FindByCoupleCode(req.CoupleCode)
 	if svcError != nil {
 		return nil, util.CoupleCodeNotFound{}
 	}
 
 	// 자신의 coupleId 와 Code 의 CoupleId 가 같음 -> 자신의 couple 에 연결한다 -> bad request
-	if *findMember.CoupleId == *findCouple.Id {
+	if *authContext.CoupleId == *targetCouple.Id {
 		return nil, util.BadRequestError{}
 	}
 
 	// Couple 이 이미 연결되어 있는 경우 Bad Request
-	if len(findCouple.Members) >= 2 {
+	if len(targetCouple.Members) >= 2 {
 		return nil, util.BadRequestError{}
 	}
 
 	transaction.BeginTransaction()
 
 	// 기존의 Couple 삭제
-	svcErr := svc.coupleSvc.DeleteCouple(*findMember.CoupleId, transaction)
+	svcErr := svc.coupleSvc.DeleteCouple(*authContext.CoupleId, transaction)
 	if svcErr != nil {
 		return nil, util.DBUpdateError{}
-	}
-
-	// Couple.Members 에 member 추가
-	// Member.CoupleId 에 연결될 coupleId 를 넣어줌
-	findMember.CoupleId = findCouple.Id
-	findCouple.Members = append(findCouple.Members, findMember)
-	updateCoupleReq := &couple.UpdateCoupleReq{
-		Id:      findCouple.Id,
-		Members: findCouple.Members,
-		Code:    ptr.String(""),
-	}
-	svcError = svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
-	if svcError != nil {
-		return nil, svcError
 	}
 
 	// Update Member
 	updateReq := &member.UpdateMemberReq{
 		Provider: loginMember.Provider,
 		SocialId: loginMember.SocialId,
-		CoupleId: findCouple.Id,
+		CoupleId: targetCouple.Id,
 	}
-	_, svcError = svc.memberSvc.UpdateMember(updateReq, transaction)
+	updatedMember, svcError := svc.memberSvc.UpdateMember(updateReq, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}
-	updatedMember := findMember
+
+	// Update Couple
+	updateCoupleReq := &couple.UpdateCoupleReq{
+		Id:      targetCouple.Id,
+		Members: append(targetCouple.Members, updatedMember), // Member 추가
+		Code:    ptr.String(""),                              // 코드 삭제
+	}
+	updatedCouple, svcError := svc.coupleSvc.UpdateCouple(updateCoupleReq, transaction)
+	if svcError != nil {
+		return nil, svcError
+	}
 
 	// execute transaction
 	_, err := transaction.Execute()
@@ -214,11 +191,11 @@ func (svc *ServiceImpl) ConnectCouple(loginMember *auth.LoginMember, req *Connec
 	// generate new token with couple id
 	jwtUtil := &jwtutil.Impl{}
 	key := os.Getenv("secretKey")
-	newToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(findMember), findCouple.Id, key)
+	newToken := jwtUtil.NewToken(jwtUtil.GenerateSubject(updatedMember), updatedCouple.Id, key)
 
 	result := &StartDuaryRes{
 		Member: updatedMember,
-		Couple: findCouple,
+		Couple: updatedCouple,
 		Token:  newToken,
 	}
 

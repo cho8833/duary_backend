@@ -20,20 +20,19 @@ func NewMemberService(repo Repository) *ServiceImpl {
 
 func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *util.DynamoDBWriteTransaction) (*Member, util.ApplicationError) {
 	if transaction != nil {
-		update, err := svc.repo.GetUpdateMemberTransaction(request)
+		updatedMember, err := svc.repo.UpdateMemberTransaction(request, transaction)
 		if err != nil {
 			log.Printf("failed to get UpdateMemberTransaction. error:%s", err.Error())
 			return nil, util.DBUpdateError{}
 		}
-		transaction.AddTransaction(update)
-		return nil, nil
+		return updatedMember, nil
 	}
-	member, err := svc.repo.UpdateMember(request)
+	updatedMember, err := svc.repo.UpdateMember(request)
 	if err != nil {
 		log.Printf("failed to update member. req: %+v, error: %s", request, err.Error())
 		return nil, util.DBUpdateError{}
 	}
-	return member, nil
+	return updatedMember, nil
 }
 
 func (svc *ServiceImpl) GetMember(socialId string, provider string) (*Member, util.ApplicationError) {

@@ -6,11 +6,13 @@
   <component name="ChangeListManager">
     <list default="true" id="f1c733fd-8bc5-4c75-8bdd-fbdca6a40952" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/internal/common/common_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/common/common_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/event_scheduler_helper.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_scheduler_helper.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/event/event_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/event/event_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/util/application_error.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/util/application_error.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/couple/couple_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/couple/couple_service.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/member/member.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/member/member_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/member/member_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/member/member_service.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
