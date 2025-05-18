@@ -30,8 +30,9 @@ type CheckConnectedRes struct {
 }
 
 type UpdateMemberReq struct {
-	Birthday *time.Time `json:"birthday"`
-	Name     *string    `json:"name"`
+	Birthday  *time.Time `json:"birthday"`
+	Name      *string    `json:"name"`
+	Character *string    `json:"character"`
 }
 
 type UpdateMemberRes struct {

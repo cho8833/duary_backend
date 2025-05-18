@@ -33,10 +33,11 @@ func (svc *MemberServiceImpl) UpdateMember(request *UpdateMemberReq, socialId st
 
 	// update member
 	memberUpdateReq := &member.UpdateMemberReq{
-		SocialId: socialId,
-		Provider: provider,
-		Name:     request.Name,
-		Birthday: request.Birthday,
+		SocialId:  socialId,
+		Provider:  provider,
+		Name:      request.Name,
+		Birthday:  request.Birthday,
+		Character: request.Character,
 	}
 	updatedMember, svcErr := svc.memberSvc.UpdateMember(memberUpdateReq, transaction)
 	if svcErr != nil {
