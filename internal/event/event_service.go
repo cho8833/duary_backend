@@ -1,6 +1,8 @@
 package event
 
 import (
+	"errors"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/internal/util"
 	uuid2 "github.com/google/uuid"
 	"log"
@@ -68,6 +70,10 @@ func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rang
 
 	candidateEvents, err := service.repository.FindByCoupleIdAndStartDateBefore(coupleId, rangeEndDate)
 	if err != nil {
+		// 데이터가 없는 건 exception 이 아님
+		if temp := new(types.ResourceNotFoundException); !errors.As(err, &temp) {
+			return []VO{}, nil
+		}
 		log.Printf("failed to find events by coupleId and rangeStartDate before: %s", err)
 		return nil, util.DBReadError{}
 	}
