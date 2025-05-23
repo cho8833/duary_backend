@@ -81,11 +81,11 @@ func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken) (*SignInRes, util.Ap
 }
 
 func (svc *ServiceImpl) onSignInSuccess(payload *jwtutil.DecodedPayload, provider string) (*SignInRes, util.ApplicationError) {
-	// 카카오 회원 ID 와 카카오 ServiceProvider 로 Member 검색
+	// 회원 ID 와 ServiceProvider 로 Member 검색
 	// Member 가 없을 경우 ResourceNotFoundException 발생, 해당 Exception 은 오류가 아님
-	findMember, err := svc.memberRepository.FindBySocialIdAndProvider(payload.SocialId, "kakao")
+	findMember, err := svc.memberRepository.FindBySocialIdAndProvider(payload.SocialId, provider)
 	if temp := new(types.ResourceNotFoundException); !errors.As(err, &temp) && err != nil {
-		id := fmt.Sprintf("%dkakao", payload.SocialId)
+		id := fmt.Sprintf("%d-%s", payload.SocialId, provider)
 		log.Printf("failed to find findMember\nid:%s\nerror:%s", id, err.Error())
 		return nil, util.DBReadError{}
 	}
