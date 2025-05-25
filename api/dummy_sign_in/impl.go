@@ -1,32 +1,23 @@
-package dev
+package dummy_sign_in
 
 import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/cho8833/duary_lambda/internal/auth"
-	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
-	"github.com/cho8833/duary_lambda/internal/member"
-	"github.com/cho8833/duary_lambda/internal/shared"
+	"github.com/cho8833/duary_lambda/appjwt"
+	"github.com/cho8833/duary_lambda/auth"
+	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"os"
 )
 
-type DummyMemberService interface {
-	SignIn(req *DummySignInReq) (auth.SignInRes, shared.ApplicationError)
+type DummySignInReq struct {
+	Username string `json:"username"`
 }
 
-type DummyMemberServiceImpl struct {
-	memberRepository member.Repository
-	jwtUtil          jwtutil.JWTUtil
-}
+func SignIn(req *DummySignInReq, memberRepository member.Repository, jwtUtil appjwt.JWTUtil) (*auth.SignInRes, shared.ApplicationError) {
 
-func NewDummyMemberService(jwtUtil jwtutil.JWTUtil, memberRepository member.Repository) *DummyMemberServiceImpl {
-	return &DummyMemberServiceImpl{jwtUtil: jwtUtil, memberRepository: memberRepository}
-}
-
-func (svc *DummyMemberServiceImpl) SignIn(req *DummySignInReq) (*auth.SignInRes, shared.ApplicationError) {
-
-	findMember, err := svc.memberRepository.FindBySocialIdAndProvider(req.Username, "kakao")
+	findMember, err := memberRepository.FindBySocialIdAndProvider(req.Username, "kakao")
 	if temp := new(types.ResourceNotFoundException); !errors.As(err, &temp) && err != nil {
 		log.Printf("failed to find findMember\nid:%s\nerror:%s", req.Username, err.Error())
 		return nil, shared.DBReadError{}
@@ -34,10 +25,10 @@ func (svc *DummyMemberServiceImpl) SignIn(req *DummySignInReq) (*auth.SignInRes,
 
 	if findMember != nil {
 		// generate application token
-		memberId := svc.jwtUtil.GenerateSubject(findMember)
+		memberId := jwtUtil.GenerateSubject(findMember.SocialId, findMember.Provider)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, findMember.CoupleId, key)
-		_, err := svc.memberRepository.SaveMember(findMember)
+		newToken := jwtUtil.NewToken(memberId, findMember.CoupleId, key)
+		_, err := memberRepository.SaveMember(findMember)
 		if err != nil {
 			log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, err.Error())
 			return nil, shared.DBSaveError{}
@@ -60,16 +51,16 @@ func (svc *DummyMemberServiceImpl) SignIn(req *DummySignInReq) (*auth.SignInRes,
 			FcmToken:    nil,
 			Email:       nil,
 		}
-		_, err := svc.memberRepository.SaveMember(newMember)
+		_, err := memberRepository.SaveMember(newMember)
 		if err != nil {
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
 			return nil, shared.DBSaveError{}
 		}
 
 		// generate application token
-		memberId := svc.jwtUtil.GenerateSubject(newMember)
+		memberId := jwtUtil.GenerateSubject(newMember.SocialId, newMember.Provider)
 		key := os.Getenv("secretKey")
-		newToken := svc.jwtUtil.NewToken(memberId, newMember.CoupleId, key)
+		newToken := jwtUtil.NewToken(memberId, newMember.CoupleId, key)
 
 		result := &auth.SignInRes{
 			Member:     newMember,
