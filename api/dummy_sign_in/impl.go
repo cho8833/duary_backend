@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/appjwt"
 	"github.com/cho8833/duary_lambda/auth"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"os"

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/cho8833/duary_lambda/appjwt"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model/member"
 	"time"
 )
 

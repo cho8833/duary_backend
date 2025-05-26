@@ -1,9 +1,8 @@
-module github.com/cho8833/duary_lambda/member
+module github.com/cho8833/duary_lambda/model
 
 go 1.22.1
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.19.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.7.82
@@ -28,6 +27,4 @@ require (
 	github.com/aws/smithy-go v1.22.2 // indirect
 )
 
-replace (
-	github.com/cho8833/duary_lambda/shared => ../shared
-)
+replace github.com/cho8833/duary_lambda/shared => ../shared

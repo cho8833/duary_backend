@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/cho8833/duary_lambda/event"
+	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"time"
@@ -20,16 +20,10 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
-	schedulerClient, err := event.GetSchedulerClient()
-	if err != nil {
-		log.Printf(err.Error())
-		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
-	}
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
-	schedulerHelper := event.NewEventBridgeSchedulerHelper(schedulerClient)
 
-	eventSvc := event.NewEventService(eventRepo, *schedulerHelper)
+	eventSvc := event.NewEventService(eventRepo)
 
 	coupleId := request.QueryStringParameters["coupleId"]
 	startDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])

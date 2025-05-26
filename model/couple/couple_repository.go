@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/model"
 	"log"
 )
 
@@ -18,17 +18,17 @@ type Repository interface {
 	SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
-	UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *shared.DynamoDBWriteTransaction) (*Couple, error)
+	UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error)
 	DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error)
 }
 
 type RepositoryDynamoDB struct {
-	*shared.DynamoDBRepository[Couple]
+	*model.DynamoDBRepository[Couple]
 	client *dynamodb.Client
 }
 
 func NewCoupleRepository(client *dynamodb.Client) *RepositoryDynamoDB {
-	return &RepositoryDynamoDB{client: client, DynamoDBRepository: shared.NewBaseDynamoRepository[Couple](client, tableName)}
+	return &RepositoryDynamoDB{client: client, DynamoDBRepository: model.NewBaseDynamoRepository[Couple](client, tableName)}
 }
 
 func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error) {
@@ -115,7 +115,7 @@ func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *shared.DynamoDBWriteTransaction) (*Couple, error) {
+func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error) {
 	// Application 단에서 업데이트 값 예측
 	cacheCouple, err := repository.FindByIdCaching(context.TODO(), *req.Id)
 	if err != nil {

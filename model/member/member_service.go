@@ -1,12 +1,13 @@
 package member
 
 import (
+	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
 
 type Service interface {
-	UpdateMember(request *UpdateMemberReq, transaction *shared.DynamoDBWriteTransaction) (*Member, shared.ApplicationError)
+	UpdateMember(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError)
 	GetMember(socialId string, provider string) (*Member, shared.ApplicationError)
 }
 
@@ -18,7 +19,7 @@ func NewMemberService(repo Repository) *ServiceImpl {
 	return &ServiceImpl{repo: repo}
 }
 
-func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *shared.DynamoDBWriteTransaction) (*Member, shared.ApplicationError) {
+func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError) {
 	if transaction != nil {
 		updatedMember, err := svc.repo.UpdateMemberTransaction(request, transaction)
 		if err != nil {

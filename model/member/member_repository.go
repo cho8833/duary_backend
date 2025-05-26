@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/model"
 	"log"
 )
 
@@ -18,7 +18,7 @@ type Repository interface {
 	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
 	SaveMember(member *Member) (*Member, error)
 	UpdateMember(member *UpdateMemberReq) (*Member, error)
-	UpdateMemberTransaction(member *UpdateMemberReq, transaction *shared.DynamoDBWriteTransaction) (*Member, error)
+	UpdateMemberTransaction(member *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -90,7 +90,7 @@ func (repo *RepositoryDynamoDB) UpdateMember(member *UpdateMemberReq) (*Member, 
 	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) UpdateMemberTransaction(req *UpdateMemberReq, transaction *shared.DynamoDBWriteTransaction) (*Member, error) {
+func (repo *RepositoryDynamoDB) UpdateMemberTransaction(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error) {
 	// Application 단에서 업데이트 값 예측
 	cacheMember, err := repo.FindBySocialIdAndProvider(req.SocialId, req.Provider)
 	if err != nil {

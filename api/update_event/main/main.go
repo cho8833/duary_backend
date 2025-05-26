@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/cho8833/duary_lambda/event"
+	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
@@ -20,14 +20,9 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	schedulerClient, err := event.GetSchedulerClient()
-	if err != nil {
-		log.Printf(err.Error())
-		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
-	}
-	schedulerHelper := event.NewEventBridgeSchedulerHelper(schedulerClient)
 	eventRepo := event.NewEventRepository(dynamodbClient)
-	eventSvc := event.NewEventService(eventRepo, *schedulerHelper)
+
+	eventSvc := event.NewEventService(eventRepo)
 
 	updateEventReq := &event.UpdateReq{}
 

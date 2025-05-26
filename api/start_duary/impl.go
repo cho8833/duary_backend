@@ -2,8 +2,9 @@ package start_duary
 
 import (
 	"github.com/cho8833/duary_lambda/appjwt"
-	"github.com/cho8833/duary_lambda/couple"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"os"
@@ -23,7 +24,7 @@ type StartDuaryRes struct {
 	Token  *appjwt.ApplicationJWT `json:"token"`
 }
 
-func StartDuary(request *StartDuaryReq, transaction *shared.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*StartDuaryRes, shared.ApplicationError) {
+func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*StartDuaryRes, shared.ApplicationError) {
 	// validate request
 	if request.Name == nil || request.Birthday == nil || request.MyCharacter == nil || request.RelationDate == nil {
 		log.Printf("invalid request. request %+v", request)

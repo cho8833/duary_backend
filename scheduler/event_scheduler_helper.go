@@ -1,4 +1,4 @@
-package event
+package scheduler
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/scheduler"
 	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
+	"github.com/cho8833/duary_lambda/model/event"
 	"log"
 	"time"
 )
@@ -18,7 +19,7 @@ func NewEventBridgeSchedulerHelper(schedulerClient *scheduler.Client) *BridgeSch
 	return &BridgeSchedulerHelper{schedulerClient: schedulerClient}
 }
 
-func (helper *BridgeSchedulerHelper) CreateEventSchedule(event *VO, scheduleBefore int) {
+func (helper *BridgeSchedulerHelper) CreateEventSchedule(event *event.VO, scheduleBefore int) {
 	// 15분 전 알림
 	scheduleTime := event.StartDateTime.Add(-15 * time.Minute)
 
@@ -40,7 +41,7 @@ func (helper *BridgeSchedulerHelper) CreateEventSchedule(event *VO, scheduleBefo
 	}
 }
 
-func (helper *BridgeSchedulerHelper) DeleteEventSchedule(event *VO) {
+func (helper *BridgeSchedulerHelper) DeleteEventSchedule(event *event.VO) {
 	input := scheduler.DeleteScheduleInput{
 		Name: aws.String(helper.scheduleName(event)),
 	}
@@ -53,7 +54,7 @@ func (helper *BridgeSchedulerHelper) DeleteEventSchedule(event *VO) {
 	}
 }
 
-func (helper *BridgeSchedulerHelper) scheduleName(event *VO) string {
+func (helper *BridgeSchedulerHelper) scheduleName(event *event.VO) string {
 	return event.CoupleId + "#" + event.Id
 }
 

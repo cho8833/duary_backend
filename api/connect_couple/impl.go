@@ -3,8 +3,9 @@ package connect_couple
 import (
 	"github.com/aws/smithy-go/ptr"
 	"github.com/cho8833/duary_lambda/appjwt"
-	"github.com/cho8833/duary_lambda/couple"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"os"
 )
@@ -19,7 +20,7 @@ type StartDuaryRes struct {
 	Token  *appjwt.ApplicationJWT `json:"token"`
 }
 
-func ConnectCouple(req *ConnectCoupleReq, transaction *shared.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*StartDuaryRes, shared.ApplicationError) {
+func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*StartDuaryRes, shared.ApplicationError) {
 	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
 		return nil, shared.BadRequestError{}
 	}

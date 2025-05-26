@@ -3,7 +3,8 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/cho8833/duary_lambda/event"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/shared"
 )
 
@@ -12,19 +13,14 @@ GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -
 */
 func deleteEvent(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	dynamodbClient, err := event.GetDynamoDBClient()
+	dynamodbClient, err := model.GetDynamoDBClient()
 
 	if err != nil {
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
 
-	schedulerClient, err := event.GetSchedulerClient()
-	if err != nil {
-		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
-	}
-	schedulerHelper := event.NewEventBridgeSchedulerHelper(schedulerClient)
 	eventRepo := event.NewEventRepository(dynamodbClient)
-	eventSvc := event.NewEventService(eventRepo, *schedulerHelper)
+	eventSvc := event.NewEventService(eventRepo)
 
 	coupleId := request.QueryStringParameters["coupleId"]
 	eventId := request.QueryStringParameters["id"]

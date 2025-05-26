@@ -16,12 +16,11 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	repository     Repository
-	scheduleHelper BridgeSchedulerHelper
+	repository Repository
 }
 
-func NewEventService(repository Repository, scheduleHelper BridgeSchedulerHelper) *ServiceImpl {
-	return &ServiceImpl{repository: repository, scheduleHelper: scheduleHelper}
+func NewEventService(repository Repository) *ServiceImpl {
+	return &ServiceImpl{repository: repository}
 }
 
 func (service *ServiceImpl) SaveEvent(req *SaveReq) (*VO, shared.ApplicationError) {

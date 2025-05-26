@@ -4,10 +4,9 @@ use (
 	./appjwt
 	./auth
 	./shared
-	./member
-	./couple
-	./event
+	./model
 	./fcm
+	./scheduler
 	./api/get_user_info
 	./api/kakao_sign_in
 	./api/apple_sign_in

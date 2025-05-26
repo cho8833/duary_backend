@@ -7,7 +7,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/appjwt"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
@@ -16,7 +17,7 @@ import (
 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/dummy_sign_in/main/main.go && chmod 755 bootstrap && zip  build/package/dev/dummy_sign_in_api.zip bootstrap && rm bootstrap
 */
 func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	dynamodbClient, _ := member.GetDynamoDBClient()
+	dynamodbClient, _ := model.GetDynamoDBClient()
 
 	memberRepo := member.NewMemberRepository(dynamodbClient)
 	jwtUtil := &appjwt.Impl{}

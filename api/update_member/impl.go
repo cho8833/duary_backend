@@ -1,8 +1,9 @@
 package update_member
 
 import (
-	"github.com/cho8833/duary_lambda/couple"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"time"
@@ -19,7 +20,7 @@ type UpdateMemberRes struct {
 	Couple *couple.Couple `json:"couple"`
 }
 
-func UpdateMember(req *UpdateMemberReq, transaction *shared.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*UpdateMemberRes, shared.ApplicationError) {
+func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*UpdateMemberRes, shared.ApplicationError) {
 
 	authContext := shared.GetAuthContext()
 

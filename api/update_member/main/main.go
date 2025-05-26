@@ -5,8 +5,9 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/cho8833/duary_lambda/couple"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"update_member"
@@ -17,7 +18,7 @@ GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -
 */
 func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	dynamodbClient, err := member.GetDynamoDBClient()
+	dynamodbClient, err := model.GetDynamoDBClient()
 	if err != nil {
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
@@ -35,7 +36,7 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
-	transaction := shared.NewWriteTransaction(dynamodbClient)
+	transaction := model.NewWriteTransaction(dynamodbClient)
 
 	shared.NewAuthContext(request)
 

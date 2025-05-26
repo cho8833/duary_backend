@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/appjwt"
 	"github.com/cho8833/duary_lambda/auth"
-	"github.com/cho8833/duary_lambda/member"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
