@@ -60,7 +60,11 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.Dy
 }
 
 func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
-
+	now := time.Now().UTC()
+	relationDate := req.RelationDate.UTC()
+	if relationDate.After(now) {
+		return nil, shared.NewCustomApplicationError("처음 만난 날을 다시 설정해주세요")
+	}
 	if transaction != nil {
 		updatedCouple, err := svc.repository.UpdateCoupleTransaction(req, transaction)
 		if err != nil {
