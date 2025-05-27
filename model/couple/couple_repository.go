@@ -18,6 +18,7 @@ type Repository interface {
 	SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
+	UpdateCouple(req *UpdateCoupleReq) (*Couple, error)
 	UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error)
 	DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error)
 }
@@ -113,6 +114,47 @@ func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types
 		}}
 
 	return transaction, nil
+}
+
+func (repository *RepositoryDynamoDB) UpdateCouple(couple *UpdateCoupleReq) (*Couple, error) {
+	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
+	// partitionKey 임시 저장
+	partitionKey := *couple.Id
+	couple.Id = nil
+
+	av, err := attributevalue.MarshalMap(couple)
+	if err != nil {
+		return nil, err
+	}
+
+	builder := expression.UpdateBuilder{}
+
+	for k, v := range av {
+		builder = builder.Set(expression.Name(k), expression.Value(v))
+	}
+
+	expr, err := expression.NewBuilder().WithUpdate(builder).Build()
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	response, err := repository.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
+		TableName:                 aws.String(tableName),
+		Key:                       repository.getKey(partitionKey),
+		ExpressionAttributeValues: expr.Values(),
+		ExpressionAttributeNames:  expr.Names(),
+		UpdateExpression:          expr.Update(),
+		ReturnValues:              types.ReturnValueAllNew,
+	})
+	if err != nil {
+		log.Printf("failed to update item. Couple: %+v, Error: %s", couple, err.Error())
+		return nil, err
+	}
+
+	result := &Couple{}
+	_ = attributevalue.UnmarshalMap(response.Attributes, result)
+	return result, nil
 }
 
 func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error) {

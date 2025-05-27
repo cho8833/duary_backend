@@ -22,4 +22,5 @@ use (
 	./api/get_event
 	./api/update_event
 	./api/dummy_sign_in
+	./api/update_couple
 )

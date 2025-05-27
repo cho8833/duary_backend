@@ -60,6 +60,7 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.Dy
 }
 
 func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
+
 	if transaction != nil {
 		updatedCouple, err := svc.repository.UpdateCoupleTransaction(req, transaction)
 		if err != nil {
@@ -68,8 +69,12 @@ func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.Dy
 		}
 		return updatedCouple, nil
 	} else {
-		// TODO : 구현 필요
-		return nil, shared.DBUpdateError{}
+		updatedCouple, err := svc.repository.UpdateCouple(req)
+		if err != nil {
+			log.Printf("failed to update couple. req: %+v, error: %s", req, err.Error())
+			return nil, shared.DBUpdateError{}
+		}
+		return updatedCouple, nil
 	}
 }
 
