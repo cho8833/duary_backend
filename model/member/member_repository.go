@@ -17,8 +17,9 @@ const tableName = "Member"
 type Repository interface {
 	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
 	SaveMember(member *Member) (*Member, error)
-	UpdateMember(member *UpdateMemberReq) (*Member, error)
-	UpdateMemberTransaction(member *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error)
+	UpdateNonNil(member *UpdateMemberReq) (*Member, error)
+	UpdateNonNilTransaction(member *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error)
+	UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -66,7 +67,7 @@ func (repo *RepositoryDynamoDB) SaveMember(member *Member) (*Member, error) {
 	return member, nil
 }
 
-func (repo *RepositoryDynamoDB) UpdateMember(member *UpdateMemberReq) (*Member, error) {
+func (repo *RepositoryDynamoDB) UpdateNonNil(member *UpdateMemberReq) (*Member, error) {
 	expr, err := repo.updateMemberExpression(member)
 	if err != nil {
 		return nil, err
@@ -90,7 +91,7 @@ func (repo *RepositoryDynamoDB) UpdateMember(member *UpdateMemberReq) (*Member, 
 	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) UpdateMemberTransaction(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error) {
+func (repo *RepositoryDynamoDB) UpdateNonNilTransaction(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error) {
 	// Application 단에서 업데이트 값 예측
 	cacheMember, err := repo.FindBySocialIdAndProvider(req.SocialId, req.Provider)
 	if err != nil {
@@ -113,6 +114,40 @@ func (repo *RepositoryDynamoDB) UpdateMemberTransaction(req *UpdateMemberReq, tr
 	transaction.AddTransaction(transactionItem)
 
 	return cacheMember, nil
+}
+
+func (repo *RepositoryDynamoDB) UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, error) {
+	var input *dynamodb.UpdateItemInput
+	if fcmToken != nil {
+		input = &dynamodb.UpdateItemInput{
+			TableName:        aws.String(tableName),
+			Key:              repo.getKey(socialId, provider),
+			UpdateExpression: aws.String("SET fcmToken = :fcmToken"),
+			ExpressionAttributeValues: map[string]types.AttributeValue{
+				":fcmToken": &types.AttributeValueMemberS{Value: *fcmToken},
+			},
+			ReturnValues: types.ReturnValueAllNew,
+		}
+	} else {
+		input = &dynamodb.UpdateItemInput{
+			TableName:        aws.String(tableName),
+			Key:              repo.getKey(socialId, provider),
+			UpdateExpression: aws.String("REMOVE fcmToken"),
+			ReturnValues:     types.ReturnValueAllNew,
+		}
+	}
+	output, err := repo.client.UpdateItem(context.TODO(), input)
+	if err != nil {
+		log.Printf("failed to update fcm token. Error: %s", err.Error())
+		return nil, err
+	}
+	result := &Member{}
+	err = attributevalue.UnmarshalMap(output.Attributes, result)
+	if err != nil {
+		log.Printf("failed unmarshal member. Error: %s", err.Error())
+		return nil, err
+	}
+	return result, nil
 }
 
 func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*expression.Expression, error) {
