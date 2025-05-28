@@ -1,6 +1,8 @@
 package couple
 
 import (
+	"errors"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	uuid2 "github.com/google/uuid"
@@ -93,6 +95,10 @@ func (svc *ServiceImpl) DeleteCouple(id string, transaction *model.DynamoDBWrite
 
 func (svc *ServiceImpl) FindById(coupleId string) (*Couple, shared.ApplicationError) {
 	couple, err := svc.repository.FindById(&coupleId)
+	if temp := new(types.ResourceNotFoundException); errors.As(err, &temp) {
+		return nil, shared.UserNotFound{}
+	}
+
 	if err != nil {
 		return nil, shared.DBReadError{}
 	}

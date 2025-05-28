@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/cho8833/duary_lambda/appjwt"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/member"
 	"time"
 )
@@ -24,8 +25,16 @@ type AppleOAuthToken struct {
 	IdentityToken     *string `json:"identityToken"`
 	State             *string `json:"state"`
 }
+
+type SignInReq struct {
+	FcmToken        *string          `json:"fcmToken"`
+	AppleOAuthToken *AppleOAuthToken `json:"appleOAuthToken"`
+	KakaoOAuthToken *KakaoOAuthToken `json:"kakaoOAuthToken"`
+}
+
 type SignInRes struct {
 	IsRegister bool                   `json:"isRegister"`
 	Member     *member.Member         `json:"member"`
 	Token      *appjwt.ApplicationJWT `json:"token"`
+	Couple     *couple.Couple         `json:"couple"`
 }

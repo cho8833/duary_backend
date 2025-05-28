@@ -1,6 +1,8 @@
 package member
 
-import "time"
+import (
+	"time"
+)
 
 type Member struct {
 	Name        *string    `json:"name" dynamodbav:"name"`
@@ -36,6 +38,17 @@ func (m *Member) ApplyFrom(req UpdateMemberReq) {
 	}
 }
 
+func FromSaveMemberReq(req *SaveMemberReq) *Member {
+	return &Member{
+		FcmToken:    req.FcmToken,
+		AccessToken: req.AccessToken,
+		Character:   req.Character,
+		Name:        req.Name,
+		CoupleId:    req.CoupleId,
+		Birthday:    req.Birthday,
+	}
+}
+
 type UpdateMemberReq struct {
 	Name        *string    `dynamodbav:"name"`
 	Birthday    *time.Time `dynamodbav:"birthday"`
@@ -45,4 +58,15 @@ type UpdateMemberReq struct {
 	SocialId    string     `dynamodbav:"socialId"`
 	CoupleId    *string    `dynamodbav:"coupleId"`
 	Character   *string    `dynamodbav:"character"`
+}
+
+type SaveMemberReq struct {
+	Name        *string    `json:"name"`
+	Birthday    *time.Time `json:"birthday"`
+	FcmToken    *string    `json:"fcmToken"`
+	AccessToken *string    `json:"accessToken"`
+	Provider    string     `json:"provider"`
+	SocialId    string     `json:"socialId"`
+	CoupleId    *string    `json:"coupleId"`
+	Character   *string    `json:"character"`
 }

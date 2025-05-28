@@ -1,14 +1,19 @@
 package member
 
 import (
+	"errors"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
 
 type Service interface {
-	UpdateMember(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError)
+	UpdateMember(request *UpdateMemberReq) (*Member, shared.ApplicationError)
+	UpdateMemberTransaction(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError)
 	GetMember(socialId string, provider string) (*Member, shared.ApplicationError)
+	FindById(socialId string, provider string) (*Member, shared.ApplicationError)
+	SaveMember(request *SaveMemberReq) (*Member, shared.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -19,18 +24,44 @@ func NewMemberService(repo Repository) *ServiceImpl {
 	return &ServiceImpl{repo: repo}
 }
 
-func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError) {
-	if transaction != nil {
-		updatedMember, err := svc.repo.UpdateMemberTransaction(request, transaction)
-		if err != nil {
-			log.Printf("failed to get UpdateMemberTransaction. error:%s", err.Error())
-			return nil, shared.DBUpdateError{}
-		}
-		return updatedMember, nil
+func (svc *ServiceImpl) FindById(socialId string, provider string) (*Member, shared.ApplicationError) {
+	member, err := svc.repo.FindBySocialIdAndProvider(socialId, provider)
+	if temp := new(types.ResourceNotFoundException); errors.As(err, &temp) {
+		return nil, shared.UserNotFound{}
 	}
+
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, shared.DBReadError{}
+	}
+	return member, nil
+}
+
+func (svc *ServiceImpl) SaveMember(request *SaveMemberReq) (*Member, shared.ApplicationError) {
+	newMember := FromSaveMemberReq(request)
+
+	result, err := svc.repo.SaveMember(newMember)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, shared.DBSaveError{}
+	}
+	return result, nil
+}
+
+func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq) (*Member, shared.ApplicationError) {
+
 	updatedMember, err := svc.repo.UpdateMember(request)
 	if err != nil {
 		log.Printf("failed to update member. req: %+v, error: %s", request, err.Error())
+		return nil, shared.DBUpdateError{}
+	}
+	return updatedMember, nil
+}
+
+func (svc *ServiceImpl) UpdateMemberTransaction(request *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError) {
+	updatedMember, err := svc.repo.UpdateMemberTransaction(request, transaction)
+	if err != nil {
+		log.Printf("failed to get UpdateMemberTransaction. error:%s", err.Error())
 		return nil, shared.DBUpdateError{}
 	}
 	return updatedMember, nil

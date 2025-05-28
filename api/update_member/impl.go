@@ -45,7 +45,7 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 		Birthday:  req.Birthday,
 		Character: req.Character,
 	}
-	updatedMember, svcErr := memberSvc.UpdateMember(memberUpdateReq, transaction)
+	updatedMember, svcErr := memberSvc.UpdateMemberTransaction(memberUpdateReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}

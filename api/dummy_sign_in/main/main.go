@@ -8,18 +8,24 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/appjwt"
 	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/dummy_sign_in/main/main.go && chmod 755 bootstrap && zip  build/package/dev/dummy_sign_in_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/dummy_sign_in/main/main.go && chmod 755 bootstrap && zip  build/package/dummy_sign_in_api.zip bootstrap && rm bootstrap
 */
 func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	dynamodbClient, _ := model.GetDynamoDBClient()
 
 	memberRepo := member.NewMemberRepository(dynamodbClient)
+	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
+
+	memberSvc := member.NewMemberService(memberRepo)
+	coupleSvc := couple.NewCoupleService(coupleRepo)
+
 	jwtUtil := &appjwt.Impl{}
 
 	req := &dummy_sign_in.DummySignInReq{}
@@ -29,7 +35,7 @@ func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
-	res, svcError := dummy_sign_in.SignIn(req, memberRepo, jwtUtil)
+	res, svcError := dummy_sign_in.SignIn(req, memberSvc, coupleSvc, jwtUtil)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(svcError), nil
 	}

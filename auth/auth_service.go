@@ -3,8 +3,8 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/appjwt"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -16,18 +16,19 @@ type Service interface {
 }
 
 type ServiceImpl struct {
-	memberRepository member.Repository
-	jwtValidator     appjwt.JWTValidator
-	jwtUtil          appjwt.JWTUtil
+	memberSvc    member.Service
+	coupleSvc    couple.Service
+	jwtValidator appjwt.JWTValidator
+	jwtUtil      appjwt.JWTUtil
 }
 
 func NewAuthService(jwtValidator appjwt.JWTValidator,
 	jwtUtil appjwt.JWTUtil,
-	memberRepository member.Repository) *ServiceImpl {
-	return &ServiceImpl{jwtValidator: jwtValidator, jwtUtil: jwtUtil, memberRepository: memberRepository}
+	memberSvc member.Service, coupleSvc couple.Service) *ServiceImpl {
+	return &ServiceImpl{jwtValidator: jwtValidator, jwtUtil: jwtUtil, memberSvc: memberSvc, coupleSvc: coupleSvc}
 }
 
-func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken) (*SignInRes, shared.ApplicationError) {
+func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken, fcmToken *string) (*SignInRes, shared.ApplicationError) {
 
 	aud := os.Getenv("aud")
 	nonce := os.Getenv("nonce")
@@ -45,7 +46,7 @@ func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken) (*SignInRes, sh
 		return nil, shared.BadRequestError{}
 	}
 
-	res, svcError := svc.onSignInSuccess(payload, "kakao")
+	res, svcError := svc.onSignInSuccess(payload, "kakao", fcmToken)
 	if svcError != nil {
 		return nil, svcError
 	}
@@ -56,7 +57,7 @@ func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken) (*SignInRes, sh
 
 const appId = "com.ivis.duary"
 
-func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken) (*SignInRes, shared.ApplicationError) {
+func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken, fcmToken *string) (*SignInRes, shared.ApplicationError) {
 	nonce := os.Getenv("nonce")
 
 	validateValue := &appjwt.ValidatingValue{
@@ -72,7 +73,7 @@ func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken) (*SignInRes, shared.
 		return nil, shared.BadRequestError{}
 	}
 
-	res, svcError := svc.onSignInSuccess(payload, "apple")
+	res, svcError := svc.onSignInSuccess(payload, "apple", fcmToken)
 	if svcError != nil {
 		return nil, svcError
 	}
@@ -80,47 +81,65 @@ func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken) (*SignInRes, shared.
 
 }
 
-func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider string) (*SignInRes, shared.ApplicationError) {
+func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider string, fcmToken *string) (*SignInRes, shared.ApplicationError) {
 	// 회원 ID 와 ServiceProvider 로 Member 검색
 	// Member 가 없을 경우 ResourceNotFoundException 발생, 해당 Exception 은 오류가 아님
-	findMember, err := svc.memberRepository.FindBySocialIdAndProvider(payload.SocialId, provider)
-	if temp := new(types.ResourceNotFoundException); !errors.As(err, &temp) && err != nil {
+	findMember, svcErr := svc.memberSvc.FindById(payload.SocialId, provider)
+	if temp := new(shared.UserNotFound); !errors.As(svcErr, &temp) && svcErr != nil {
 		id := fmt.Sprintf("%d-%s", payload.SocialId, provider)
-		log.Printf("failed to find findMember\nid:%s\nerror:%s", id, err.Error())
-		return nil, shared.DBReadError{}
+		log.Printf("failed to find findMember\nid:%s\nerror:%s", id, svcErr.Error())
+		return nil, svcErr
 	}
 
 	// findMember 가 존재하는 경우 DB 필드를 업데이트하고 이미 회원가입된 Member return
 	if findMember != nil {
+
+		var myCouple *couple.Couple
+		if findMember.CoupleId != nil {
+			myCouple, svcErr = svc.coupleSvc.FindById(*findMember.CoupleId)
+			if svcErr != nil {
+				return nil, svcErr
+			}
+		}
 
 		// generate application token
 		memberId := svc.jwtUtil.GenerateSubject(findMember.SocialId, findMember.Provider)
 		key := os.Getenv("secretKey")
 		newToken := svc.jwtUtil.NewToken(memberId, findMember.CoupleId, key)
 
-		_, err := svc.memberRepository.SaveMember(findMember)
-		if err != nil {
-			log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, err.Error())
-			return nil, shared.DBSaveError{}
+		var memberInfo *member.Member
+		if fcmToken == nil {
+			memberInfo = findMember
+		} else {
+			// member 의 fcm_token update
+			updateMemberReq := member.UpdateMemberReq{
+				FcmToken: fcmToken,
+				SocialId: payload.SocialId,
+				Provider: provider,
+			}
+			memberInfo, svcErr = svc.memberSvc.UpdateMember(&updateMemberReq)
+			if svcErr != nil {
+				log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, svcErr)
+				return nil, shared.DBSaveError{}
+			}
 		}
 		result := &SignInRes{
-			Member:     findMember,
+			Member:     memberInfo,
 			IsRegister: false,
 			Token:      newToken,
+			Couple:     myCouple,
 		}
 		return result, nil
 	} else {
 		// findMember 가 존재하지 않는 경우 Member 생성, 최초 회원가입
-		newMember := &member.Member{
+		newMemberReq := &member.SaveMemberReq{
 			Name:     payload.NickName,
 			Birthday: nil,
 			Provider: provider,
-			Gender:   nil,
 			SocialId: payload.SocialId,
-			FcmToken: nil,
-			Email:    payload.Email,
+			FcmToken: fcmToken,
 		}
-		_, err := svc.memberRepository.SaveMember(newMember)
+		newMember, err := svc.memberSvc.SaveMember(newMemberReq)
 		if err != nil {
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
 			return nil, shared.DBSaveError{}

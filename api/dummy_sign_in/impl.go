@@ -2,9 +2,9 @@ package dummy_sign_in
 
 import (
 	"errors"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/cho8833/duary_lambda/appjwt"
 	"github.com/cho8833/duary_lambda/auth"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -12,14 +12,15 @@ import (
 )
 
 type DummySignInReq struct {
-	Username string `json:"username"`
+	Username string  `json:"username"`
+	FcmToken *string `json:"fcm_token"`
 }
 
-func SignIn(req *DummySignInReq, memberRepository member.Repository, jwtUtil appjwt.JWTUtil) (*auth.SignInRes, shared.ApplicationError) {
+func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Service, jwtUtil appjwt.JWTUtil) (*auth.SignInRes, shared.ApplicationError) {
 
-	findMember, err := memberRepository.FindBySocialIdAndProvider(req.Username, "kakao")
-	if temp := new(types.ResourceNotFoundException); !errors.As(err, &temp) && err != nil {
-		log.Printf("failed to find findMember\nid:%s\nerror:%s", req.Username, err.Error())
+	findMember, svcErr := memberSvc.FindById(req.Username, "kakao")
+	if temp := new(shared.UserNotFound); !errors.As(svcErr, &temp) && svcErr != nil {
+		log.Printf("failed to find findMember\nid:%s\nerror:%s", req.Username, svcErr.Error())
 		return nil, shared.DBReadError{}
 	}
 
@@ -28,30 +29,49 @@ func SignIn(req *DummySignInReq, memberRepository member.Repository, jwtUtil app
 		memberId := jwtUtil.GenerateSubject(findMember.SocialId, findMember.Provider)
 		key := os.Getenv("secretKey")
 		newToken := jwtUtil.NewToken(memberId, findMember.CoupleId, key)
-		_, err := memberRepository.SaveMember(findMember)
-		if err != nil {
-			log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, err.Error())
-			return nil, shared.DBSaveError{}
+
+		var memberCouple *couple.Couple
+		if findMember.CoupleId != nil {
+			memberCouple, svcErr = coupleSvc.FindById(*findMember.CoupleId)
+			if svcErr != nil {
+				return nil, shared.DBReadError{}
+			}
 		}
+
+		var memberInfo *member.Member
+		if req.FcmToken == nil {
+			memberInfo = findMember
+		} else {
+			updateMemberReq := &member.UpdateMemberReq{
+				FcmToken: req.FcmToken,
+				Provider: findMember.Provider,
+				SocialId: findMember.SocialId,
+			}
+
+			memberInfo, svcErr = memberSvc.UpdateMember(updateMemberReq)
+			if svcErr != nil {
+				return nil, shared.DBUpdateError{}
+			}
+		}
+
 		result := &auth.SignInRes{
-			Member:     findMember,
+			Member:     memberInfo,
 			IsRegister: false,
 			Token:      newToken,
+			Couple:     memberCouple,
 		}
 		return result, nil
 	} else {
 		// findMember 가 존재하지 않는 경우 Member 생성, 최초 회원가입
-		newMember := &member.Member{
+		newMemberReq := &member.SaveMemberReq{
 			Name:        nil,
 			Birthday:    nil,
 			AccessToken: nil,
 			Provider:    "kakao",
-			Gender:      nil,
 			SocialId:    req.Username,
-			FcmToken:    nil,
-			Email:       nil,
+			FcmToken:    req.FcmToken,
 		}
-		_, err := memberRepository.SaveMember(newMember)
+		newMember, err := memberSvc.SaveMember(newMemberReq)
 		if err != nil {
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
 			return nil, shared.DBSaveError{}
