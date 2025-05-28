@@ -67,6 +67,8 @@ func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.Dy
 	if relationDate.After(now) {
 		return nil, shared.NewCustomApplicationError("처음 만난 날을 다시 설정해주세요")
 	}
+
+	relationDate = time.Date(relationDate.Year(), relationDate.Month(), relationDate.Day(), 0, 0, 0, 0, relationDate.Location())
 	if transaction != nil {
 		updatedCouple, err := svc.repository.UpdateCoupleTransaction(req, transaction)
 		if err != nil {
