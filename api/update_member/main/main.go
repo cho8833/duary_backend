@@ -14,7 +14,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_member/main/main.go && chmod 755 bootstrap && zip  build/package/common/update_member_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_member/main/main.go && chmod 755 bootstrap && zip  build/package/update_member_api.zip bootstrap && rm bootstrap
 */
 func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 

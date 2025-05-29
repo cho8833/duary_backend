@@ -2,13 +2,12 @@ package test
 
 import (
 	"fmt"
-	"github.com/cho8833/duary_lambda/internal/couple"
-	"github.com/cho8833/duary_lambda/internal/test"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"testing"
 )
 
 func Test_FindByCoupleCode(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	repository := couple.NewCoupleRepository(dynamodbClient)
 

@@ -3,6 +3,7 @@ package event
 import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	uuid2 "github.com/google/uuid"
 	"log"
@@ -11,8 +12,10 @@ import (
 
 type Service interface {
 	SaveEvent(req *SaveReq) (*VO, shared.ApplicationError)
-	GetEventBetweenStartAndEndDate(coupleId *string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
+	GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
 	UpdateEvent(req *UpdateReq) (*VO, shared.ApplicationError)
+	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
+	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
 }
 
 type ServiceImpl struct {
@@ -30,6 +33,17 @@ func (service *ServiceImpl) SaveEvent(req *SaveReq) (*VO, shared.ApplicationErro
 	vo, err := service.repository.SaveEvent(event)
 	if err != nil {
 		log.Printf("save event error\nreq: %+v\nerror: %s", req, err)
+		return nil, shared.DBSaveError{}
+	}
+
+	return vo, nil
+}
+
+func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError) {
+	event := FromReq(req, *service.generateUID())
+	vo, err := service.repository.SaveTransaction(event, transaction)
+	if err != nil {
+		log.Printf("save transaction error\nreq: %+v\nerror: %s", req, err)
 		return nil, shared.DBSaveError{}
 	}
 

@@ -60,7 +60,7 @@ func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransact
 		Character: request.MyCharacter,
 		Provider:  *provider,
 	}
-	updatedMember, svcErr := memberSvc.UpdateMember(memberReq, transaction)
+	updatedMember, svcErr := memberSvc.UpdateMemberTransaction(memberReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}

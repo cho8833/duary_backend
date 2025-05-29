@@ -13,14 +13,14 @@ import (
 
 type DummySignInReq struct {
 	Username string  `json:"username"`
-	FcmToken *string `json:"fcm_token"`
+	FcmToken *string `json:"fcmToken"`
 }
 
 func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Service, jwtUtil appjwt.JWTUtil) (*auth.SignInRes, shared.ApplicationError) {
 
 	findMember, svcErr := memberSvc.FindById(req.Username, "kakao")
-	if temp := new(shared.UserNotFound); !errors.As(svcErr, &temp) && svcErr != nil {
-		log.Printf("failed to find findMember\nid:%s\nerror:%s", req.Username, svcErr.Error())
+	if temp := new(shared.UserNotFound); !errors.As(svcErr, temp) && svcErr != nil {
+		log.Printf("failed to find findMember. id:%s\nerror:%s", req.Username, svcErr.Error())
 		return nil, shared.DBReadError{}
 	}
 
@@ -71,9 +71,9 @@ func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Serv
 			SocialId:    req.Username,
 			FcmToken:    req.FcmToken,
 		}
-		newMember, err := memberSvc.SaveMember(newMemberReq)
-		if err != nil {
-			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
+		newMember, svcErr := memberSvc.SaveMember(newMemberReq)
+		if svcErr != nil {
+			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, svcErr.Error())
 			return nil, shared.DBSaveError{}
 		}
 

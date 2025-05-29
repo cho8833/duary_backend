@@ -3,18 +3,17 @@ package test
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/cho8833/duary_lambda/member"
-	"github.com/cho8833/duary_lambda/test"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
 func Test_FindById(t *testing.T) {
-	client := test.CreateLocalDynamoDBClient()
+	client := CreateLocalDynamoDBClient()
 	repository := member.NewMemberRepository(client)
 
-	member, err := repository.FindBySocialIdAndProvider(1, "")
+	member, err := repository.FindBySocialIdAndProvider("asdf", "")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -22,13 +21,13 @@ func Test_FindById(t *testing.T) {
 }
 
 func Test_saveMember(t *testing.T) {
-	client := test.CreateLocalDynamoDBClient()
+	client := CreateLocalDynamoDBClient()
 	repository := member.NewMemberRepository(client)
 	name := "test"
 	now := time.Now()
 	gender := "man"
 	dummyMember := &member.Member{
-		SocialId: 1,
+		SocialId: "asdf",
 		Name:     &name,
 		Birthday: &now,
 		Gender:   &gender,
@@ -44,10 +43,10 @@ func Test_saveMember(t *testing.T) {
 }
 
 func Test_findBySocialIdAndProvider(t *testing.T) {
-	client := test.CreateLocalDynamoDBClient()
+	client := CreateLocalDynamoDBClient()
 	repo := member.NewMemberRepository(client)
 
-	member, err := repo.FindBySocialIdAndProvider(1, "kakao")
+	member, err := repo.FindBySocialIdAndProvider("asdf", "kakao")
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -55,16 +54,16 @@ func Test_findBySocialIdAndProvider(t *testing.T) {
 }
 
 func Test_updateItem(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 	repo := member.NewMemberRepository(dynamodbClient)
 
 	dummyUpdate := &member.UpdateMemberReq{
 		Provider: "kakao",
-		SocialId: 1,
+		SocialId: "asdf",
 		Name:     aws.String("Name"),
 		FcmToken: aws.String("FCMTOKEN"),
 	}
-	result, err := repo.UpdateMember(dummyUpdate)
+	result, err := repo.UpdateNonNil(dummyUpdate)
 	if err != nil {
 		t.Fatalf("%s", err.Error())
 	}

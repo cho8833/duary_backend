@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/aws/smithy-go/ptr"
+	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"strings"
@@ -21,6 +22,7 @@ type Repository interface {
 	SaveEvent(event *Event) (*VO, error)
 	UpdateEvent(req *UpdateReq) (*VO, error)
 	DeleteEvent(coupleId string, id string) error
+	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -46,6 +48,24 @@ func (repo *RepositoryDynamoDB) SaveEvent(event *Event) (*VO, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	vo := FromEvent(*event)
+
+	return &vo, nil
+}
+
+func (repo *RepositoryDynamoDB) SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error) {
+	item, err := attributevalue.MarshalMap(event)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+	transactionItem := &types.TransactWriteItem{
+		Put: &types.Put{
+			TableName: aws.String(tableName),
+			Item:      item,
+		}}
+	transaction.AddTransaction(transactionItem)
 
 	vo := FromEvent(*event)
 

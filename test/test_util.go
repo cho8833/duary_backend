@@ -29,7 +29,7 @@ func CreateLocalDynamoDBClient() *dynamodb.Client {
 	return dynamodb.NewFromConfig(cfg)
 }
 
-func CreateTestAuthContext(socialId *int64, provider *string, coupleId *string) *shared.AuthContext {
+func CreateTestAuthContext(socialId *string, provider *string, coupleId *string) *shared.AuthContext {
 	authContext := shared.GetAuthContext()
 	authContext.CoupleId = coupleId
 	authContext.Provider = provider

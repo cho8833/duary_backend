@@ -41,7 +41,7 @@ func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provi
 	}
 	if result.Item == nil {
 		return nil, &types.ResourceNotFoundException{
-			Message: aws.String(fmt.Sprintf("resource not found for id: %d", socialId)),
+			Message: aws.String(fmt.Sprintf("resource not found for id: %s", socialId)),
 		}
 	}
 	member := &Member{}

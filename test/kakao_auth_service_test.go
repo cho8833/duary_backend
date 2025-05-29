@@ -2,10 +2,10 @@ package test
 
 import (
 	"fmt"
-	"github.com/cho8833/duary_lambda/internal/auth"
-	"github.com/cho8833/duary_lambda/internal/auth/jwtutil"
-	"github.com/cho8833/duary_lambda/internal/member"
-	"github.com/cho8833/duary_lambda/internal/test"
+	"github.com/cho8833/duary_lambda/appjwt"
+	"github.com/cho8833/duary_lambda/auth"
+	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/member"
 	"testing"
 )
 
@@ -18,10 +18,17 @@ func Test_KakaoSignIn(t *testing.T) {
 		AccessToken: &accessToken,
 	}
 
-	memberRepository := member.NewMemberRepository(test.CreateLocalDynamoDBClient())
-	svc := auth.NewAuthService(&jwtutil.JWTValidatorImpl{}, &jwtutil.Impl{}, memberRepository)
+	dynamodbClient := CreateLocalDynamoDBClient()
+	memberRepository := member.NewMemberRepository(dynamodbClient)
+	coupleRepository := couple.NewCoupleRepository(dynamodbClient)
 
-	result, svcError := svc.KakaoSignIn(reqToken)
+	memberSvc := member.NewMemberService(memberRepository)
+	coupleSvc := couple.NewCoupleService(coupleRepository)
+
+	svc := auth.NewAuthService(&appjwt.JWTValidatorImpl{}, &appjwt.Impl{}, memberSvc, coupleSvc)
+
+	result, svcError := svc.KakaoSignIn(reqToken, ptr("asdf"))
+
 	if svcError != nil {
 		t.Fatalf(svcError.Error())
 	}

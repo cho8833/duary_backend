@@ -2,7 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/cho8833/duary_lambda/event"
+	"github.com/cho8833/duary_lambda/model/event"
 	"testing"
 	"time"
 )
@@ -15,7 +15,7 @@ func getDailyDummy() event.VO {
 		Id:            "event1",
 		Title:         "Team Meeting",
 		CoupleId:      "couple1",
-		CreatedBy:     1,
+		CreatedBy:     "user1",
 		StartDateTime: testDate,
 		EndDateTime:   testDate.Add(time.Hour * 2),
 		Content:       ptr("Discuss project updates"),
@@ -39,7 +39,7 @@ func getWeeklyDummy() event.VO {
 		Id:            "event2",
 		Title:         "Team Meeting",
 		CoupleId:      "couple1",
-		CreatedBy:     1,
+		CreatedBy:     "user2",
 		StartDateTime: testDate,
 		EndDateTime:   testDate.Add(time.Hour * 2),
 		Content:       ptr("Discuss project updates"),

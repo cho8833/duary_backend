@@ -46,6 +46,8 @@ func FromSaveMemberReq(req *SaveMemberReq) *Member {
 		Name:        req.Name,
 		CoupleId:    req.CoupleId,
 		Birthday:    req.Birthday,
+		SocialId:    req.SocialId,
+		Provider:    req.Provider,
 	}
 }
 

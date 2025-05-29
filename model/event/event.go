@@ -23,15 +23,16 @@ type Event struct {
 	Title         string      `dynamodbav:"title"`
 	Content       *string     `dynamodbav:"content"` // 메모
 	IsTogether    bool        `dynamodbav:"isTogether"`
-	CreatedBy     int         `dynamodbav:"createdBy"`
+	CreatedBy     string      `dynamodbav:"createdBy"`
 	IsAllDay      bool        `dynamodbav:"isAllDay"`
 	Location      *string     `dynamodbav:"location"`
 	HangOutWith   *string     `dynamodbav:"hangOutWith"`
 	Recurrence    *Recurrence `dynamodbav:"recurrence"`
+	EventType     string      `dynamodbav:"eventType"` // ANNIVERSARY, NORMAL
 }
 
 type Recurrence struct {
-	Frequency       string    `json:"frequency" dynamodbav:"frequency"`
+	Frequency       string    `json:"frequency" dynamodbav:"frequency"` // DAILY, WEEKLY, MONTHLY, YEARLY
 	Interval        uint8     `json:"interval" dynamodbav:"interval"`
 	RepeatStartDate time.Time `json:"repeatStartDate" dynamodbav:"repeatStartDate"`
 	RepeatEndDate   time.Time `json:"repeatEndDate" dynamodbav:"repeatEndDate"`
@@ -50,6 +51,7 @@ func FromReq(req *SaveReq, id string) *Event {
 		Location:      req.Location,
 		HangOutWith:   req.HangOutWith,
 		Recurrence:    req.Recurrence,
+		EventType:     req.EventType,
 	}
 }
 
@@ -58,7 +60,7 @@ type VO struct {
 	Id            string      `json:"id"`
 	Title         string      `json:"title"`
 	CoupleId      string      `json:"coupleId"`
-	CreatedBy     int         `json:"createdBy"`
+	CreatedBy     string      `json:"createdBy"`
 	StartDateTime time.Time   `json:"startDateTime"`
 	EndDateTime   time.Time   `json:"endDateTime"`
 	Content       *string     `json:"content"`
@@ -67,6 +69,7 @@ type VO struct {
 	Location      *string     `json:"location"`
 	HangOutWith   *string     `json:"hangOutWith"`
 	Recurrence    *Recurrence `json:"recurrence"`
+	EventType     string      `json:"eventType"`
 }
 
 func FromEvent(event Event) VO {
@@ -84,13 +87,14 @@ func FromEvent(event Event) VO {
 		Location:      event.Location,
 		HangOutWith:   event.HangOutWith,
 		Recurrence:    event.Recurrence,
+		EventType:     event.EventType,
 	}
 }
 
 type SaveReq struct {
 	Title         string      `json:"title"`
 	CoupleId      string      `json:"coupleId"`
-	CreatedBy     int         `json:"createdBy"`
+	CreatedBy     string      `json:"createdBy"`
 	StartDateTime time.Time   `json:"startDateTime"`
 	EndDateTime   time.Time   `json:"endDateTime"`
 	Content       *string     `json:"content"`
@@ -99,6 +103,7 @@ type SaveReq struct {
 	Location      *string     `json:"location"`
 	HangOutWith   *string     `json:"hangOutWith"`
 	Recurrence    *Recurrence `json:"recurrence"`
+	EventType     string      `json:"eventType"`
 }
 
 type UpdateReq struct {

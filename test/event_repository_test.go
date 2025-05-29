@@ -2,8 +2,7 @@ package test
 
 import (
 	"fmt"
-	"github.com/cho8833/duary_lambda/event"
-	"github.com/cho8833/duary_lambda/test"
+	"github.com/cho8833/duary_lambda/model/event"
 	"testing"
 	"time"
 )
@@ -20,7 +19,7 @@ ensure dynamodb clean before running save!!!!!!!!!
 */
 
 func Test_UpdateEvent(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -48,7 +47,7 @@ func Test_UpdateEvent_updateStartDateTime(t *testing.T) {
 
 }
 func Test_SaveEvent(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -56,7 +55,7 @@ func Test_SaveEvent(t *testing.T) {
 	eventReq := event.SaveReq{
 		Title:         "Team Meeting",
 		CoupleId:      "couple1",
-		CreatedBy:     1,
+		CreatedBy:     "testuser1",
 		StartDateTime: now,
 		EndDateTime:   now.Add(2 * time.Hour),
 		Content:       ptr("Discuss project updates"),
@@ -84,7 +83,7 @@ func Test_SaveEvent(t *testing.T) {
 }
 
 func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -100,7 +99,7 @@ func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 }
 
 func Test_GetEvent_not_match_couple_id(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -118,7 +117,7 @@ func Test_GetEvent_not_match_couple_id(t *testing.T) {
 }
 
 func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
@@ -134,7 +133,7 @@ func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
 }
 
 func Test_DeleteEvent_there_is_event_matching_id(t *testing.T) {
-	dynamodbClient := test.CreateLocalDynamoDBClient()
+	dynamodbClient := CreateLocalDynamoDBClient()
 
 	eventRepo := event.NewEventRepository(dynamodbClient)
 
