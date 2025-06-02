@@ -32,10 +32,10 @@ type Event struct {
 }
 
 type Recurrence struct {
-	Frequency       string    `json:"frequency" dynamodbav:"frequency"` // DAILY, WEEKLY, MONTHLY, YEARLY
-	Interval        uint8     `json:"interval" dynamodbav:"interval"`
-	RepeatStartDate time.Time `json:"repeatStartDate" dynamodbav:"repeatStartDate"`
-	RepeatEndDate   time.Time `json:"repeatEndDate" dynamodbav:"repeatEndDate"`
+	Frequency       string     `json:"frequency" dynamodbav:"frequency"` // DAILY, WEEKLY, MONTHLY, YEARLY
+	Interval        uint8      `json:"interval" dynamodbav:"interval"`
+	RepeatStartDate time.Time  `json:"repeatStartDate" dynamodbav:"repeatStartDate"`
+	RepeatEndDate   *time.Time `json:"repeatEndDate" dynamodbav:"repeatEndDate"`
 }
 
 func FromReq(req *SaveReq, id string) *Event {

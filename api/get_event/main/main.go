@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -15,7 +16,7 @@ GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -
 */
 func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	dynamodbClient, err := event.GetDynamoDBClient()
+	dynamodbClient, err := model.GetDynamoDBClient()
 	if err != nil {
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil

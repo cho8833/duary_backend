@@ -127,7 +127,7 @@ func (service *ServiceImpl) GenerateOccurrence(vo VO, rangeStartDate time.Time, 
 
 	for {
 		// occurrence 의 날짜가 반복종료(vo.Reccurrence.RepeatEndDate) 날짜 혹은 범위(rangeEndDate) 밖이면 종료
-		if currentDate.After(rangeEndDate) || currentDate.After(vo.Recurrence.RepeatEndDate) {
+		if currentDate.After(rangeEndDate) || (vo.Recurrence.RepeatEndDate != nil && currentDate.After(*vo.Recurrence.RepeatEndDate)) {
 			break
 		}
 
