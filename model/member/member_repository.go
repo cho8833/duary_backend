@@ -170,6 +170,12 @@ func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*e
 	if req.Character != nil {
 		update = update.Set(expression.Name("character"), expression.Value(req.Character))
 	}
+	if req.LoverAlarm != nil {
+		update = update.Set(expression.Name("loverAlarm"), expression.Value(req.LoverAlarm))
+	}
+	if req.MyAlarm != nil {
+		update = update.Set(expression.Name("myAlarm"), expression.Value(req.MyAlarm))
+	}
 
 	expr, err := expression.NewBuilder().WithUpdate(update).Build()
 

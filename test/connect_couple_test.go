@@ -7,7 +7,6 @@ import (
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
-	"log"
 	"testing"
 )
 
@@ -30,7 +29,7 @@ func Test_ConnectCouple(t *testing.T) {
 
 	res, svcErr := connect_couple.ConnectCouple(req, transaction, coupleSvc, memberSvc, eventSvc)
 	if svcErr != nil {
-		log.Println(svcErr.Error())
+		t.Fatalf(svcErr.Error())
 	} else {
 		print(shared.ToString(res))
 	}

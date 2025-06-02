@@ -133,11 +133,13 @@ func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider
 	} else {
 		// findMember 가 존재하지 않는 경우 Member 생성, 최초 회원가입
 		newMemberReq := &member.SaveMemberReq{
-			Name:     payload.NickName,
-			Birthday: nil,
-			Provider: provider,
-			SocialId: payload.SocialId,
-			FcmToken: fcmToken,
+			Name:       payload.NickName,
+			Birthday:   nil,
+			Provider:   provider,
+			SocialId:   payload.SocialId,
+			FcmToken:   fcmToken,
+			LoverAlarm: member.DefaultAlarmOffset,
+			MyAlarm:    member.DefaultAlarmOffset,
 		}
 		newMember, err := svc.memberSvc.SaveMember(newMemberReq)
 		if err != nil {

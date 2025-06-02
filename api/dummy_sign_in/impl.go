@@ -70,6 +70,8 @@ func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Serv
 			Provider:    "kakao",
 			SocialId:    req.Username,
 			FcmToken:    req.FcmToken,
+			MyAlarm:     member.DefaultAlarmOffset,
+			LoverAlarm:  member.DefaultAlarmOffset,
 		}
 		newMember, svcErr := memberSvc.SaveMember(newMemberReq)
 		if svcErr != nil {

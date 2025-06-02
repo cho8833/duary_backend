@@ -19,7 +19,7 @@ func NewEventBridgeSchedulerHelper(schedulerClient *scheduler.Client) *BridgeSch
 	return &BridgeSchedulerHelper{schedulerClient: schedulerClient}
 }
 
-func (helper *BridgeSchedulerHelper) CreateEventSchedule(event *event.VO, scheduleBefore int) {
+func (helper *BridgeSchedulerHelper) CreateEventSchedule(event *event.VO, offset event.AlarmOffset) {
 	// 15분 전 알림
 	scheduleTime := event.StartDateTime.Add(-15 * time.Minute)
 
