@@ -50,7 +50,7 @@ func (svc *ServiceImpl) SaveMember(request *SaveMemberReq) (*Member, shared.Appl
 }
 
 func (svc *ServiceImpl) UpdateMember(request *UpdateMemberReq) (*Member, shared.ApplicationError) {
-
+	
 	updatedMember, err := svc.repo.UpdateNonNil(request)
 	if err != nil {
 		log.Printf("failed to update member. req: %+v, error: %s", request, err.Error())

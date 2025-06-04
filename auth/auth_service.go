@@ -112,12 +112,7 @@ func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider
 			memberInfo = findMember
 		} else {
 			// member 의 fcm_token update
-			updateMemberReq := member.UpdateMemberReq{
-				FcmToken: fcmToken,
-				SocialId: payload.SocialId,
-				Provider: provider,
-			}
-			memberInfo, svcErr = svc.memberSvc.UpdateMember(&updateMemberReq)
+			memberInfo, svcErr = svc.memberSvc.UpdateFcmToken(payload.SocialId, provider, fcmToken)
 			if svcErr != nil {
 				log.Printf("failed to save findMember\nfindMember: %+v\nerror: %s", findMember, svcErr)
 				return nil, shared.DBSaveError{}

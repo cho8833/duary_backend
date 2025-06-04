@@ -43,12 +43,7 @@ func tokenSignIn(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 	}
 
 	// update member.fcmToken
-	updateMemberReq := member.UpdateMemberReq{
-		FcmToken: signInReq.FcmToken,
-		SocialId: *authContext.SocialId,
-		Provider: *authContext.Provider,
-	}
-	updatedMember, svcErr := memberSvc.UpdateMember(&updateMemberReq)
+	updatedMember, svcErr := memberSvc.UpdateFcmToken(*authContext.SocialId, *authContext.Provider, signInReq.FcmToken)
 	if svcErr != nil {
 		return shared.LambdaAppErrorResponse(svcErr), nil
 	}
