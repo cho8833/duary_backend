@@ -92,9 +92,9 @@ func FromEvent(event Event) VO {
 }
 
 type SaveReq struct {
-	Title         string      `json:"title"`
-	CoupleId      string      `json:"coupleId"`
-	CreatedBy     string      `json:"createdBy"`
+	Title         string `json:"title"`
+	CoupleId      string
+	CreatedBy     string
 	StartDateTime time.Time   `json:"startDateTime"`
 	EndDateTime   time.Time   `json:"endDateTime"`
 	Content       *string     `json:"content"`
