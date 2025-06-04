@@ -22,9 +22,9 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
-	eventSvc := event.NewEventService(eventRepo)
+	eventSvc := event.NewService(eventRepo)
 
 	coupleId := request.QueryStringParameters["coupleId"]
 	startDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])
@@ -36,7 +36,7 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 		return shared.LambdaErrorResponse(shared.NewCustomApplicationError("endDate must be provided"), 400), nil
 	}
 
-	res, svcErr := eventSvc.GetEventBetweenStartAndEndDate(coupleId, startDate, endDate)
+	res, svcErr := eventSvc.GetBetweenStartAndEndDate(coupleId, startDate, endDate)
 	if svcErr != nil {
 		return shared.LambdaAppErrorResponse(svcErr), nil
 	}

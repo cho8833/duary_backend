@@ -19,8 +19,8 @@ func deleteEvent(request events.APIGatewayProxyRequest) (events.APIGatewayProxyR
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
-	eventSvc := event.NewEventService(eventRepo)
+	eventRepo := event.NewRepository(dynamodbClient)
+	eventSvc := event.NewService(eventRepo)
 
 	coupleId := request.QueryStringParameters["coupleId"]
 	eventId := request.QueryStringParameters["id"]

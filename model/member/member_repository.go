@@ -16,7 +16,7 @@ const tableName = "Member"
 
 type Repository interface {
 	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
-	SaveMember(member *Member) (*Member, error)
+	Save(member *Member) (*Member, error)
 	UpdateNonNil(member *UpdateMemberReq) (*Member, error)
 	UpdateNonNilTransaction(member *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error)
 	UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, error)
@@ -26,7 +26,7 @@ type RepositoryDynamoDB struct {
 	client dynamodb.Client
 }
 
-func NewMemberRepository(client *dynamodb.Client) *RepositoryDynamoDB {
+func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 	return &RepositoryDynamoDB{client: *client}
 }
 
@@ -52,7 +52,7 @@ func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provi
 
 	return member, nil
 }
-func (repo *RepositoryDynamoDB) SaveMember(member *Member) (*Member, error) {
+func (repo *RepositoryDynamoDB) Save(member *Member) (*Member, error) {
 	item, err := attributevalue.MarshalMap(member)
 	if err != nil {
 		return nil, err

@@ -20,9 +20,9 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
-	eventSvc := event.NewEventService(eventRepo)
+	eventSvc := event.NewService(eventRepo)
 
 	updateEventReq := &event.UpdateReq{}
 
@@ -40,7 +40,7 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
-	vo, svcError := eventSvc.UpdateEvent(updateEventReq)
+	vo, svcError := eventSvc.Update(updateEventReq)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}

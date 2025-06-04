@@ -20,11 +20,11 @@ GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -
 func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	dynamodbClient, _ := model.GetDynamoDBClient()
 
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient)
 
-	memberSvc := member.NewMemberService(memberRepo)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
+	memberSvc := member.NewService(memberRepo)
+	coupleSvc := couple.NewService(coupleRepo)
 
 	jwtUtil := &appjwt.Impl{}
 

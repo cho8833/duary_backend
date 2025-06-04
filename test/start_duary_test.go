@@ -14,10 +14,10 @@ func Test_startDuary(t *testing.T) {
 
 	transaction := model.NewWriteTransaction(dynamodbClient)
 
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
-	memberSvc := member.NewMemberService(memberRepo)
+	coupleRepo := couple.NewRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient)
+	coupleSvc := couple.NewService(coupleRepo)
+	memberSvc := member.NewService(memberRepo)
 
 	dateTemp := time.Now()
 	dateTemp = dateTemp.AddDate(0, -1, 0)

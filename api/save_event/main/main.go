@@ -22,9 +22,9 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	eventRepo := event.NewEventRepository(dynamoDBClient)
+	eventRepo := event.NewRepository(dynamoDBClient)
 
-	eventSvc := event.NewEventService(eventRepo)
+	eventSvc := event.NewService(eventRepo)
 
 	authContext := shared.NewAuthContext(req)
 
@@ -39,7 +39,7 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 
 	saveEventReq.CreatedBy = *authContext.SocialId + "-" + *authContext.Provider
 
-	vo, svcError := eventSvc.SaveEvent(saveEventReq)
+	vo, svcError := eventSvc.Save(saveEventReq)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(svcError), nil
 	}

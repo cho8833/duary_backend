@@ -11,9 +11,9 @@ import (
 )
 
 type Service interface {
-	SaveEvent(req *SaveReq) (*VO, shared.ApplicationError)
-	GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
-	UpdateEvent(req *UpdateReq) (*VO, shared.ApplicationError)
+	Save(req *SaveReq) (*VO, shared.ApplicationError)
+	GetBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
+	Update(req *UpdateReq) (*VO, shared.ApplicationError)
 	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
 	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
 }
@@ -22,15 +22,15 @@ type ServiceImpl struct {
 	repository Repository
 }
 
-func NewEventService(repository Repository) *ServiceImpl {
+func NewService(repository Repository) *ServiceImpl {
 	return &ServiceImpl{repository: repository}
 }
 
-func (service *ServiceImpl) SaveEvent(req *SaveReq) (*VO, shared.ApplicationError) {
+func (service *ServiceImpl) Save(req *SaveReq) (*VO, shared.ApplicationError) {
 
 	event := FromReq(req, *service.generateUID())
 
-	vo, err := service.repository.SaveEvent(event)
+	vo, err := service.repository.Save(event)
 	if err != nil {
 		log.Printf("save event error\nreq: %+v\nerror: %s", req, err)
 		return nil, shared.DBSaveError{}
@@ -50,9 +50,9 @@ func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.Dyn
 	return vo, nil
 }
 
-func (service *ServiceImpl) UpdateEvent(req *UpdateReq) (*VO, shared.ApplicationError) {
+func (service *ServiceImpl) Update(req *UpdateReq) (*VO, shared.ApplicationError) {
 
-	vo, err := service.repository.UpdateEvent(req)
+	vo, err := service.repository.Update(req)
 
 	if err != nil {
 		log.Printf("update event error\nreq: %+v\nerror: %s", req, err)
@@ -71,7 +71,7 @@ func (service *ServiceImpl) DeleteEvent(coupleId string, id string) shared.Appli
 		return shared.BadRequestError{}
 	}
 
-	err := service.repository.DeleteEvent(coupleId, id)
+	err := service.repository.Delete(coupleId, id)
 
 	if err != nil {
 		return shared.DBDeleteError{}
@@ -79,7 +79,7 @@ func (service *ServiceImpl) DeleteEvent(coupleId string, id string) shared.Appli
 	return nil
 }
 
-func (service *ServiceImpl) GetEventBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError) {
+func (service *ServiceImpl) GetBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError) {
 
 	candidateEvents, err := service.repository.FindByCoupleIdAndStartDateBefore(coupleId, rangeEndDate)
 	if err != nil {

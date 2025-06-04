@@ -48,7 +48,7 @@ func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Serv
 				SocialId: findMember.SocialId,
 			}
 
-			memberInfo, svcErr = memberSvc.UpdateMember(updateMemberReq)
+			memberInfo, svcErr = memberSvc.Update(updateMemberReq)
 			if svcErr != nil {
 				return nil, shared.DBUpdateError{}
 			}
@@ -73,7 +73,7 @@ func SignIn(req *DummySignInReq, memberSvc member.Service, coupleSvc couple.Serv
 			MyAlarm:     member.DefaultAlarmOffset,
 			LoverAlarm:  member.DefaultAlarmOffset,
 		}
-		newMember, svcErr := memberSvc.SaveMember(newMemberReq)
+		newMember, svcErr := memberSvc.Save(newMemberReq)
 		if svcErr != nil {
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, svcErr.Error())
 			return nil, shared.DBSaveError{}

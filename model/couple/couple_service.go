@@ -12,12 +12,12 @@ import (
 )
 
 type Service interface {
-	CreateCouple(req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction, id ...string) (*Couple, shared.ApplicationError)
-	UpdateCouple(couple *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError)
+	Create(req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction, id ...string) (*Couple, shared.ApplicationError)
+	Update(couple *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError)
 	FindByCoupleCode(coupleCode *string) (*Couple, shared.ApplicationError)
 	FindById(coupleId string) (*Couple, shared.ApplicationError)
-	DeleteCouple(id string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
-	CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError)
+	Delete(id string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
+	CreateWithId(id string, req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError)
 	GenerateUID() *string
 }
 
@@ -25,11 +25,11 @@ type ServiceImpl struct {
 	repository Repository
 }
 
-func NewCoupleService(repository Repository) *ServiceImpl {
+func NewService(repository Repository) *ServiceImpl {
 	return &ServiceImpl{repository: repository}
 }
 
-func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction, id ...string) (*Couple, shared.ApplicationError) {
+func (svc *ServiceImpl) Create(req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction, id ...string) (*Couple, shared.ApplicationError) {
 	var coupleId *string
 	if len(id) == 0 {
 		coupleId = svc.GenerateUID()
@@ -44,7 +44,7 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.Dy
 	}
 
 	if transaction != nil {
-		input, err := svc.repository.SaveCoupleTransaction(couple)
+		input, err := svc.repository.SaveTransaction(couple)
 		if err != nil {
 			log.Printf("failed to get saveCoupleTransaction. error:%s", err.Error())
 			return nil, shared.DBSaveError{}
@@ -52,7 +52,7 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.Dy
 		transaction.AddTransaction(input)
 		return couple, nil
 	} else {
-		couple, err := svc.repository.SaveCouple(couple)
+		couple, err := svc.repository.Save(couple)
 		if err != nil {
 			log.Printf("failed to save couple\nreq: %+v\nerror:%s", req, err.Error())
 			return nil, shared.DBSaveError{}
@@ -61,7 +61,7 @@ func (svc *ServiceImpl) CreateCouple(req *CreateCoupleReq, transaction *model.Dy
 	}
 }
 
-func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
+func (svc *ServiceImpl) Update(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
 	if req.RelationDate != nil {
 		now := time.Now().UTC()
 		relationDate := req.RelationDate.UTC()
@@ -72,14 +72,14 @@ func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.Dy
 		req.RelationDate = &relationDate
 	}
 	if transaction != nil {
-		updatedCouple, err := svc.repository.UpdateCoupleTransaction(req, transaction)
+		updatedCouple, err := svc.repository.UpdateTransaction(req, transaction)
 		if err != nil {
 			log.Printf("failed to update couple. req: %+v, error: %s", req, err.Error())
 			return nil, shared.DBUpdateError{}
 		}
 		return updatedCouple, nil
 	} else {
-		updatedCouple, err := svc.repository.UpdateCouple(req)
+		updatedCouple, err := svc.repository.Update(req)
 		if err != nil {
 			log.Printf("failed to update couple. req: %+v, error: %s", req, err.Error())
 			return nil, shared.DBUpdateError{}
@@ -88,8 +88,8 @@ func (svc *ServiceImpl) UpdateCouple(req *UpdateCoupleReq, transaction *model.Dy
 	}
 }
 
-func (svc *ServiceImpl) DeleteCouple(id string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {
-	deleteTransaction, err := svc.repository.DeleteCoupleTransaction(id)
+func (svc *ServiceImpl) Delete(id string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {
+	deleteTransaction, err := svc.repository.DeleteTransaction(id)
 	if err != nil {
 		return shared.DBDeleteError{}
 	}
@@ -125,8 +125,8 @@ func (svc *ServiceImpl) FindByCoupleCode(coupleCode *string) (*Couple, shared.Ap
 
 }
 
-func (svc *ServiceImpl) CreateCoupleWithId(id string, req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
-	return svc.CreateCouple(req, transaction, id)
+func (svc *ServiceImpl) CreateWithId(id string, req *CreateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, shared.ApplicationError) {
+	return svc.Create(req, transaction, id)
 }
 
 func (svc *ServiceImpl) GenerateUID() *string {

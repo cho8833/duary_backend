@@ -14,11 +14,11 @@ import (
 func Test_dummySignIn_Local(t *testing.T) {
 	client := CreateLocalDynamoDBClient()
 
-	memberRepository := member.NewMemberRepository(client)
-	coupleRepo := couple.NewCoupleRepository(client)
+	memberRepository := member.NewRepository(client)
+	coupleRepo := couple.NewRepository(client)
 
-	coupleSvc := couple.NewCoupleService(coupleRepo)
-	memberSvc := member.NewMemberService(memberRepository)
+	coupleSvc := couple.NewService(coupleRepo)
+	memberSvc := member.NewService(memberRepository)
 
 	req := &dummy_sign_in.DummySignInReq{
 		Username: "124",

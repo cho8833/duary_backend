@@ -14,13 +14,13 @@ func Test_ConnectCouple(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
 	transaction := model.NewWriteTransaction(dynamodbClient)
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
-	memberSvc := member.NewMemberService(memberRepo)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
-	eventSvc := event.NewEventService(eventRepo)
+	memberSvc := member.NewService(memberRepo)
+	coupleSvc := couple.NewService(coupleRepo)
+	eventSvc := event.NewService(eventRepo)
 
 	req := &connect_couple.ConnectCoupleReq{
 		CoupleCode: ptr("0unz465jw"),

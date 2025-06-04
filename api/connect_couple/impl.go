@@ -57,7 +57,7 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	transaction.BeginTransaction()
 
 	// 기존의 Couple 삭제
-	svcErr := coupleSvc.DeleteCouple(*authContext.CoupleId, transaction)
+	svcErr := coupleSvc.Delete(*authContext.CoupleId, transaction)
 	if svcErr != nil {
 		return nil, shared.DBUpdateError{}
 	}
@@ -68,7 +68,7 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		SocialId: *authContext.SocialId,
 		CoupleId: targetCouple.Id,
 	}
-	updatedMember, svcError := memberSvc.UpdateMemberTransaction(updateReq, transaction)
+	updatedMember, svcError := memberSvc.UpdateTransaction(updateReq, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}
@@ -79,7 +79,7 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		Members: append(targetCouple.Members, updatedMember), // Member 추가
 		Code:    ptr.String(""),                              // 코드 삭제
 	}
-	updatedCouple, svcError := coupleSvc.UpdateCouple(updateCoupleReq, transaction)
+	updatedCouple, svcError := coupleSvc.Update(updateCoupleReq, transaction)
 	if svcError != nil {
 		return nil, svcError
 	}

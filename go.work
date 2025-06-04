@@ -8,7 +8,6 @@ use (
 	./fcm
 	./scheduler
 	./test
-	./api/get_user_info
 	./api/kakao_sign_in
 	./api/apple_sign_in
 	./api/get_oidc_public_key

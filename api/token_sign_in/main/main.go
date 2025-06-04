@@ -27,11 +27,11 @@ func tokenSignIn(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient)
 
-	memberSvc := member.NewMemberService(memberRepo)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
+	memberSvc := member.NewService(memberRepo)
+	coupleSvc := couple.NewService(coupleRepo)
 
 	authContext := shared.NewAuthContext(req)
 

@@ -19,11 +19,11 @@ func Test_KakaoSignIn(t *testing.T) {
 	}
 
 	dynamodbClient := CreateLocalDynamoDBClient()
-	memberRepository := member.NewMemberRepository(dynamodbClient)
-	coupleRepository := couple.NewCoupleRepository(dynamodbClient)
+	memberRepository := member.NewRepository(dynamodbClient)
+	coupleRepository := couple.NewRepository(dynamodbClient)
 
-	memberSvc := member.NewMemberService(memberRepository)
-	coupleSvc := couple.NewCoupleService(coupleRepository)
+	memberSvc := member.NewService(memberRepository)
+	coupleSvc := couple.NewService(coupleRepository)
 
 	svc := auth.NewAuthService(&appjwt.JWTValidatorImpl{}, &appjwt.Impl{}, memberSvc, coupleSvc)
 

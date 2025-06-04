@@ -136,7 +136,7 @@ func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider
 			LoverAlarm: member.DefaultAlarmOffset,
 			MyAlarm:    member.DefaultAlarmOffset,
 		}
-		newMember, err := svc.memberSvc.SaveMember(newMemberReq)
+		newMember, err := svc.memberSvc.Save(newMemberReq)
 		if err != nil {
 			log.Printf("failed to save findMember\nnew findMember: %+v\nerror: %s", newMember, err.Error())
 			return nil, shared.DBSaveError{}

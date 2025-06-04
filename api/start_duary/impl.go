@@ -60,7 +60,7 @@ func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransact
 		Character: request.MyCharacter,
 		Provider:  *provider,
 	}
-	updatedMember, svcErr := memberSvc.UpdateMemberTransaction(memberReq, transaction)
+	updatedMember, svcErr := memberSvc.UpdateTransaction(memberReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}
@@ -72,7 +72,7 @@ func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransact
 			updatedMember,
 		},
 	}
-	newCouple, err := coupleSvc.CreateCoupleWithId(*newCoupleId, coupleReq, transaction)
+	newCouple, err := coupleSvc.CreateWithId(*newCoupleId, coupleReq, transaction)
 	if err != nil {
 		return nil, err
 	}

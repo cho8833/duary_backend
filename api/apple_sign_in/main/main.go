@@ -25,11 +25,11 @@ func appleSignIn(ctx context.Context, request events.APIGatewayProxyRequest) (ev
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	memberRepository := member.NewMemberRepository(dynamoDBClient)
-	coupleRepository := couple.NewCoupleRepository(dynamoDBClient)
+	memberRepository := member.NewRepository(dynamoDBClient)
+	coupleRepository := couple.NewRepository(dynamoDBClient)
 
-	memberSvc := member.NewMemberService(memberRepository)
-	coupleSvc := couple.NewCoupleService(coupleRepository)
+	memberSvc := member.NewService(memberRepository)
+	coupleSvc := couple.NewService(coupleRepository)
 
 	svc := auth.NewAuthService(&appjwt.JWTValidatorImpl{}, &appjwt.Impl{}, memberSvc, coupleSvc)
 

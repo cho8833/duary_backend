@@ -10,7 +10,7 @@ import (
 //func Test_FindByCoupleIdAndStartDateBefore(t *testing.T) {
 //	dynamodbClient := util.CreateLocalDynamoDBClient()
 //
-//	repository := event.NewEventRepository(dynamodbClient)
+//	repository := event.NewRepository(dynamodbClient)
 //
 //}
 
@@ -21,7 +21,7 @@ ensure dynamodb clean before running save!!!!!!!!!
 func Test_UpdateEvent(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
 	startRange := time.Now()
 	events, _ := eventRepo.FindByCoupleIdAndStartDateBefore("couple1", startRange)
@@ -33,7 +33,7 @@ func Test_UpdateEvent(t *testing.T) {
 		Content:  ptr("updated content"),
 	}
 
-	updatedVO, err := eventRepo.UpdateEvent(&updateReq)
+	updatedVO, err := eventRepo.Update(&updateReq)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -49,7 +49,7 @@ func Test_UpdateEvent_updateStartDateTime(t *testing.T) {
 func Test_SaveEvent(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
 	now := time.Now()
 	eventReq := event.SaveReq{
@@ -73,7 +73,7 @@ func Test_SaveEvent(t *testing.T) {
 
 	target := event.FromReq(&eventReq, "event1")
 
-	saveEvent, err := eventRepo.SaveEvent(target)
+	saveEvent, err := eventRepo.Save(target)
 	if err != nil {
 		return
 	}
@@ -85,7 +85,7 @@ func Test_SaveEvent(t *testing.T) {
 func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
 	now := timePtr(time.Now())
 	rangeStart := time.Date(now.Year(), now.Month()+1, now.Day(), 0, 0, 0, 0, now.Location())
@@ -101,7 +101,7 @@ func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
 func Test_GetEvent_not_match_couple_id(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
 	now := timePtr(time.Now())
 
@@ -119,7 +119,7 @@ func Test_GetEvent_not_match_couple_id(t *testing.T) {
 func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
 	rangeStart := time.Date(2024, 12, 12, 0, 0, 0, 0, time.Local)
 
@@ -135,9 +135,9 @@ func Test_GetEvent_match_couple_id_not_match_start_date_before(t *testing.T) {
 func Test_DeleteEvent_there_is_event_matching_id(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
-	err := eventRepo.DeleteEvent("couple1", "2025-04-28T15:26:09+09:00#event1")
+	err := eventRepo.Delete("couple1", "2025-04-28T15:26:09+09:00#event1")
 
 	if err != nil {
 		t.Fatalf(err.Error())

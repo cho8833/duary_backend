@@ -25,10 +25,10 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 	transaction := model.NewWriteTransaction(dynamoDBClient)
-	coupleRepo := couple.NewCoupleRepository(dynamoDBClient)
-	memberRepo := member.NewMemberRepository(dynamoDBClient)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
-	memberSvc := member.NewMemberService(memberRepo)
+	coupleRepo := couple.NewRepository(dynamoDBClient)
+	memberRepo := member.NewRepository(dynamoDBClient)
+	coupleSvc := couple.NewService(coupleRepo)
+	memberSvc := member.NewService(memberRepo)
 
 	initDuaryReq := &start_duary.StartDuaryReq{}
 	err = json.Unmarshal([]byte(req.Body), &initDuaryReq)

@@ -9,7 +9,7 @@ import (
 func Test_FindByCoupleCode(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
 
-	repository := couple.NewCoupleRepository(dynamodbClient)
+	repository := couple.NewRepository(dynamodbClient)
 
 	coupleCode := "72itgwj0t"
 	couples, err := repository.FindByCoupleCode(&coupleCode)

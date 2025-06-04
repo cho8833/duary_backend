@@ -84,7 +84,7 @@ func (_m *MemberRepository) SaveMember(member *model.Member) error {
 	ret := _m.Called(member)
 
 	if len(ret) == 0 {
-		panic("no return value specified for SaveMember")
+		panic("no return value specified for Save")
 	}
 
 	var r0 error
@@ -97,7 +97,7 @@ func (_m *MemberRepository) SaveMember(member *model.Member) error {
 	return r0
 }
 
-// MemberRepository_SaveMember_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SaveMember'
+// MemberRepository_SaveMember_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Save'
 type MemberRepository_SaveMember_Call struct {
 	*mock.Call
 }
@@ -105,7 +105,7 @@ type MemberRepository_SaveMember_Call struct {
 // SaveMember is a helper method to define mock.On call
 //   - member *model.Member
 func (_e *MemberRepository_Expecter) SaveMember(member interface{}) *MemberRepository_SaveMember_Call {
-	return &MemberRepository_SaveMember_Call{Call: _e.mock.On("SaveMember", member)}
+	return &MemberRepository_SaveMember_Call{Call: _e.mock.On("Save", member)}
 }
 
 func (_c *MemberRepository_SaveMember_Call) Run(run func(member *model.Member)) *MemberRepository_SaveMember_Call {

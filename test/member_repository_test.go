@@ -11,7 +11,7 @@ import (
 
 func Test_FindById(t *testing.T) {
 	client := CreateLocalDynamoDBClient()
-	repository := member.NewMemberRepository(client)
+	repository := member.NewRepository(client)
 
 	member, err := repository.FindBySocialIdAndProvider("asdf", "")
 	if err != nil {
@@ -22,7 +22,7 @@ func Test_FindById(t *testing.T) {
 
 func Test_saveMember(t *testing.T) {
 	client := CreateLocalDynamoDBClient()
-	repository := member.NewMemberRepository(client)
+	repository := member.NewRepository(client)
 	name := "test"
 	now := time.Now()
 	gender := "man"
@@ -35,7 +35,7 @@ func Test_saveMember(t *testing.T) {
 		FcmToken: nil,
 	}
 
-	_, err := repository.SaveMember(dummyMember)
+	_, err := repository.Save(dummyMember)
 
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -44,7 +44,7 @@ func Test_saveMember(t *testing.T) {
 
 func Test_findBySocialIdAndProvider(t *testing.T) {
 	client := CreateLocalDynamoDBClient()
-	repo := member.NewMemberRepository(client)
+	repo := member.NewRepository(client)
 
 	member, err := repo.FindBySocialIdAndProvider("asdf", "kakao")
 	if err != nil {
@@ -55,7 +55,7 @@ func Test_findBySocialIdAndProvider(t *testing.T) {
 
 func Test_updateItem(t *testing.T) {
 	dynamodbClient := CreateLocalDynamoDBClient()
-	repo := member.NewMemberRepository(dynamodbClient)
+	repo := member.NewRepository(dynamodbClient)
 
 	dummyUpdate := &member.UpdateMemberReq{
 		Provider: "kakao",

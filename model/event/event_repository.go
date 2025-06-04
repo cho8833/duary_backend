@@ -19,9 +19,9 @@ const tableName = "Event"
 
 type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
-	SaveEvent(event *Event) (*VO, error)
-	UpdateEvent(req *UpdateReq) (*VO, error)
-	DeleteEvent(coupleId string, id string) error
+	Save(event *Event) (*VO, error)
+	Update(req *UpdateReq) (*VO, error)
+	Delete(coupleId string, id string) error
 	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
 }
 
@@ -29,11 +29,11 @@ type RepositoryDynamoDB struct {
 	client *dynamodb.Client
 }
 
-func NewEventRepository(client *dynamodb.Client) *RepositoryDynamoDB {
+func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 	return &RepositoryDynamoDB{client: client}
 }
 
-func (repo *RepositoryDynamoDB) SaveEvent(event *Event) (*VO, error) {
+func (repo *RepositoryDynamoDB) Save(event *Event) (*VO, error) {
 
 	item, err := attributevalue.MarshalMap(event)
 	if err != nil {
@@ -103,7 +103,7 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) UpdateEvent(req *UpdateReq) (*VO, error) {
+func (repo *RepositoryDynamoDB) Update(req *UpdateReq) (*VO, error) {
 	// startDateTime 이 바뀔 경우 ID 가 바뀜
 	// update 할 event 식별을 위한 sortKey 저장
 	sortKey := req.Id
@@ -160,7 +160,7 @@ func (repo *RepositoryDynamoDB) UpdateEvent(req *UpdateReq) (*VO, error) {
 	return &result, nil
 }
 
-func (repo *RepositoryDynamoDB) DeleteEvent(coupleId string, id string) error {
+func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) error {
 
 	deleteInput := &dynamodb.DeleteItemInput{
 		TableName:    aws.String(tableName),

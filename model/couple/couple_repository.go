@@ -14,13 +14,13 @@ import (
 const tableName = "Couple"
 
 type Repository interface {
-	SaveCouple(couple *Couple) (*Couple, error)
-	SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error)
+	Save(couple *Couple) (*Couple, error)
+	SaveTransaction(couple *Couple) (*types.TransactWriteItem, error)
 	FindById(id *string) (*Couple, error)
 	FindByCoupleCode(coupleCode *string) ([]Couple, error)
-	UpdateCouple(req *UpdateCoupleReq) (*Couple, error)
-	UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error)
-	DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error)
+	Update(req *UpdateCoupleReq) (*Couple, error)
+	UpdateTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error)
+	DeleteTransaction(id string) (*types.TransactWriteItem, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -28,11 +28,11 @@ type RepositoryDynamoDB struct {
 	client *dynamodb.Client
 }
 
-func NewCoupleRepository(client *dynamodb.Client) *RepositoryDynamoDB {
+func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
 	return &RepositoryDynamoDB{client: client, DynamoDBRepository: model.NewBaseDynamoRepository[Couple](client, tableName)}
 }
 
-func (repository *RepositoryDynamoDB) SaveCouple(couple *Couple) (*Couple, error) {
+func (repository *RepositoryDynamoDB) Save(couple *Couple) (*Couple, error) {
 	item, err := attributevalue.MarshalMap(couple)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (repository *RepositoryDynamoDB) FindById(id *string) (*Couple, error) {
 	return result, nil
 }
 
-func (repository *RepositoryDynamoDB) SaveCoupleTransaction(couple *Couple) (*types.TransactWriteItem, error) {
+func (repository *RepositoryDynamoDB) SaveTransaction(couple *Couple) (*types.TransactWriteItem, error) {
 	item, err := attributevalue.MarshalMap(couple)
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (repository *RepositoryDynamoDB) SaveCoupleTransaction(couple *Couple) (*ty
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types.TransactWriteItem, error) {
+func (repository *RepositoryDynamoDB) DeleteTransaction(id string) (*types.TransactWriteItem, error) {
 	transaction := &types.TransactWriteItem{
 		Delete: &types.Delete{
 			TableName: aws.String(tableName),
@@ -116,7 +116,7 @@ func (repository *RepositoryDynamoDB) DeleteCoupleTransaction(id string) (*types
 	return transaction, nil
 }
 
-func (repository *RepositoryDynamoDB) UpdateCouple(couple *UpdateCoupleReq) (*Couple, error) {
+func (repository *RepositoryDynamoDB) Update(couple *UpdateCoupleReq) (*Couple, error) {
 	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
 	// partitionKey 임시 저장
 	partitionKey := *couple.Id
@@ -157,7 +157,7 @@ func (repository *RepositoryDynamoDB) UpdateCouple(couple *UpdateCoupleReq) (*Co
 	return result, nil
 }
 
-func (repository *RepositoryDynamoDB) UpdateCoupleTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error) {
+func (repository *RepositoryDynamoDB) UpdateTransaction(req *UpdateCoupleReq, transaction *model.DynamoDBWriteTransaction) (*Couple, error) {
 	// Application 단에서 업데이트 값 예측
 	cacheCouple, err := repository.FindByIdCaching(context.TODO(), *req.Id)
 	if err != nil {

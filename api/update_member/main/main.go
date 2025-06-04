@@ -24,10 +24,10 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	memberSvc := member.NewMemberService(memberRepo)
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
+	memberRepo := member.NewRepository(dynamodbClient)
+	memberSvc := member.NewService(memberRepo)
+	coupleRepo := couple.NewRepository(dynamodbClient)
+	coupleSvc := couple.NewService(coupleRepo)
 
 	updateReq := &update_member.UpdateMemberReq{}
 	err = json.Unmarshal([]byte(request.Body), updateReq)

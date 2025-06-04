@@ -26,9 +26,9 @@ func updateCouple(_ context.Context, request events.APIGatewayProxyRequest) (eve
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	repo := couple.NewCoupleRepository(client)
+	repo := couple.NewRepository(client)
 
-	svc := couple.NewCoupleService(repo)
+	svc := couple.NewService(repo)
 
 	req := &couple.UpdateCoupleReq{}
 
@@ -41,7 +41,7 @@ func updateCouple(_ context.Context, request events.APIGatewayProxyRequest) (eve
 
 	req.Id = authContext.CoupleId
 
-	res, svcErr := svc.UpdateCouple(req, nil)
+	res, svcErr := svc.Update(req, nil)
 
 	if svcErr != nil {
 		return shared.LambdaAppErrorResponse(svcErr), nil

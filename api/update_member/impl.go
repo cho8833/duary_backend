@@ -47,7 +47,7 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 		Character: req.Character,
 		FcmToken:  req.FcmToken,
 	}
-	updatedMember, svcErr := memberSvc.UpdateMemberTransaction(memberUpdateReq, transaction)
+	updatedMember, svcErr := memberSvc.UpdateTransaction(memberUpdateReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}
@@ -64,7 +64,7 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 		Id:      coupleId,
 		Members: updatedMembers,
 	}
-	updatedCouple, svcErr := coupleSvc.UpdateCouple(coupleUpdateReq, transaction)
+	updatedCouple, svcErr := coupleSvc.Update(coupleUpdateReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}

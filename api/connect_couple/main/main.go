@@ -22,13 +22,13 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 	dynamodbClient, _ := model.GetDynamoDBClient()
 
 	transaction := model.NewWriteTransaction(dynamodbClient)
-	memberRepo := member.NewMemberRepository(dynamodbClient)
-	coupleRepo := couple.NewCoupleRepository(dynamodbClient)
-	eventRepo := event.NewEventRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient)
 
-	memberSvc := member.NewMemberService(memberRepo)
-	coupleSvc := couple.NewCoupleService(coupleRepo)
-	eventSvc := event.NewEventService(eventRepo)
+	memberSvc := member.NewService(memberRepo)
+	coupleSvc := couple.NewService(coupleRepo)
+	eventSvc := event.NewService(eventRepo)
 
 	connectCoupleReq := &connect_couple.ConnectCoupleReq{}
 	err := json.Unmarshal([]byte(request.Body), &connectCoupleReq)
