@@ -66,7 +66,7 @@ func (svc *ServiceImpl) Update(req *UpdateCoupleReq, transaction *model.DynamoDB
 		now := time.Now().UTC()
 		relationDate := req.RelationDate.UTC()
 		if relationDate.After(now) {
-			return nil, shared.NewCustomApplicationError("처음 만난 날을 다시 설정해주세요")
+			return nil, shared.ValidateError{Message: "처음 만난 날을 다시 설정해주세요"}
 		}
 		relationDate = time.Date(relationDate.Year(), relationDate.Month(), relationDate.Day(), 0, 0, 0, 0, relationDate.Location())
 		req.RelationDate = &relationDate

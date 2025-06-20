@@ -13,7 +13,7 @@ import (
 type Service interface {
 	Save(req *SaveReq) (*VO, shared.ApplicationError)
 	GetBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
-	Update(req *UpdateReq) (*VO, shared.ApplicationError)
+	Update(coupleId string, id string, req *UpdateReq) (*VO, shared.ApplicationError)
 	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
 	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
 }
@@ -27,7 +27,10 @@ func NewService(repository Repository) *ServiceImpl {
 }
 
 func (service *ServiceImpl) Save(req *SaveReq) (*VO, shared.ApplicationError) {
-
+	svcErr := req.Validate()
+	if svcErr != nil {
+		return nil, svcErr
+	}
 	event := FromReq(req, *service.generateUID())
 
 	vo, err := service.repository.Save(event)
@@ -40,6 +43,10 @@ func (service *ServiceImpl) Save(req *SaveReq) (*VO, shared.ApplicationError) {
 }
 
 func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError) {
+	svcErr := req.Validate()
+	if svcErr != nil {
+		return nil, svcErr
+	}
 	event := FromReq(req, *service.generateUID())
 	vo, err := service.repository.SaveTransaction(event, transaction)
 	if err != nil {
@@ -50,9 +57,12 @@ func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.Dyn
 	return vo, nil
 }
 
-func (service *ServiceImpl) Update(req *UpdateReq) (*VO, shared.ApplicationError) {
-
-	vo, err := service.repository.Update(req)
+func (service *ServiceImpl) Update(coupleId string, id string, req *UpdateReq) (*VO, shared.ApplicationError) {
+	svcErr := req.Validate()
+	if svcErr != nil {
+		return nil, svcErr
+	}
+	vo, err := service.repository.Update(coupleId, id, req)
 
 	if err != nil {
 		log.Printf("update event error\nreq: %+v\nerror: %s", req, err)
@@ -94,16 +104,15 @@ func (service *ServiceImpl) GetBetweenStartAndEndDate(coupleId string, rangeStar
 	var result []VO
 
 	for _, event := range candidateEvents {
-
 		// 반복 이벤트인 경우 이벤트 인스턴스(Occurrence) 생성
-		if event.Recurrence != nil {
-			ocurrences, err := service.GenerateOccurrence(event, rangeStartDate, rangeEndDate)
+		if event.Frequency != OneTime {
+			occurrences, err := service.GenerateOccurrence(event, rangeStartDate, rangeEndDate)
 			if err != nil {
 				return nil, err
 			}
-			result = append(result, ocurrences...)
+			result = append(result, occurrences...)
 
-			// 비반복 이벤트인 경우 이베트가 range 내에 포함되는지 검사
+			// 단발성 이벤트인 경우 이베트가 range 내에 포함되는지 검사
 		} else {
 			startDateTime := event.StartDateTime
 			endDateTime := event.EndDateTime
@@ -117,42 +126,6 @@ func (service *ServiceImpl) GetBetweenStartAndEndDate(coupleId string, rangeStar
 		result = make([]VO, 0)
 	}
 	return result, nil
-}
-
-func (service *ServiceImpl) GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError) {
-
-	var occurrences []VO
-
-	currentDate := vo.Recurrence.RepeatStartDate
-
-	for {
-		// occurrence 의 날짜가 반복종료(vo.Reccurrence.RepeatEndDate) 날짜 혹은 범위(rangeEndDate) 밖이면 종료
-		if currentDate.After(rangeEndDate) || (vo.Recurrence.RepeatEndDate != nil && currentDate.After(*vo.Recurrence.RepeatEndDate)) {
-			break
-		}
-
-		if (currentDate.After(rangeStartDate) || currentDate.Equal(rangeStartDate)) && currentDate.Before(rangeEndDate) {
-			eventCopy := vo
-			eventCopy.StartDateTime = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, currentDate.Location())
-			eventCopy.EndDateTime = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), 0, 0, 0, 0, currentDate.Location())
-
-			occurrences = append(occurrences, eventCopy)
-		}
-
-		if vo.Recurrence.Frequency == "DAILY" {
-			currentDate = currentDate.AddDate(0, 0, int(1*vo.Recurrence.Interval))
-		} else if vo.Recurrence.Frequency == "WEEKLY" {
-			currentDate = currentDate.AddDate(0, 0, int(7*vo.Recurrence.Interval))
-		} else if vo.Recurrence.Frequency == "MONTHLY" {
-			currentDate = currentDate.AddDate(0, int(vo.Recurrence.Interval), 0)
-		} else if vo.Recurrence.Frequency == "YEARLY" {
-			currentDate = currentDate.AddDate(int(vo.Recurrence.Interval), 0, 0)
-		} else {
-			return nil, shared.DBReadError{}
-		}
-
-	}
-	return occurrences, nil
 }
 
 func (service *ServiceImpl) generateUID() *string {

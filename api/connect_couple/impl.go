@@ -85,33 +85,55 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// Create Anniversary Event
-	anniversary100DayReq := &event.SaveReq{
-		Recurrence: &event.Recurrence{
-			RepeatStartDate: *updatedCouple.RelationDate,
-			Interval:        100,
-			Frequency:       "DAILY",
-		},
-		StartDateTime: *updatedCouple.RelationDate,
-		IsAllDay:      true,
-		IsTogether:    true,
-		CreatedBy:     updatedCouple.Members[0].GetId(),
-		Title:         "100days",
-		EventType:     "ANNIVERSARY",
+	firstMetDayReq := &event.SaveReq{
 		CoupleId:      *targetCouple.Id,
+		CreatedBy:     updatedCouple.Members[0].GetId(),
+		StartDateTime: *updatedCouple.RelationDate,
+		EndDateTime:   *updatedCouple.RelationDate,
+		Title:         "처음 만난 날",
+		EventType:     event.Anniversary,
+		IsTogether:    true,
+		IsAllDay:      true,
 	}
-	anniversaryYearlyReq := &event.SaveReq{
-		Recurrence: &event.Recurrence{
-			RepeatStartDate: *updatedCouple.RelationDate,
-			Interval:        1,
-			Frequency:       "YEARLY",
+	day100RecurStartDate := updatedCouple.RelationDate.AddDate(0, 0, 100)
+	anniversary100DayReq := &event.SaveReq{
+		CoupleId:  *targetCouple.Id,
+		CreatedBy: updatedCouple.Members[0].GetId(),
+
+		StartDateTime:  *updatedCouple.RelationDate,
+		EndDateTime:    *updatedCouple.RelationDate,
+		RecurStartDate: &day100RecurStartDate,
+		Frequency:      event.Daily,
+		Daily: &event.DailyRecurrence{
+			Interval: 100,
 		},
-		StartDateTime: *updatedCouple.RelationDate,
-		IsAllDay:      true,
-		CreatedBy:     updatedCouple.Members[0].GetId(),
-		Title:         "year",
-		IsTogether:    true,
-		EventType:     "ANNIVERSARY",
-		CoupleId:      *targetCouple.Id,
+		Title:      "100days",
+		EventType:  event.Anniversary,
+		IsTogether: true,
+		IsAllDay:   true,
+	}
+	yearlyRecurStartDate := updatedCouple.RelationDate.AddDate(1, 0, 0)
+	anniversaryYearlyReq := &event.SaveReq{
+		CoupleId:  *targetCouple.Id,
+		CreatedBy: updatedCouple.Members[0].GetId(),
+
+		StartDateTime:  *updatedCouple.RelationDate,
+		EndDateTime:    *updatedCouple.RelationDate,
+		RecurStartDate: &yearlyRecurStartDate,
+		Frequency:      event.Yearly,
+		Yearly: &event.YearlyRecurrence{
+			Month: updatedCouple.RelationDate.Month(),
+			Day:   updatedCouple.RelationDate.Day(),
+		},
+		Title:      "year",
+		EventType:  event.Anniversary,
+		IsTogether: true,
+		IsAllDay:   true,
+	}
+
+	_, svcErr = eventSvc.SaveTransaction(firstMetDayReq, transaction)
+	if svcErr != nil {
+		return nil, svcErr
 	}
 	_, svcErr = eventSvc.SaveTransaction(anniversary100DayReq, transaction)
 	if svcErr != nil {

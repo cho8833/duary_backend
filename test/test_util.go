@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/cho8833/duary_lambda/shared"
+	"time"
 )
 
 func CreateLocalDynamoDBClient() *dynamodb.Client {
@@ -36,4 +37,8 @@ func CreateTestAuthContext(socialId *string, provider *string, coupleId *string)
 	authContext.SocialId = socialId
 
 	return authContext
+}
+
+func timePtr(t time.Time) *time.Time {
+	return &t
 }

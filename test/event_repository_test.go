@@ -15,7 +15,15 @@ import (
 //}
 
 /*
-ensure dynamodb clean before running save!!!!!!!!!
+make sure dynamodb clean before running save!!!!!!!!!
+*/
+
+/*
+java -Djava.library.path=./DynamoDBLocal_lib -jar DynamoDBLocal.jar -sharedDb
+
+aws dynamodb create-table --table-name Event --attribute-definitions AttributeName=coupleId,AttributeType=S AttributeName=startDateTime,AttributeType=S --key-schema AttributeName=coupleId,KeyType=HASH AttributeName=startDateTime,KeyType=RANGE --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 --endpoint-url http://localhost:8000
+
+aws dynamodb delete-table --table-name Event --endpoint-url http://localhost:8000
 */
 
 func Test_UpdateEvent(t *testing.T) {
@@ -28,12 +36,10 @@ func Test_UpdateEvent(t *testing.T) {
 
 	vo := events[0]
 	updateReq := event.UpdateReq{
-		Id:       &vo.Id,
-		CoupleId: &vo.CoupleId,
-		Content:  ptr("updated content"),
+		Content: ptr("updated content"),
 	}
 
-	updatedVO, err := eventRepo.Update(&updateReq)
+	updatedVO, err := eventRepo.Update(vo.CoupleId, vo.Id, &updateReq)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
@@ -51,23 +57,32 @@ func Test_SaveEvent(t *testing.T) {
 
 	eventRepo := event.NewRepository(dynamodbClient)
 
-	now := time.Now()
+	testDate := time.Date(2025, 5, 1, 5, 0, 0, 0, time.Local)
+	recurEndDate := testDate.AddDate(0, 1, 0)
 	eventReq := event.SaveReq{
-		Title:         "Team Meeting",
-		CoupleId:      "couple1",
-		CreatedBy:     "testuser1",
-		StartDateTime: now,
-		EndDateTime:   now.Add(2 * time.Hour),
-		Content:       ptr("Discuss project updates"),
-		IsTogether:    true,
-		IsAllDay:      false,
-		Location:      ptr("Office"),
-		HangOutWith:   ptr("Team"),
-		Recurrence: &event.Recurrence{
-			Frequency:       "weekly",
-			Interval:        1,
-			RepeatStartDate: now,
-			RepeatEndDate:   now.AddDate(0, 3, 0),
+		Title:          "Team Meeting",
+		CoupleId:       "couple1",
+		CreatedBy:      "testuser1",
+		StartDateTime:  testDate,
+		EndDateTime:    testDate.Add(2 * time.Hour),
+		RecurStartDate: &testDate,
+		RecurEndDate:   &recurEndDate,
+		Content:        ptr("Discuss project updates"),
+		IsTogether:     true,
+		IsAllDay:       false,
+		Location:       ptr("Office"),
+		HangOutWith:    ptr("Team"),
+		Weekly: &event.WeeklyRecurrence{
+			Schedule: map[event.Weekday]event.TimeRange{
+				event.Weekday(time.Tuesday): {
+					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
+					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
+				},
+				event.Weekday(time.Thursday): {
+					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
+					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
+				},
+			},
 		},
 	}
 
@@ -147,7 +162,4 @@ func Test_DeleteEvent_there_is_event_matching_id(t *testing.T) {
 
 func ptr(s string) *string {
 	return &s
-}
-func timePtr(time time.Time) *time.Time {
-	return &time
 }

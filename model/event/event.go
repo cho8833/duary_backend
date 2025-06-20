@@ -1,6 +1,8 @@
 package event
 
 import (
+	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 )
@@ -11,111 +13,161 @@ StartDate, EndDate 의 값 중 Time.Year, Time.Month, Time.Day 만 쓰임
 
 # StartTime, StartTime 의 값 중 Time.Hour, Time.Minute 만 쓰임
 
-StartDateTime 과 Recurrence.RepeatStartDate(EndDateTime 과 Recurrence.RepeatEndDate) 가 중복으로 있는 이유:
+StartTime 과 Recurrence.RepeatStartDate(EndTime 과 Recurrence.RepeatEndDate) 가 중복으로 있는 이유:
 
-	반복 이벤트에 대한 Occurrence 를 만들 때 StartDateTime(EndDateTime) 에 Occurrence 의 StartDateTime(EndDateTime) 가 들어감.
+	반복 이벤트에 대한 Occurrence 를 만들 때 StartTime(EndTime) 에 Occurrence 의 StartTime(EndTime) 가 들어감.
 */
 type Event struct {
-	CoupleId string `dynamodbav:"coupleId"` // partition key
-	// sort key format : {startDateTime(ISO8601)}#{generated id}
-	StartDateTime string      `dynamodbav:"startDateTime"` // sort key
-	EndDateTime   time.Time   `dynamodbav:"endDateTime"`
-	Title         string      `dynamodbav:"title"`
-	Content       *string     `dynamodbav:"content"` // 메모
-	IsTogether    bool        `dynamodbav:"isTogether"`
-	CreatedBy     string      `dynamodbav:"createdBy"`
-	IsAllDay      bool        `dynamodbav:"isAllDay"`
-	Location      *string     `dynamodbav:"location"`
-	HangOutWith   *string     `dynamodbav:"hangOutWith"`
-	Recurrence    *Recurrence `dynamodbav:"recurrence"`
-	EventType     string      `dynamodbav:"eventType"` // ANNIVERSARY, NORMAL
+	CoupleId  string `dynamodbav:"coupleId"` // partition key
+	CreatedBy string `dynamodbav:"createdBy"`
+
+	StartDateTime  string             `dynamodbav:"startDateTime"` // sort key format : {startDateTime(ISO8601)}#{generated id}
+	EndDateTime    time.Time          `dynamodbav:"endDateTime"`
+	Frequency      Frequency          `dynamodbav:"frequency"`
+	recurStartDate *time.Time         `dynamodbav:"recurStartDate"`
+	recurEndDate   *time.Time         `dynamodbav:"recurEndDate"`
+	Daily          *DailyRecurrence   `dynamodbav:"daily"`
+	Weekly         *WeeklyRecurrence  `dynamodbav:"weekly"`
+	Monthly        *MonthlyRecurrence `dynamodbav:"monthly"`
+	Yearly         *YearlyRecurrence  `dynamodbav:"yearly"`
+
+	Title       string  `dynamodbav:"title"`
+	Content     *string `dynamodbav:"content"`
+	IsTogether  bool    `dynamodbav:"isTogether"`
+	IsAllDay    bool    `dynamodbav:"isAllDay"`
+	Location    *string `dynamodbav:"location"`
+	HangOutWith *string `dynamodbav:"hangOutWith"`
+
+	EventType EventType `dynamodbav:"eventType"`
 }
 
-type Recurrence struct {
-	Frequency       string     `json:"frequency" dynamodbav:"frequency"` // DAILY, WEEKLY, MONTHLY, YEARLY
-	Interval        uint8      `json:"interval" dynamodbav:"interval"`
-	RepeatStartDate time.Time  `json:"repeatStartDate" dynamodbav:"repeatStartDate"`
-	RepeatEndDate   *time.Time `json:"repeatEndDate" dynamodbav:"repeatEndDate"`
+type DailyRecurrence struct {
+	Interval int
 }
 
-func FromReq(req *SaveReq, id string) *Event {
-	sortKey := req.StartDateTime.Format(time.RFC3339) + "#" + id
-	return &Event{
-		Title:         req.Title,
-		StartDateTime: sortKey,
-		EndDateTime:   req.EndDateTime,
-		IsTogether:    req.IsTogether,
-		CoupleId:      req.CoupleId,
-		CreatedBy:     req.CreatedBy,
-		IsAllDay:      req.IsAllDay,
-		Location:      req.Location,
-		HangOutWith:   req.HangOutWith,
-		Recurrence:    req.Recurrence,
-		EventType:     req.EventType,
-	}
+type WeeklyRecurrence struct {
+	Schedule map[Weekday]TimeRange
+}
+
+type TimeRange struct {
+	Start time.Time
+	End   time.Time
+}
+
+type MonthlyRecurrence struct {
+	Days []int
+}
+
+type YearlyRecurrence struct {
+	Month time.Month
+	Day   int
+}
+
+type Frequency string
+
+const (
+	OneTime Frequency = "NONE"
+	Daily   Frequency = "DAILY"
+	Weekly  Frequency = "WEEKLY"
+	Monthly Frequency = "MONTHLY"
+	Yearly  Frequency = "YEARLY"
+)
+
+type EventType string
+
+const (
+	Normal      EventType = "NORMAL"
+	Anniversary EventType = "ANNIVERSARY"
+)
+
+func (e Event) isRecurrence() bool {
+	return e.Frequency != OneTime
 }
 
 type VO struct {
-	// id format : {startDateTime(ISO8601)}#{generatedId}
-	Id            string      `json:"id"`
-	Title         string      `json:"title"`
-	CoupleId      string      `json:"coupleId"`
-	CreatedBy     string      `json:"createdBy"`
-	StartDateTime time.Time   `json:"startDateTime"`
-	EndDateTime   time.Time   `json:"endDateTime"`
-	Content       *string     `json:"content"`
-	IsTogether    bool        `json:"isTogether"`
-	IsAllDay      bool        `json:"isAllDay"`
-	Location      *string     `json:"location"`
-	HangOutWith   *string     `json:"hangOutWith"`
-	Recurrence    *Recurrence `json:"recurrence"`
-	EventType     string      `json:"eventType"`
+	Id        string `json:"id"` // id format : {startDate(ISO8601)}#{generatedId}
+	CoupleId  string `json:"coupleId"`
+	CreatedBy string `json:"createdBy"`
+
+	StartDateTime  time.Time          `json:"startDateTime"`
+	EndDateTime    time.Time          `json:"endDateTime"`
+	Frequency      Frequency          `json:"frequency"`
+	RecurStartDate *time.Time         `json:"recurStartDate"`
+	RecurEndDate   *time.Time         `json:"recurEndDate"`
+	Daily          *DailyRecurrence   `json:"daily"`
+	Weekly         *WeeklyRecurrence  `json:"weekly"`
+	Monthly        *MonthlyRecurrence `json:"monthly"`
+	Yearly         *YearlyRecurrence  `json:"yearly"`
+	RecurCount     int                `json:"recurCount"`
+
+	Title       string  `json:"title"`
+	Content     *string `json:"content"`
+	Location    *string `json:"location"`
+	HangOutWith *string `json:"hangOutWith"`
+	IsTogether  bool    `json:"isTogether"`
+	IsAllDay    bool    `json:"isAllDay"`
+
+	EventType EventType `json:"eventType"`
 }
 
 func FromEvent(event Event) VO {
 	sortKeySplit := strings.Split(event.StartDateTime, "#")
 	startDateTime, _ := time.Parse(time.RFC3339, sortKeySplit[0])
 	return VO{
-		Id:            event.StartDateTime,
-		CoupleId:      event.CoupleId,
-		Title:         event.Title,
-		StartDateTime: startDateTime,
-		EndDateTime:   event.EndDateTime,
-		Content:       event.Content,
-		IsTogether:    event.IsTogether,
-		IsAllDay:      event.IsAllDay,
-		Location:      event.Location,
-		HangOutWith:   event.HangOutWith,
-		Recurrence:    event.Recurrence,
-		EventType:     event.EventType,
+		Id:        event.StartDateTime,
+		CoupleId:  event.CoupleId,
+		CreatedBy: event.CreatedBy,
+
+		StartDateTime:  startDateTime,
+		EndDateTime:    event.EndDateTime,
+		Frequency:      event.Frequency,
+		RecurStartDate: event.recurStartDate,
+		RecurEndDate:   event.recurEndDate,
+		Daily:          event.Daily,
+		Weekly:         event.Weekly,
+		Monthly:        event.Monthly,
+		Yearly:         event.Yearly,
+
+		Title:       event.Title,
+		Content:     event.Content,
+		IsTogether:  event.IsTogether,
+		IsAllDay:    event.IsAllDay,
+		Location:    event.Location,
+		HangOutWith: event.HangOutWith,
+
+		EventType: event.EventType,
 	}
 }
 
-type SaveReq struct {
-	Title         string `json:"title"`
-	CoupleId      string
-	CreatedBy     string
-	StartDateTime time.Time   `json:"startDateTime"`
-	EndDateTime   time.Time   `json:"endDateTime"`
-	Content       *string     `json:"content"`
-	IsTogether    bool        `json:"isTogether"`
-	IsAllDay      bool        `json:"isAllDay"`
-	Location      *string     `json:"location"`
-	HangOutWith   *string     `json:"hangOutWith"`
-	Recurrence    *Recurrence `json:"recurrence"`
-	EventType     string      `json:"eventType"`
+type Weekday time.Weekday
+
+func (w *Weekday) UnmarshalJSON(data []byte) error {
+	// 문자열로 변환 (예: "Thursday")
+	var s string
+	if err := json.Unmarshal(data, &s); err != nil {
+		return err
+	}
+
+	// 문자열을 Weekday enum으로 매핑
+	lookup := map[string]time.Weekday{
+		"Sunday":    time.Sunday,
+		"Monday":    time.Monday,
+		"Tuesday":   time.Tuesday,
+		"Wednesday": time.Wednesday,
+		"Thursday":  time.Thursday,
+		"Friday":    time.Friday,
+		"Saturday":  time.Saturday,
+	}
+
+	if val, ok := lookup[s]; ok {
+		*w = Weekday(val)
+		return nil
+	}
+
+	return fmt.Errorf("invalid weekday string: %s", s)
 }
 
-type UpdateReq struct {
-	Id            *string     `json:"id" dynamodbav:"id,omitempty"`
-	CoupleId      *string     `json:"coupleId" dynamodbav:"coupleId,omitempty"`
-	Title         *string     `json:"title" dynamodbav:"title,omitempty"`
-	StartDateTime *time.Time  `json:"startDateTime" dynamodbav:"startDateTime,omitempty"`
-	EndDateTime   *time.Time  `json:"endDateTime" dynamodbav:"endDateTime,omitempty"`
-	Content       *string     `json:"content" dynamodbav:"content,omitempty"`
-	IsTogether    *bool       `json:"isTogether" dynamodbav:"isTogether,omitempty"`
-	IsAllDay      *bool       `json:"isAllDay" dynamodbav:"isAllDay,omitempty"`
-	Location      *string     `json:"location" dynamodbav:"location,omitempty"`
-	HangOutWith   *string     `json:"hangOutWith" dynamodbav:"hangOutWith,omitempty"`
-	Recurrence    *Recurrence `json:"recurrence" dynamodbav:"recurrence,omitempty"`
+func (w Weekday) MarshalJSON() ([]byte, error) {
+	day := time.Weekday(w).String() // "Thursday"
+	return json.Marshal(day)
 }

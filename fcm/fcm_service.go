@@ -26,9 +26,14 @@ func GetFCMClient() (*messaging.Client, error) {
 }
 
 type SendReq struct {
-	Title     string   `json:"title"`
-	Body      string   `json:"body"`
-	FcmTokens []string `json:"fcmTokens"`
+	Title         string         `json:"title"`
+	Body          string         `json:"body"`
+	FcmTokens     []string       `json:"fcmTokens"`
+	EventSchedule *EventSchedule `json:"scheduleName"`
+}
+
+type EventSchedule struct {
+	ScheduleName string `json:"scheduleName"`
 }
 
 type Service struct {

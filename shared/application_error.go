@@ -6,16 +6,13 @@ type ApplicationError interface {
 }
 
 type ValidateError struct {
-	message string
+	Message string
 }
 
-func NewCustomApplicationError(message string) ValidateError {
-	return ValidateError{message: message}
+func (e ValidateError) Error() string {
+	return e.Message
 }
-func (err ValidateError) Error() string {
-	return err.message
-}
-func (err ValidateError) StatusCode() int {
+func (e ValidateError) StatusCode() int {
 	return 400
 }
 

@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/aws/smithy-go/ptr"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -20,7 +19,7 @@ const tableName = "Event"
 type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
 	Save(event *Event) (*VO, error)
-	Update(req *UpdateReq) (*VO, error)
+	Update(coupleId string, id string, req *UpdateReq) (*VO, error)
 	Delete(coupleId string, id string) error
 	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
 }
@@ -103,20 +102,13 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) Update(req *UpdateReq) (*VO, error) {
-	// startDateTime 이 바뀔 경우 ID 가 바뀜
-	// update 할 event 식별을 위한 sortKey 저장
-	sortKey := req.Id
+func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req *UpdateReq) (*VO, error) {
+	sortKey := id
 
-	// MarshalMap 호출 시 partitionKey 를 제외하기 위해 req.CoupleId 를 nil 로 설정
-	// partitionKey 임시 저장
-	partitionKey := req.CoupleId
-	req.CoupleId = nil
-
-	// StartDateTime 이 바뀐다면 sortKey 를 업데이트 해줘야 함
+	// StartTime 이 바뀐다면 sortKey 를 업데이트 해줘야 함
 	if req.StartDateTime != nil {
-		id := strings.Split(*req.Id, "#")[1]
-		req.Id = ptr.String(req.StartDateTime.Format(time.RFC3339) + "#" + id)
+		id := strings.Split(id, "#")[1]
+		sortKey = req.StartDateTime.Format(time.RFC3339) + "#" + id
 	}
 
 	av, err := attributevalue.MarshalMap(req)
@@ -140,7 +132,7 @@ func (repo *RepositoryDynamoDB) Update(req *UpdateReq) (*VO, error) {
 
 	response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName:                 aws.String(tableName),
-		Key:                       repo.getKey(*partitionKey, *sortKey),
+		Key:                       repo.getKey(coupleId, sortKey),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		UpdateExpression:          expr.Update(),

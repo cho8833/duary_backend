@@ -29,11 +29,11 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 	coupleId := request.QueryStringParameters["coupleId"]
 	startDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["startDate"])
 	if err != nil {
-		return shared.LambdaErrorResponse(shared.NewCustomApplicationError("startDate must be provided"), 400), nil
+		return shared.LambdaErrorResponse(shared.ValidateError{Message: "startDate must be provided"}, 400), nil
 	}
 	endDate, err := time.Parse(time.RFC3339, request.QueryStringParameters["endDate"])
 	if err != nil {
-		return shared.LambdaErrorResponse(shared.NewCustomApplicationError("endDate must be provided"), 400), nil
+		return shared.LambdaErrorResponse(shared.ValidateError{Message: "endDate must be provided"}, 400), nil
 	}
 
 	res, svcErr := eventSvc.GetBetweenStartAndEndDate(coupleId, startDate, endDate)
