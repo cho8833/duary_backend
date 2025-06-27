@@ -49,7 +49,7 @@ func (req *SaveReq) Validate() shared.ApplicationError {
 
 	// 3. Weekly Event 인 경우 주간 반복 데이터가 있어야 함
 	if req.Frequency == Weekly {
-		if req.Weekly == nil || len(req.Weekly.Schedule) == 0 {
+		if req.Weekly == nil || len(req.Weekly.Weekdays) == 0 {
 			return shared.ValidateError{Message: "주 반복 이벤트의 정보가 지정되지 않았습니다"}
 		}
 	}

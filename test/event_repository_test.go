@@ -73,16 +73,12 @@ func Test_SaveEvent(t *testing.T) {
 		Location:       ptr("Office"),
 		HangOutWith:    ptr("Team"),
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Tuesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Thursday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Tuesday),
+				event.Weekday(time.Thursday),
 			},
+			Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.Local),
+			End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.Local),
 		},
 	}
 

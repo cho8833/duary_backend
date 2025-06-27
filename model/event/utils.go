@@ -55,7 +55,7 @@ func (service *ServiceImpl) dailyOccurrences(event VO, start time.Time, end time
 
 func (service *ServiceImpl) weeklyOccurrences(event VO, start time.Time, end time.Time) []VO {
 	var result []VO
-	schedules := event.Weekly.Schedule
+	weekly := event.Weekly
 
 	// 반복 종료일 계산
 	maxRepeatEnd := end
@@ -69,7 +69,7 @@ func (service *ServiceImpl) weeklyOccurrences(event VO, start time.Time, end tim
 	// 반복 시작일을 기준으로 주 단위로 이동
 	startOfWeek := start
 	for !startOfWeek.After(maxRepeatEnd) {
-		for weekday, timeRange := range schedules {
+		for _, weekday := range weekly.Weekdays {
 			// 해당 주의 요일에 해당하는 날짜 계산
 			dayOffset := int(time.Weekday(weekday) - startOfWeek.Weekday())
 			if dayOffset < 0 {
@@ -82,7 +82,7 @@ func (service *ServiceImpl) weeklyOccurrences(event VO, start time.Time, end tim
 			}
 			if !eventDate.Before(start) && !eventDate.After(end) {
 				occurrence := service.changeDate(event, eventDate)
-				occurrence = service.changeTime(occurrence, timeRange.Start, timeRange.End)
+				occurrence = service.changeTime(occurrence, event.StartDateTime, event.EndDateTime)
 				occurrence.RecurCount = recurCount
 				result = append(result, occurrence)
 				recurCount++

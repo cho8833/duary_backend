@@ -46,12 +46,7 @@ type DailyRecurrence struct {
 }
 
 type WeeklyRecurrence struct {
-	Schedule map[Weekday]TimeRange
-}
-
-type TimeRange struct {
-	Start time.Time
-	End   time.Time
+	Weekdays []Weekday
 }
 
 type MonthlyRecurrence struct {
@@ -114,7 +109,7 @@ func FromEvent(event Event) VO {
 	sortKeySplit := strings.Split(event.StartDateTime, "#")
 	startDateTime, _ := time.Parse(time.RFC3339, sortKeySplit[0])
 	return VO{
-		Id:        event.StartDateTime,
+		Id:        sortKeySplit[1],
 		CoupleId:  event.CoupleId,
 		CreatedBy: event.CreatedBy,
 
@@ -139,7 +134,30 @@ func FromEvent(event Event) VO {
 	}
 }
 
+/*
+time.Weekday 는 Unmarshalling 불가능 -> custom type + UnMarshall/Marshall 구현
+*/
 type Weekday time.Weekday
+
+var shortDayNames = []string{
+	"SUN",
+	"MON",
+	"TUE",
+	"WED",
+	"THU",
+	"FRI",
+	"SAT",
+}
+
+var longDayNames = map[string]time.Weekday{
+	"Sunday":    time.Sunday,
+	"Monday":    time.Monday,
+	"Tuesday":   time.Tuesday,
+	"Wednesday": time.Wednesday,
+	"Thursday":  time.Thursday,
+	"Friday":    time.Friday,
+	"Saturday":  time.Saturday,
+}
 
 func (w *Weekday) UnmarshalJSON(data []byte) error {
 	// 문자열로 변환 (예: "Thursday")
@@ -148,18 +166,7 @@ func (w *Weekday) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	// 문자열을 Weekday enum으로 매핑
-	lookup := map[string]time.Weekday{
-		"Sunday":    time.Sunday,
-		"Monday":    time.Monday,
-		"Tuesday":   time.Tuesday,
-		"Wednesday": time.Wednesday,
-		"Thursday":  time.Thursday,
-		"Friday":    time.Friday,
-		"Saturday":  time.Saturday,
-	}
-
-	if val, ok := lookup[s]; ok {
+	if val, ok := longDayNames[s]; ok {
 		*w = Weekday(val)
 		return nil
 	}
@@ -170,4 +177,8 @@ func (w *Weekday) UnmarshalJSON(data []byte) error {
 func (w Weekday) MarshalJSON() ([]byte, error) {
 	day := time.Weekday(w).String() // "Thursday"
 	return json.Marshal(day)
+}
+
+func (w Weekday) ShortDayName() string {
+	return shortDayNames[w]
 }

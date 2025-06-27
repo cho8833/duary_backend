@@ -285,15 +285,9 @@ func Test_GenerateOccurrence_of_weekly_by_one_day1(t *testing.T) {
 	dummy := event.VO{
 		Frequency: event.Weekly,
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Tuesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Thursday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Tuesday),
+				event.Weekday(time.Thursday),
 			},
 		},
 		StartDateTime:  testTime,
@@ -329,15 +323,9 @@ func Test_GenerateOccurrence_of_weekly_by_one_day2(t *testing.T) {
 	dummy := event.VO{
 		Frequency: event.Weekly,
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Tuesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Thursday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Tuesday),
+				event.Weekday(time.Thursday),
 			},
 		},
 		StartDateTime:  testTime,
@@ -366,15 +354,9 @@ func Test_GenerateOccurrence_of_weekly_by_one_day3(t *testing.T) {
 	dummy := event.VO{
 		Frequency: event.Weekly,
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Wednesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Friday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Tuesday),
+				event.Weekday(time.Thursday),
 			},
 		},
 		StartDateTime:  testTime,
@@ -408,15 +390,9 @@ func Test_GenerateOccurrence_of_weekly_by_one_month1(t *testing.T) {
 	dummy := event.VO{
 		Frequency: event.Weekly,
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Wednesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Friday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Wednesday),
+				event.Weekday(time.Friday),
 			},
 		},
 		StartDateTime:  testTime,
@@ -461,15 +437,9 @@ func Test_GenerateOccurrence_of_weekly_by_one_month2(t *testing.T) {
 	dummy := event.VO{
 		Frequency: event.Weekly,
 		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Wednesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Friday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
+			Weekdays: []event.Weekday{
+				event.Weekday(time.Wednesday),
+				event.Weekday(time.Friday),
 			},
 		},
 		StartDateTime:  testTime,
@@ -494,57 +464,6 @@ func Test_GenerateOccurrence_of_weekly_by_one_month2(t *testing.T) {
 		time.Date(2025, 5, 30, 9, 0, 0, 0, time.UTC),
 	}
 
-	for i := range result {
-		if !result[i].StartDateTime.Equal(expected[i]) {
-			t.Fatalf("Wrong Occurence %s", shared.ToString(result[i]))
-		}
-	}
-}
-
-func Test_GenerateOccurrence_of_weekly_custom_time_range(t *testing.T) {
-	t.Logf("Weekly Recur: custom Time Range")
-
-	rangeStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	rangeEndDate := time.Date(2025, 6, 1, 0, 0, 0, 0, time.UTC)
-	recurStartDate := time.Date(2025, 5, 15, 0, 0, 0, 0, time.UTC)
-	recurEndDate := time.Date(2025, 6, 15, 0, 0, 0, 0, time.UTC)
-	testTime := time.Date(2025, 5, 15, 9, 0, 0, 0, time.UTC)
-	svc := &event.ServiceImpl{}
-
-	dummy := event.VO{
-		Frequency: event.Weekly,
-		Weekly: &event.WeeklyRecurrence{
-			Schedule: map[event.Weekday]event.TimeRange{
-				event.Weekday(time.Wednesday): {
-					Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-				},
-				event.Weekday(time.Friday): {
-					Start: time.Date(2025, 5, 1, 11, 0, 0, 0, time.UTC),
-					End:   time.Date(2025, 5, 1, 13, 0, 0, 0, time.UTC),
-				},
-			},
-		},
-		StartDateTime:  testTime,
-		EndDateTime:    testTime.Add(time.Hour * 2),
-		RecurStartDate: &recurStartDate,
-		RecurEndDate:   &recurEndDate,
-	}
-
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 5 {
-		t.Fatalf("GenerateOccurrence result length: expect 5, got %v", len(result))
-	}
-	expected := []time.Time{
-		time.Date(2025, 5, 16, 11, 0, 0, 0, time.UTC),
-		time.Date(2025, 5, 21, 9, 0, 0, 0, time.UTC),
-		time.Date(2025, 5, 23, 11, 0, 0, 0, time.UTC),
-		time.Date(2025, 5, 28, 9, 0, 0, 0, time.UTC),
-		time.Date(2025, 5, 30, 11, 0, 0, 0, time.UTC),
-	}
 	for i := range result {
 		if !result[i].StartDateTime.Equal(expected[i]) {
 			t.Fatalf("Wrong Occurence %s", shared.ToString(result[i]))
