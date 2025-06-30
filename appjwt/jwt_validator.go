@@ -122,7 +122,8 @@ func (validator *JWTValidatorImpl) VerifyRSA256(idToken string, value *Validatin
 		// check Nonce, pair with frontend
 		nonce := claims["nonce"].(string)
 		if value.Nonce != "" {
-			if nonce != value.Nonce {
+			// Google 은 nonce 설정 불가하여, Google 은 nonce checking 은 스킵
+			if nonce != value.Nonce && iss != "https://accounts.google.com" {
 				return nil, fmt.Errorf("nonce does not match")
 			}
 		}
