@@ -4,7 +4,9 @@ import (
 	"context"
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
+	"github.com/cho8833/duary_lambda/model/member"
 	"log"
+	"strings"
 )
 
 func GetFCMClient() (*messaging.Client, error) {
@@ -16,7 +18,6 @@ func GetFCMClient() (*messaging.Client, error) {
 		log.Fatalf("Failed to create Firebase app: %v", err)
 		return nil, err
 	}
-	log.Printf("Using Firebase Cloud Messaging client: %+v", app)
 	client, err := app.Messaging(ctx)
 	if err != nil {
 		log.Printf("Error creating Messaging client: %+v", err)
@@ -26,22 +27,18 @@ func GetFCMClient() (*messaging.Client, error) {
 }
 
 type SendReq struct {
-	Title         string         `json:"title"`
-	Body          string         `json:"body"`
-	FcmTokens     []string       `json:"fcmTokens"`
-	EventSchedule *EventSchedule `json:"scheduleName"`
-}
-
-type EventSchedule struct {
-	ScheduleName string `json:"scheduleName"`
+	Title          string `json:"title"`
+	Body           string `json:"body"`
+	TargetMemberId string `json:"target_member_id"`
 }
 
 type Service struct {
-	client *messaging.Client
+	client        *messaging.Client
+	memberService member.Service
 }
 
-func NewService(client *messaging.Client) *Service {
-	return &Service{client: client}
+func NewService(client *messaging.Client, memberService member.Service) *Service {
+	return &Service{client: client, memberService: memberService}
 }
 
 func (s *Service) Send(req SendReq) {
@@ -49,35 +46,31 @@ func (s *Service) Send(req SendReq) {
 		Title: req.Title,
 		Body:  req.Body,
 	}
-	if len(req.FcmTokens) == 1 {
-		message := &messaging.Message{
-			Data: map[string]string{
-				"title": req.Title,
-				"body":  req.Body,
-			},
-			Notification: notification,
-			Token:        req.FcmTokens[0],
-		}
-		response, err := s.client.Send(context.Background(), message)
-		if err != nil {
-			log.Printf("failed to send: %+v\n", err)
-		} else {
-			log.Printf("send response: %+v\n\n", response)
-		}
-	} else {
-		message := &messaging.MulticastMessage{
-			Data: map[string]string{
-				"title": req.Title,
-				"body":  req.Body,
-			},
-			Notification: notification,
-			Tokens:       req.FcmTokens,
-		}
-		response, err := s.client.SendEachForMulticast(context.Background(), message)
-		if err != nil {
-			log.Printf("failed to send: %+v\n", err)
-		} else {
-			log.Printf("send response: %+v\n\n", response)
-		}
+
+	temp := strings.Split(req.TargetMemberId, "-")
+	targetMember, svcErr := s.memberService.FindById(temp[0], temp[1])
+	if svcErr != nil {
+		log.Printf("Error finding target member: %v", svcErr)
+		return
 	}
+	if targetMember.FcmToken == nil {
+		log.Printf("target member has no fcm token")
+		return
+	}
+
+	message := &messaging.Message{
+		Data: map[string]string{
+			"title": req.Title,
+			"body":  req.Body,
+		},
+		Notification: notification,
+		Token:        *targetMember.FcmToken,
+	}
+	response, err := s.client.Send(context.Background(), message)
+	if err != nil {
+		log.Printf("failed to send: %+v\n", err)
+	} else {
+		log.Printf("send response: %+v\n\n", response)
+	}
+
 }

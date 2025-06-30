@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/scheduler"
@@ -13,6 +14,12 @@ import (
 	"strconv"
 	"time"
 )
+
+type SendFCMReq struct {
+	Title          string `json:"title"`
+	Body           string `json:"body"`
+	TargetMemberId string `json:"target_member_id"`
+}
 
 type BridgeSchedulerHelper struct {
 	schedulerClient *scheduler.Client
@@ -28,16 +35,34 @@ func (helper *BridgeSchedulerHelper) CreateEventSchedule(ev event.VO, tm member.
 
 	var duration time.Duration
 	if ev.CreatedBy == tm.GetId() { // 나의 일정인 경우
+		if tm.MyAlarm == event.None { // 나의 일정 알람을 끈 경우 아무것도 하지 않음
+			return nil
+		}
 		duration = event.AlarmOffsetMap[tm.MyAlarm].Duration
 	} else { // 상대방 일정인 경우
+		if tm.LoverAlarm == event.None { // 연인의 일정 알람을 끈 경우 아무것도 하지 않음
+			return nil
+		}
 		duration = event.AlarmOffsetMap[tm.LoverAlarm].Duration
 	}
 
+	fcmReq := SendFCMReq{
+		Title:          ev.Title,
+		TargetMemberId: tm.GetId(),
+	}
+	encoded, err := json.Marshal(fcmReq)
+	if err != nil {
+		log.Println(err)
+		return shared.InternalServerError{}
+	}
+	encodedString := string(encoded)
 	target := &types.Target{
 		Arn:     aws.String("arn:aws:lambda:ap-northeast-2:922001515124:function:send_fcm"),
 		RoleArn: aws.String("arn:aws:iam::922001515124:role/SchedulerExecutionRole"),
+		Input:   &encodedString,
 	}
-	scheduleName := helper.scheduleName(ev.Id, tm.GetId())
+
+	scheduleName := helper.GetScheduleName(ev.Id, tm.GetId())
 
 	timeZone := "UTC"
 
@@ -114,20 +139,22 @@ func (helper *BridgeSchedulerHelper) CreateEventSchedule(ev event.VO, tm member.
 	return nil
 }
 
-func (helper *BridgeSchedulerHelper) DeleteEventSchedule(ev event.VO, tm member.Member) {
+func (helper *BridgeSchedulerHelper) DeleteEventSchedule(scheduleName string) shared.ApplicationError {
 	input := scheduler.DeleteScheduleInput{
-		Name: aws.String(helper.scheduleName(ev.Id, tm.GetId())),
+		Name: &scheduleName,
 	}
 
 	output, err := helper.schedulerClient.DeleteSchedule(context.TODO(), &input)
 	if err != nil {
 		log.Printf("failed to delete scheduler: %+v\n", err)
+		return shared.InternalServerError{}
 	} else {
 		log.Printf("delete schedule output: %+v\n", output)
+		return nil
 	}
 }
 
-func (helper *BridgeSchedulerHelper) scheduleName(eventId string, memberId string) string {
+func (helper *BridgeSchedulerHelper) GetScheduleName(eventId string, memberId string) string {
 	return eventId + "-" + memberId
 }
 

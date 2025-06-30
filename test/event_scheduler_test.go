@@ -1,6 +1,11 @@
 package test
 
 import (
+	"context"
+	"encoding/json"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	aws_scheduler "github.com/aws/aws-sdk-go-v2/service/scheduler"
+	"github.com/aws/aws-sdk-go-v2/service/scheduler/types"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/scheduler"
@@ -138,4 +143,45 @@ func Test_CreateEventSchedule_Yearly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func Test_EventSchedule_Invoke_FCM(t *testing.T) {
+	schedulerClient, err := scheduler.GetSchedulerClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fcmReq := scheduler.SendFCMReq{
+		Title:          "test",
+		Body:           "test",
+		TargetMemberId: "3428835809-kakao",
+	}
+	encoded, err := json.Marshal(fcmReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	encodedString := string(encoded)
+	target := &types.Target{
+		Arn:     aws.String("arn:aws:lambda:ap-northeast-2:922001515124:function:send_fcm"),
+		RoleArn: aws.String("arn:aws:iam::922001515124:role/SchedulerExecutionRole"),
+		Input:   &encodedString,
+	}
+	scheduleExpression := "rate(1 minutes)"
+
+	input := aws_scheduler.CreateScheduleInput{
+		Name:                       aws.String("fcm_test_scheduler"),
+		FlexibleTimeWindow:         &types.FlexibleTimeWindow{Mode: types.FlexibleTimeWindowModeOff},
+		ScheduleExpression:         aws.String(scheduleExpression),
+		ScheduleExpressionTimezone: aws.String("Asia/Seoul"),
+		StartDate:                  aws.Time(time.Now()),
+		EndDate:                    aws.Time(time.Now().Add(time.Hour)),
+		ActionAfterCompletion:      types.ActionAfterCompletionDelete,
+		Target:                     target,
+	}
+
+	_, err = schedulerClient.CreateSchedule(context.TODO(), &input)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 }

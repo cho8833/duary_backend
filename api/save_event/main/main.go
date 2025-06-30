@@ -61,7 +61,13 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 	}
 
 	//----------------------------Create EventBridge Schedule------------------------//
-	scheduleHelper.CreateEventSchedule(vo)
+	for _, user := range findCouple.Members {
+		svcError = scheduleHelper.CreateEventSchedule(*vo, *user)
+		if svcError != nil {
+			// TODO: 에러 처리
+			log.Printf(svcError.Error())
+		}
+	}
 
 	return shared.LambdaResponseWithData(vo), nil
 }

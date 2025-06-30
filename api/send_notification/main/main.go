@@ -6,20 +6,28 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/fcm"
+	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
 
 /*
-GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/send_notification/main/main.go && chmod 755 bootstrap && zip  build/package/common/send_notification.zip bootstrap duary-8c5b2-firebase-adminsdk-9d1a5-e86abbedfc.json && rm bootstrap
+GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/send_notification/main/main.go && chmod 755 bootstrap && zip  build/package/send_notification.zip bootstrap duary-8c5b2-firebase-adminsdk-9d1a5-e86abbedfc.json && rm bootstrap
 */
 func sendNotification(ctx context.Context, event json.RawMessage) (events.APIGatewayProxyResponse, error) {
 	fcmClient, err := fcm.GetFCMClient()
-
 	if err != nil {
 		log.Printf("failed to get fcmClient: %+v\n", err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	dynamodbClient, err := model.GetDynamoDBClient()
+	if err != nil {
+		log.Printf("failed to get DynamoDBClient: %+v\n", err)
+		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
+	}
+	memberRepo := member.NewRepository(dynamodbClient)
+	memberSvc := member.NewService(memberRepo)
 
 	fcmReq := &fcm.SendReq{}
 	err = json.Unmarshal(event, fcmReq)
@@ -28,7 +36,7 @@ func sendNotification(ctx context.Context, event json.RawMessage) (events.APIGat
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	fcmService := fcm.NewService(fcmClient)
+	fcmService := fcm.NewService(fcmClient, memberSvc)
 
 	fcmService.Send(*fcmReq)
 
