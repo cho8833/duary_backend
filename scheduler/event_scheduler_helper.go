@@ -80,14 +80,29 @@ func (helper *BridgeSchedulerHelper) CreateEventSchedule(ev event.VO, tm member.
 			Target:                     target,
 		}
 	} else if ev.Frequency == event.Monthly {
-		//scheduleTime := ev.StartDateTime.Add(duration)
-		//input = scheduler.CreateScheduleInput{
-		//	Name:                       &scheduleName,
-		//	FlexibleTimeWindow:  &types.FlexibleTimeWindow{Mode: types.FlexibleTimeWindowModeOff},
-		//	ScheduleExpression:
-		//}
+		scheduleTime := ev.StartDateTime.Add(duration)
+		input = scheduler.CreateScheduleInput{
+			Name:                       &scheduleName,
+			FlexibleTimeWindow:         &types.FlexibleTimeWindow{Mode: types.FlexibleTimeWindowModeOff},
+			ScheduleExpression:         aws.String(helper.monthlyExpression(scheduleTime, *ev.Monthly)),
+			ScheduleExpressionTimezone: &timeZone,
+			StartDate:                  ev.RecurStartDate,
+			EndDate:                    ev.RecurEndDate,
+			ActionAfterCompletion:      types.ActionAfterCompletionDelete,
+			Target:                     target,
+		}
 	} else if ev.Frequency == event.Yearly {
-		// TODO
+		scheduleTime := ev.StartDateTime.Add(duration)
+		input = scheduler.CreateScheduleInput{
+			Name:                       &scheduleName,
+			FlexibleTimeWindow:         &types.FlexibleTimeWindow{Mode: types.FlexibleTimeWindowModeOff},
+			ScheduleExpression:         aws.String(helper.yearlyExpression(scheduleTime, *ev.Yearly)),
+			ScheduleExpressionTimezone: &timeZone,
+			StartDate:                  ev.RecurStartDate,
+			EndDate:                    ev.RecurEndDate,
+			ActionAfterCompletion:      types.ActionAfterCompletionDelete,
+			Target:                     target,
+		}
 	}
 	output, err := helper.schedulerClient.CreateSchedule(context.TODO(), &input)
 	if err != nil {
@@ -145,7 +160,24 @@ func (helper *BridgeSchedulerHelper) weeklyExpression(scheduleTime time.Time, we
 	return s
 }
 
-//func (helper *BridgeSchedulerHelper) monthlyExpression(scheduleTime time.Time, monthly event.MonthlyRecurrence) string {
-//	s := "cron(" + strconv.Itoa(scheduleTime.Minute()) + " " + strconv.Itoa(scheduleTime.Hour()) + " "
-//
-//}
+func (helper *BridgeSchedulerHelper) monthlyExpression(scheduleTime time.Time, monthly event.MonthlyRecurrence) string {
+	s := "cron(" + strconv.Itoa(scheduleTime.Minute()) + " " + strconv.Itoa(scheduleTime.Hour()) + " "
+
+	for index, day := range monthly.Days {
+		s += strconv.Itoa(day)
+		if index < len(monthly.Days)-1 {
+			s += ","
+		}
+	}
+	s += " * ? *)"
+	return s
+}
+
+func (helper *BridgeSchedulerHelper) yearlyExpression(scheduleTime time.Time, yearly event.YearlyRecurrence) string {
+
+	s := fmt.Sprintf("cron(%d %d %d %d ? *)", scheduleTime.Minute(),
+		scheduleTime.Hour(),
+		yearly.Day,
+		int(yearly.Month))
+	return s
+}

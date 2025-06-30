@@ -74,3 +74,68 @@ func Test_CreateEventSchedule_Weekly(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func Test_CreateEventSchedule_Monthly(t *testing.T) {
+	schedulerClient, err := scheduler.GetSchedulerClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
+	recurStartDate := time.Date(2026, 5, 15, 0, 0, 0, 0, time.UTC)
+	recurEndDate := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+
+	data := event.VO{
+		Id:        "scheduler_test_event",
+		Frequency: event.Monthly,
+		Monthly: &event.MonthlyRecurrence{
+			Days: []int{
+				1, 3, 5, 7, 9,
+			},
+		},
+		StartDateTime:  time.Date(2025, 5, 15, 9, 0, 0, 0, time.UTC),
+		EndDateTime:    time.Date(2025, 5, 15, 11, 0, 0, 0, time.UTC),
+		RecurStartDate: &recurStartDate,
+		RecurEndDate:   &recurEndDate,
+	}
+	createdBy := member.Member{
+		SocialId: "test_member",
+		Provider: "GOOGLE",
+	}
+
+	err = schedulerHelper.CreateEventSchedule(data, createdBy)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_CreateEventSchedule_Yearly(t *testing.T) {
+	schedulerClient, err := scheduler.GetSchedulerClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
+	recurStartDate := time.Now()
+	recurEndDate := time.Date(2026, 6, 15, 0, 0, 0, 0, time.UTC)
+
+	data := event.VO{
+		Id:        "scheduler_test_event",
+		Frequency: event.Yearly,
+		Yearly: &event.YearlyRecurrence{
+			Month: time.August,
+			Day:   13,
+		},
+		StartDateTime:  time.Date(2025, 5, 15, 9, 0, 0, 0, time.UTC),
+		EndDateTime:    time.Date(2026, 5, 15, 11, 0, 0, 0, time.UTC),
+		RecurStartDate: &recurStartDate,
+		RecurEndDate:   &recurEndDate,
+	}
+	createdBy := member.Member{
+		SocialId: "test_member",
+		Provider: "GOOGLE",
+	}
+
+	err = schedulerHelper.CreateEventSchedule(data, createdBy)
+	if err != nil {
+		t.Fatal(err)
+	}
+}

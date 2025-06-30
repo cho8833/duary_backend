@@ -77,8 +77,6 @@ func Test_SaveEvent(t *testing.T) {
 				event.Weekday(time.Tuesday),
 				event.Weekday(time.Thursday),
 			},
-			Start: time.Date(2025, 5, 1, 9, 0, 0, 0, time.Local),
-			End:   time.Date(2025, 5, 1, 11, 0, 0, 0, time.Local),
 		},
 	}
 
