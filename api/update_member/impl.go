@@ -3,6 +3,7 @@ package update_member
 import (
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/couple"
+	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -10,10 +11,12 @@ import (
 )
 
 type UpdateMemberReq struct {
-	Birthday  *time.Time `json:"birthday"`
-	Name      *string    `json:"name"`
-	Character *string    `json:"character"`
-	FcmToken  *string    `json:"fcmToken"`
+	Birthday   *time.Time         `json:"birthday"`
+	Name       *string            `json:"name"`
+	Character  *string            `json:"character"`
+	FcmToken   *string            `json:"fcmToken"`
+	MyAlarm    *event.AlarmOffset `json:"myAlarm"`
+	LoverAlarm *event.AlarmOffset `json:"loverAlarm"`
 }
 
 type UpdateMemberRes struct {
@@ -40,12 +43,14 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 
 	// update member
 	memberUpdateReq := &member.UpdateMemberReq{
-		SocialId:  *socialId,
-		Provider:  *provider,
-		Name:      req.Name,
-		Birthday:  req.Birthday,
-		Character: req.Character,
-		FcmToken:  req.FcmToken,
+		SocialId:   *socialId,
+		Provider:   *provider,
+		Name:       req.Name,
+		Birthday:   req.Birthday,
+		Character:  req.Character,
+		FcmToken:   req.FcmToken,
+		MyAlarm:    req.MyAlarm,
+		LoverAlarm: req.LoverAlarm,
 	}
 	updatedMember, svcErr := memberSvc.UpdateTransaction(memberUpdateReq, transaction)
 	if svcErr != nil {
