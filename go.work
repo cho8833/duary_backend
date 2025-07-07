@@ -25,4 +25,5 @@ use (
 	./api/update_couple
 	./api/token_sign_in
 	./api/sign_out
+	./api/get_couple
 )

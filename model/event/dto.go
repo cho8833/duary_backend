@@ -101,6 +101,8 @@ func FromReq(req *SaveReq, id string) *Event {
 }
 
 type UpdateReq struct {
+	Id string `json:"id"`
+
 	StartDateTime  *time.Time         `json:"startDateTime" dynamodbav:"startDateTime,omitempty"`
 	EndDateTime    *time.Time         `json:"endDateTime" dynamodbav:"endDateTime,omitempty"`
 	RecurStartDate *time.Time         `json:"recurStartDate" dynamodbav:"recurStartDate,omitempty"`

@@ -85,7 +85,7 @@ func (svc *ServiceImpl) onSignInSuccess(payload *appjwt.DecodedPayload, provider
 	// 회원 ID 와 ServiceProvider 로 Member 검색
 	// Member 가 없을 경우 ResourceNotFoundException 발생, 해당 Exception 은 오류가 아님
 	findMember, svcErr := svc.memberSvc.FindById(payload.SocialId, provider)
-	if temp := new(shared.UserNotFound); !errors.As(svcErr, &temp) && svcErr != nil {
+	if temp := new(shared.UserNotFound); !errors.As(svcErr, temp) && svcErr != nil {
 		id := fmt.Sprintf("%d-%s", payload.SocialId, provider)
 		log.Printf("failed to find findMember\nid:%s\nerror:%s", id, svcErr.Error())
 		return nil, svcErr

@@ -22,7 +22,7 @@ func Test_startDuary(t *testing.T) {
 	dateTemp := time.Now()
 	dateTemp = dateTemp.AddDate(0, -1, 0)
 
-	CreateTestAuthContext(ptr("123"), ptr("kakao"), nil)
+	CreateTestAuthContext(ptr("asdf"), ptr("kakao"), nil)
 
 	req := &start_duary.StartDuaryReq{
 		RelationDate: &dateTemp,

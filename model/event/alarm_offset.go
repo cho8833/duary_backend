@@ -3,6 +3,7 @@ package event
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"time"
 )
 
@@ -81,4 +82,21 @@ func (af *AlarmOffset) UnmarshalJSON(data []byte) error {
 	}
 	*af = val
 	return nil
+}
+
+func (af AlarmOffset) MarshalDynamoDBAttributeValue() (types.AttributeValue, error) {
+	return &types.AttributeValueMemberS{
+		Value: af.ToJSON(),
+	}, nil
+}
+
+func (af *AlarmOffset) UnmarshalDynamoDBAttributeValue(av types.AttributeValue) error {
+	s := av.(*types.AttributeValueMemberS).Value
+	val, err := FromJSON(s)
+	if err != nil {
+		return err
+	}
+	*af = val
+	return nil
+
 }

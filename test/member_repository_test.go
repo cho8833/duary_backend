@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -25,14 +26,14 @@ func Test_saveMember(t *testing.T) {
 	repository := member.NewRepository(client)
 	name := "test"
 	now := time.Now()
-	gender := "man"
 	dummyMember := &member.Member{
-		SocialId: "asdf",
-		Name:     &name,
-		Birthday: &now,
-		Gender:   &gender,
-		Provider: "kakao",
-		FcmToken: nil,
+		SocialId:   "asdf",
+		Name:       &name,
+		Birthday:   &now,
+		Provider:   "kakao",
+		FcmToken:   nil,
+		LoverAlarm: event.Min15,
+		MyAlarm:    event.Min15,
 	}
 
 	_, err := repository.Save(dummyMember)

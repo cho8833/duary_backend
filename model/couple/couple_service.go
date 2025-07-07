@@ -100,7 +100,7 @@ func (svc *ServiceImpl) Delete(id string, transaction *model.DynamoDBWriteTransa
 func (svc *ServiceImpl) FindById(coupleId string) (*Couple, shared.ApplicationError) {
 	couple, err := svc.repository.FindById(&coupleId)
 	if temp := new(types.ResourceNotFoundException); errors.As(err, &temp) {
-		return nil, shared.UserNotFound{}
+		return nil, shared.CoupleNotFound{}
 	}
 
 	if err != nil {

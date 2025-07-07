@@ -52,7 +52,7 @@ func tokenSignIn(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 	var memberCouple *couple.Couple
 	if updatedMember.CoupleId != nil {
 		memberCouple, svcErr = coupleSvc.FindById(*updatedMember.CoupleId)
-		if temp := new(shared.UserNotFound); !errors.As(err, &temp) && svcErr != nil {
+		if temp := new(shared.CoupleNotFound); !errors.As(err, temp) && svcErr != nil {
 			log.Printf("failed to find member. Error: %s", svcErr)
 			return shared.LambdaAppErrorResponse(svcErr), nil
 		}
