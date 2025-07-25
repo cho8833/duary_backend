@@ -62,7 +62,7 @@ func (helper *BridgeSchedulerHelper) CreateEventSchedule(ev event.VO, tm member.
 		Input:   &encodedString,
 	}
 
-	scheduleName := helper.GetScheduleName(ev.Id, tm.GetId())
+	scheduleName := helper.GetScheduleName(ev.GetIdOnly(), tm.GetId())
 
 	timeZone := "UTC"
 
@@ -171,7 +171,7 @@ func (helper *BridgeSchedulerHelper) UpdateEventSchedule(ev event.VO, tm member.
 		Input:   &encodedString,
 	}
 
-	scheduleName := helper.GetScheduleName(ev.Id, tm.GetId())
+	scheduleName := helper.GetScheduleName(ev.GetIdOnly(), tm.GetId())
 
 	timeZone := "UTC"
 

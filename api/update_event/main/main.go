@@ -14,7 +14,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_event/main/main.go && chmod 755 bootstrap && zip  build/package/update_event_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_event/main/main.go && chmod 755 bootstrap && zip  build/package/update_event.zip bootstrap && rm bootstrap
 */
 func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// init
@@ -34,14 +34,6 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 	scheduleHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
-	// parse req
-	updateEventReq := &event.UpdateReq{}
-	err = json.Unmarshal([]byte(request.Body), updateEventReq)
-	if err != nil {
-		log.Println(err.Error())
-		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
-	}
-
 	// get auth
 	authCtx := shared.NewAuthContext(request)
 	coupleId := authCtx.CoupleId
@@ -60,6 +52,15 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
+	// parse req
+	updateEventReq := &event.EditReq{}
+	err = json.Unmarshal([]byte(request.Body), updateEventReq)
+	if err != nil {
+		log.Println(err.Error())
+		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
+	}
+	eventId := request.QueryStringParameters["id"]
+
 	// find member
 	tm, svcErr := memberSvc.FindById(*socialId, *provider)
 	if svcErr != nil {
@@ -67,7 +68,7 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 
 	// update event (dynamodb)
-	vo, svcError := eventSvc.Update(*coupleId, updateEventReq.Id, updateEventReq)
+	vo, svcError := eventSvc.Update(*coupleId, eventId, *updateEventReq)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}

@@ -2,6 +2,7 @@ package event
 
 import (
 	"context"
+	"fmt"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression"
@@ -19,9 +20,10 @@ const tableName = "Event"
 type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
 	Save(event *Event) (*VO, error)
-	Update(coupleId string, id string, req *UpdateReq) (*VO, error)
+	Update(coupleId string, id string, req EditReq) (*VO, error)
 	Delete(coupleId string, id string) error
 	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
+	DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error
 }
 
 type RepositoryDynamoDB struct {
@@ -102,54 +104,113 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 	return result, nil
 }
 
-func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req *UpdateReq) (*VO, error) {
-	sortKey := id
-
-	// StartTime 이 바뀐다면 sortKey 를 업데이트 해줘야 함
-	if req.StartDateTime != nil {
-		id := strings.Split(id, "#")[1]
-		sortKey = req.StartDateTime.Format(time.RFC3339) + "#" + id
-	}
-
-	av, err := attributevalue.MarshalMap(req)
-	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-
-	builder := expression.UpdateBuilder{}
-
-	for k, v := range av {
-		builder = builder.Set(expression.Name(k), expression.Value(v))
-	}
-
-	expr, err := expression.NewBuilder().WithUpdate(builder).Build()
-
-	if err != nil {
-		log.Printf(err.Error())
-		return nil, err
-	}
-
-	response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-		TableName:                 aws.String(tableName),
-		Key:                       repo.getKey(coupleId, sortKey),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-		UpdateExpression:          expr.Update(),
-		ReturnValues:              types.ReturnValueAllNew,
+func (repo *RepositoryDynamoDB) findById(coupleId string, id string) (*Event, error) {
+	output, err := repo.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
+		TableName: aws.String(tableName),
+		Key:       repo.getKey(coupleId, id),
 	})
-
 	if err != nil {
-		log.Printf("failed to update item. Req: %+v, error: %s", req, err.Error())
+		log.Printf(err.Error())
 		return nil, err
 	}
 
-	updated := &Event{}
-	_ = attributevalue.UnmarshalMap(response.Attributes, updated)
+	if output.Item == nil {
+		return nil, &types.ResourceNotFoundException{
+			Message: aws.String(fmt.Sprintf("resource not found for id: %s", id)),
+		}
+	}
 
-	result := FromEvent(*updated)
+	var item Event
+	err = attributevalue.UnmarshalMap(output.Item, &item)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+	return &item, nil
+}
 
-	return &result, nil
+func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req EditReq) (*VO, error) {
+
+	foundEvent, err := repo.findById(coupleId, id)
+	if err != nil {
+		return nil, err
+	}
+
+	sortKeySplit := strings.Split(foundEvent.StartDateTime, "#")
+	originalStartDateTime, err := time.Parse(time.RFC3339, sortKeySplit[0])
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+	didUpdateStartDateTime := !originalStartDateTime.Equal(*req.StartDateTime)
+
+	// StartDateTime 이 업데이트 되는 경우 sort key 가 바뀌기 때문에 기존 item 을 삭제하고 새로 생성해야 함
+	if didUpdateStartDateTime {
+		transaction := model.NewWriteTransaction(repo.client)
+		transaction.BeginTransaction()
+
+		err := repo.DeleteTransaction(coupleId, id, transaction)
+		if err != nil {
+			log.Printf(err.Error())
+			return nil, err
+		}
+
+		saveEvent := foundEvent.copyWith(req)
+		updated, err := repo.SaveTransaction(&saveEvent, transaction)
+		if err != nil {
+			log.Printf(err.Error())
+			return nil, err
+		}
+
+		_, err = transaction.Execute()
+		if err != nil {
+			log.Printf(err.Error())
+			return nil, err
+		}
+
+		return updated, nil
+
+		// StartDateTime 이 바뀌지 않은 경우 Update
+	} else {
+		av, err := attributevalue.MarshalMap(req)
+		if err != nil {
+			log.Printf(err.Error())
+			return nil, err
+		}
+
+		builder := expression.UpdateBuilder{}
+
+		for k, v := range av {
+			builder = builder.Set(expression.Name(k), expression.Value(v))
+		}
+
+		expr, err := expression.NewBuilder().WithUpdate(builder).Build()
+		if err != nil {
+			log.Printf(err.Error())
+			return nil, err
+		}
+
+		response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
+			TableName:                 aws.String(tableName),
+			Key:                       repo.getKey(coupleId, id),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			UpdateExpression:          expr.Update(),
+			ReturnValues:              types.ReturnValueAllNew,
+		})
+
+		if err != nil {
+			log.Printf("failed to update item. Req: %+v, error: %s", req, err.Error())
+			return nil, err
+		}
+
+		updated := &Event{}
+		_ = attributevalue.UnmarshalMap(response.Attributes, updated)
+
+		result := FromEvent(*updated)
+
+		return &result, nil
+	}
 }
 
 func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) error {
@@ -170,6 +231,18 @@ func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) error {
 		return shared.DBDeleteError{}
 	}
 	log.Printf("deleted item. coupleId: %s, id: %s, response: %+v", coupleId, id, response)
+
+	return nil
+}
+
+func (repo *RepositoryDynamoDB) DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error {
+	transactionItem := &types.TransactWriteItem{
+		Delete: &types.Delete{
+			TableName: aws.String(tableName),
+			Key:       repo.getKey(coupleId, id),
+		},
+	}
+	transaction.AddTransaction(transactionItem)
 
 	return nil
 }

@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/event"
 	"testing"
 	"time"
@@ -92,14 +93,14 @@ func Test_SaveEvent(t *testing.T) {
 }
 
 func Test_GetEvent_match_couple_id_match_start_date_before(t *testing.T) {
-	dynamodbClient := CreateLocalDynamoDBClient()
+	dynamodbClient, _ := model.GetDynamoDBClient()
 
 	eventRepo := event.NewRepository(dynamodbClient)
 
 	now := timePtr(time.Now())
 	rangeStart := time.Date(now.Year(), now.Month()+1, now.Day(), 0, 0, 0, 0, now.Location())
 
-	events, err := eventRepo.FindByCoupleIdAndStartDateBefore("couple1", rangeStart)
+	events, err := eventRepo.FindByCoupleIdAndStartDateBefore("dafe98ab-9eac-4b66-ba47-a389783d1a19", rangeStart)
 
 	if err != nil {
 		t.Fatalf(err.Error())

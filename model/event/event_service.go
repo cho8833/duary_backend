@@ -13,7 +13,7 @@ import (
 type Service interface {
 	Save(req *SaveReq) (*VO, shared.ApplicationError)
 	GetBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
-	Update(coupleId string, id string, req *UpdateReq) (*VO, shared.ApplicationError)
+	Update(coupleId string, id string, req *SaveReq) (*VO, shared.ApplicationError)
 	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
 	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
 }
@@ -57,7 +57,7 @@ func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.Dyn
 	return vo, nil
 }
 
-func (service *ServiceImpl) Update(coupleId string, id string, req *UpdateReq) (*VO, shared.ApplicationError) {
+func (service *ServiceImpl) Update(coupleId string, id string, req EditReq) (*VO, shared.ApplicationError) {
 	svcErr := req.Validate()
 	if svcErr != nil {
 		return nil, svcErr

@@ -24,8 +24,8 @@ type Event struct {
 	StartDateTime  string             `dynamodbav:"startDateTime"` // sort key format : {startDateTime(ISO8601)}#{generated id}
 	EndDateTime    time.Time          `dynamodbav:"endDateTime"`
 	Frequency      Frequency          `dynamodbav:"frequency"`
-	recurStartDate *time.Time         `dynamodbav:"recurStartDate"`
-	recurEndDate   *time.Time         `dynamodbav:"recurEndDate"`
+	RecurStartDate *time.Time         `dynamodbav:"recurStartDate"`
+	RecurEndDate   *time.Time         `dynamodbav:"recurEndDate"`
 	Daily          *DailyRecurrence   `dynamodbav:"daily"`
 	Weekly         *WeeklyRecurrence  `dynamodbav:"weekly"`
 	Monthly        *MonthlyRecurrence `dynamodbav:"monthly"`
@@ -41,21 +41,42 @@ type Event struct {
 	EventType EventType `dynamodbav:"eventType"`
 }
 
+func (e Event) copyWith(req EditReq) Event {
+	sortKeySplit := strings.Split(e.StartDateTime, "#")
+	e.StartDateTime = req.StartDateTime.Format(time.RFC3339) + "#" + sortKeySplit[1]
+	e.EndDateTime = req.EndDateTime
+	e.Frequency = req.Frequency
+	e.RecurStartDate = req.RecurStartDate
+	e.RecurEndDate = req.RecurEndDate
+	e.Daily = req.Daily
+	e.Weekly = req.Weekly
+	e.Monthly = req.Monthly
+
+	e.Title = req.Title
+	e.Content = req.Content
+	e.IsTogether = req.IsTogether
+	e.IsAllDay = req.IsAllDay
+	e.Location = req.Location
+	e.HangOutWith = req.HangOutWith
+
+	return e
+}
+
 type DailyRecurrence struct {
-	Interval int
+	Interval int `json:"interval" dynamodbav:"interval"`
 }
 
 type WeeklyRecurrence struct {
-	Weekdays []Weekday
+	Weekdays []Weekday `json:"weekdays" dynamodbav:"weekdays"`
 }
 
 type MonthlyRecurrence struct {
-	Days []int
+	Days []int `json:"days" dynamodbav:"days"`
 }
 
 type YearlyRecurrence struct {
-	Month time.Month
-	Day   int
+	Month time.Month `json:"month" dynamodbav:"month"`
+	Day   int        `json:"day" dynamodbav:"day"`
 }
 
 type Frequency string
@@ -105,19 +126,24 @@ type VO struct {
 	EventType EventType `json:"eventType"`
 }
 
+func (vo VO) GetIdOnly() string {
+	sortKeySplit := strings.Split(vo.Id, "#")
+	return sortKeySplit[1]
+}
+
 func FromEvent(event Event) VO {
 	sortKeySplit := strings.Split(event.StartDateTime, "#")
 	startDateTime, _ := time.Parse(time.RFC3339, sortKeySplit[0])
 	return VO{
-		Id:        sortKeySplit[1],
+		Id:        event.StartDateTime,
 		CoupleId:  event.CoupleId,
 		CreatedBy: event.CreatedBy,
 
 		StartDateTime:  startDateTime,
 		EndDateTime:    event.EndDateTime,
 		Frequency:      event.Frequency,
-		RecurStartDate: event.recurStartDate,
-		RecurEndDate:   event.recurEndDate,
+		RecurStartDate: event.RecurStartDate,
+		RecurEndDate:   event.RecurEndDate,
 		Daily:          event.Daily,
 		Weekly:         event.Weekly,
 		Monthly:        event.Monthly,
@@ -149,6 +175,16 @@ var shortDayNames = []string{
 	"SAT",
 }
 
+var weekdayParseMap = map[string]time.Weekday{
+	"SUN": time.Sunday,
+	"MON": time.Monday,
+	"TUE": time.Tuesday,
+	"WED": time.Wednesday,
+	"THU": time.Thursday,
+	"FRI": time.Friday,
+	"SAT": time.Saturday,
+}
+
 var longDayNames = map[string]time.Weekday{
 	"Sunday":    time.Sunday,
 	"Monday":    time.Monday,
@@ -166,7 +202,7 @@ func (w *Weekday) UnmarshalJSON(data []byte) error {
 		return err
 	}
 
-	if val, ok := longDayNames[s]; ok {
+	if val, ok := weekdayParseMap[s]; ok {
 		*w = Weekday(val)
 		return nil
 	}
@@ -175,7 +211,7 @@ func (w *Weekday) UnmarshalJSON(data []byte) error {
 }
 
 func (w Weekday) MarshalJSON() ([]byte, error) {
-	day := time.Weekday(w).String() // "Thursday"
+	day := shortDayNames[w] // "THU", "FRI" ...
 	return json.Marshal(day)
 }
 

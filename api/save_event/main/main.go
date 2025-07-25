@@ -14,7 +14,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/save_event/main/main.go && chmod 755 bootstrap && zip  build/package/event/save_event_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/save_event/main/main.go && chmod 755 bootstrap && zip  build/package/event/save_event.zip bootstrap && rm bootstrap
 */
 
 func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

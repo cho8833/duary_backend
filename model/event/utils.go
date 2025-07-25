@@ -191,8 +191,8 @@ func (service *ServiceImpl) yearlyOccurrences(event VO, start time.Time, end tim
 
 func (service *ServiceImpl) changeDate(target VO, date time.Time) VO {
 	eventCopy := target
-	startDateTime := time.Date(date.Year(), date.Month(), date.Day(), target.StartDateTime.Hour(), target.StartDateTime.Minute(), 0, 0, time.UTC)
-	endDateTime := time.Date(date.Year(), date.Month(), date.Day(), target.EndDateTime.Hour(), target.EndDateTime.Minute(), 0, 0, time.UTC)
+	startDateTime := time.Date(date.Year(), date.Month(), date.Day(), target.StartDateTime.Hour(), target.StartDateTime.Minute(), 0, 0, target.StartDateTime.Location())
+	endDateTime := time.Date(date.Year(), date.Month(), date.Day(), target.EndDateTime.Hour(), target.EndDateTime.Minute(), 0, 0, target.StartDateTime.Location())
 
 	if service.isCrossOneDay(startDateTime, endDateTime) {
 		endDateTime = endDateTime.AddDate(0, 0, 1)
@@ -205,8 +205,8 @@ func (service *ServiceImpl) changeDate(target VO, date time.Time) VO {
 
 func (service *ServiceImpl) changeTime(target VO, start time.Time, end time.Time) VO {
 	eventCopy := target
-	startDateTime := time.Date(target.StartDateTime.Year(), target.StartDateTime.Month(), target.StartDateTime.Day(), start.Hour(), start.Minute(), start.Second(), 0, time.UTC)
-	endDateTime := time.Date(target.EndDateTime.Year(), target.EndDateTime.Month(), target.EndDateTime.Day(), end.Hour(), end.Minute(), end.Second(), 0, time.UTC)
+	startDateTime := time.Date(target.StartDateTime.Year(), target.StartDateTime.Month(), target.StartDateTime.Day(), start.Hour(), start.Minute(), start.Second(), 0, target.StartDateTime.Location())
+	endDateTime := time.Date(target.EndDateTime.Year(), target.EndDateTime.Month(), target.EndDateTime.Day(), end.Hour(), end.Minute(), end.Second(), 0, target.StartDateTime.Location())
 
 	if service.isCrossOneDay(startDateTime, endDateTime) {
 		endDateTime = endDateTime.AddDate(0, 0, 1)

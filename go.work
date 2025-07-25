@@ -26,4 +26,5 @@ use (
 	./api/token_sign_in
 	./api/sign_out
 	./api/get_couple
+	./api/google_sign_in
 )
