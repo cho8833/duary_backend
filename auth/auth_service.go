@@ -35,7 +35,7 @@ func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken, fcmToken *strin
 	// verify id token
 	validateValue := &appjwt.ValidatingValue{
 		Url:      "https://kauth.kakao.com/.well-known/jwks.json",
-		Aud:      aud,
+		Aud:      []string{aud},
 		Nonce:    nonce,
 		Iss:      "https://kauth.kakao.com",
 		Provider: "kakao",
@@ -55,6 +55,32 @@ func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken, fcmToken *strin
 
 }
 
+func (svc *ServiceImpl) GoogleSignIn(googleToken *GoogleOAuthToken, fcmToken *string) (*SignInRes, shared.ApplicationError) {
+	androidClientId := os.Getenv("ANDROID_CLIENT_ID")
+	iosClientId := os.Getenv("IOS_CLIENT_ID")
+	webClinetId := os.Getenv("WEB_CLIENT_ID")
+	nonce := os.Getenv("nonce")
+
+	validateValue := &appjwt.ValidatingValue{
+		Iss:      "https://accounts.google.com",
+		Provider: "google",
+		Nonce:    nonce,
+		Aud:      []string{androidClientId, iosClientId, webClinetId},
+		Url:      "https://www.googleapis.com/oauth2/v3/certs",
+	}
+
+	payload, err := svc.jwtValidator.VerifyRSA256(*googleToken.IdToken, validateValue)
+	if err != nil {
+		log.Printf("failed to verify google token. idToken: %s, error: %s", googleToken.IdToken, err.Error())
+		return nil, shared.BadRequestError{}
+	}
+	res, svcError := svc.onSignInSuccess(payload, "google", fcmToken)
+	if svcError != nil {
+		return nil, svcError
+	}
+	return res, nil
+}
+
 const appId = "com.ivis.duary"
 
 func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken, fcmToken *string) (*SignInRes, shared.ApplicationError) {
@@ -65,7 +91,7 @@ func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken, fcmToken *string) (*
 		Nonce:    nonce,
 		Iss:      "https://appleid.apple.com",
 		Provider: "apple",
-		Aud:      appId,
+		Aud:      []string{appId},
 	}
 	payload, err := svc.jwtValidator.VerifyRSA256(*token.IdentityToken, validateValue)
 	if err != nil {

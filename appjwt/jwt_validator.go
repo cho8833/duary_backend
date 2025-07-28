@@ -35,7 +35,7 @@ type GetPublicKeyReq struct {
 
 type ValidatingValue struct {
 	Iss      string
-	Aud      string
+	Aud      []string
 	Nonce    string
 	Url      string
 	Provider string
@@ -104,10 +104,18 @@ func (validator *JWTValidatorImpl) VerifyRSA256(idToken string, value *Validatin
 		if err != nil {
 			return nil, err
 		}
-		if value.Aud != "" {
-			if aud[0] != value.Aud {
-				return nil, fmt.Errorf("audience does not match")
+		isAudValid := false
+		if len(value.Aud) != 0 {
+			for _, a := range value.Aud {
+				if aud[0] == a {
+					isAudValid = true
+				}
 			}
+		} else {
+			isAudValid = true
+		}
+		if !isAudValid {
+			return nil, fmt.Errorf("audience does not match")
 		}
 
 		// check expirationTime, must be before now
@@ -121,12 +129,10 @@ func (validator *JWTValidatorImpl) VerifyRSA256(idToken string, value *Validatin
 
 		// check Nonce, pair with frontend
 		nonce := claims["nonce"].(string)
-		if value.Nonce != "" {
-			// Google 은 nonce 설정 불가하여, Google 은 nonce checking 은 스킵
-			if nonce != value.Nonce && iss != "https://accounts.google.com" {
-				return nil, fmt.Errorf("nonce does not match")
-			}
+		if nonce != value.Nonce {
+			return nil, fmt.Errorf("nonce does not match")
 		}
+
 	}
 
 	socialId := claims["sub"].(string)

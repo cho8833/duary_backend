@@ -26,10 +26,18 @@ type AppleOAuthToken struct {
 	State             *string `json:"state"`
 }
 
+type GoogleOAuthToken struct {
+	DisplayName *string `json:"displayName"`
+	Email       *string `json:"email"`
+	Id          *string `json:"id"`
+	PhotoUrl    *string `json:"photoUrl"`
+	IdToken     *string `json:"idToken"`
+}
 type SignInReq struct {
-	FcmToken        *string          `json:"fcmToken"`
-	AppleOAuthToken *AppleOAuthToken `json:"appleOAuthToken"`
-	KakaoOAuthToken *KakaoOAuthToken `json:"kakaoOAuthToken"`
+	FcmToken         *string           `json:"fcmToken"`
+	AppleOAuthToken  *AppleOAuthToken  `json:"appleOAuthToken"`
+	KakaoOAuthToken  *KakaoOAuthToken  `json:"kakaoOAuthToken"`
+	GoogleOauthToken *GoogleOAuthToken `json:"googleOAuthToken"`
 }
 
 type SignInRes struct {

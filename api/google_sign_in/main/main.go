@@ -2,7 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cho8833/duary_lambda/appjwt"
+	"github.com/cho8833/duary_lambda/auth"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/member"
@@ -27,4 +31,25 @@ func googleSignIn(ctx context.Context, request events.APIGatewayProxyRequest) (e
 
 	memberSvc := member.NewService(memberRepository)
 	coupleSvc := couple.NewService(coupleRepository)
+
+	svc := auth.NewAuthService(&appjwt.JWTValidatorImpl{}, &appjwt.Impl{}, memberSvc, coupleSvc)
+
+	signInReq := &auth.SignInReq{}
+	err = json.Unmarshal([]byte(request.Body), &signInReq)
+	if err != nil {
+		log.Printf(err.Error())
+		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
+	}
+
+	result, svcErr := svc.GoogleSignIn(signInReq.GoogleOauthToken, signInReq.FcmToken)
+	if svcErr != nil {
+		log.Printf(svcErr.Error())
+		return shared.LambdaAppErrorResponse(svcErr), nil
+	}
+
+	return shared.LambdaResponseWithDataAndHeader(result, appjwt.ApplicationJWTToHeader(*result.Token)), nil
+}
+
+func main() {
+	lambda.Start(googleSignIn)
 }
