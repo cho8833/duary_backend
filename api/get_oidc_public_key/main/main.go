@@ -9,7 +9,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/get_oidc_public_key/main/main.go && chmod 755 bootstrap && zip  build/package/auth/get_oidc_public_key.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/get_oidc_public_key/main/main.go && chmod 755 bootstrap && zip  build/package/get_oidc_public_key.zip bootstrap && rm bootstrap
 */
 func getOIDCPublicKeyAPI(ctx context.Context, request *appjwt.GetPublicKeyReq) (*shared.ServerResponse[any], error) {
 	// check Req

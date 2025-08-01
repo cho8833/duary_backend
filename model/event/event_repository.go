@@ -16,6 +16,7 @@ import (
 )
 
 const tableName = "Event"
+const typeIndexName = "eventType-index"
 
 type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
@@ -24,6 +25,7 @@ type Repository interface {
 	Delete(coupleId string, id string) error
 	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
 	DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error
+	QueryByCoupleIdAndType(coupleId string, eventType EventType, include bool) ([]VO, error)
 }
 
 type RepositoryDynamoDB struct {
@@ -245,6 +247,51 @@ func (repo *RepositoryDynamoDB) DeleteTransaction(coupleId string, id string, tr
 	transaction.AddTransaction(transactionItem)
 
 	return nil
+}
+
+func (repo *RepositoryDynamoDB) QueryByCoupleIdAndType(coupleId string, eventType EventType, include bool) ([]VO, error) {
+	keyEx := expression.Key("coupleId").Equal(expression.Value(coupleId)).And(expression.Key("eventType").Equal(expression.Value(eventType)))
+	var expr expression.Expression
+	var err error
+	if include {
+		proj := expression.NamesList(
+			expression.Name("createdBy"),
+			expression.Name("coupleId"),
+			expression.Name("startDateTime"))
+		expr, err = expression.NewBuilder().WithKeyCondition(keyEx).WithProjection(proj).Build()
+	} else {
+		expr, err = expression.NewBuilder().WithKeyCondition(keyEx).Build()
+	}
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+	input := &dynamodb.QueryInput{
+		TableName:                 aws.String(tableName),
+		IndexName:                 aws.String(typeIndexName),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		KeyConditionExpression:    expr.KeyCondition(),
+		ProjectionExpression:      expr.Projection(),
+	}
+	output, err := repo.client.Query(context.TODO(), input)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	var events []Event
+	if err := attributevalue.UnmarshalListOfMaps(output.Items, &events); err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	var result []VO
+	for _, e := range events {
+		result = append(result, FromEvent(e))
+	}
+
+	return result, nil
 }
 
 func (repo *RepositoryDynamoDB) getKey(coupleId string, id string) map[string]types.AttributeValue {

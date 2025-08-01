@@ -22,9 +22,12 @@ use (
 	./api/get_event
 	./api/update_event
 	./api/dummy_sign_in
-	./api/update_couple
+	./api/update_couple_relation_date
 	./api/token_sign_in
 	./api/sign_out
 	./api/get_couple
 	./api/google_sign_in
+	./api/disconnect_couple
+	./api/send_anniversary_fcm
+	./api/withdrawal
 )

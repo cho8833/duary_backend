@@ -15,7 +15,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/apple_sign_in/main/main.go && chmod 755 bootstrap && zip  build/package/apple_sign_in_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/apple_sign_in/main/main.go && chmod 755 bootstrap && zip  build/package/apple_sign_in.zip bootstrap && rm bootstrap
 */
 func appleSignIn(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	dynamoDBClient, err := model.GetDynamoDBClient()

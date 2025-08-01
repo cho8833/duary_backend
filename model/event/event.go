@@ -94,6 +94,7 @@ type EventType string
 const (
 	Normal      EventType = "NORMAL"
 	Anniversary EventType = "ANNIVERSARY"
+	Birthday    EventType = "BIRTHDAY"
 )
 
 func (e Event) isRecurrence() bool {

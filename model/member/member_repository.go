@@ -20,6 +20,8 @@ type Repository interface {
 	UpdateNonNil(member *UpdateMemberReq) (*Member, error)
 	UpdateNonNilTransaction(member *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction) (*Member, error)
 	UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, error)
+	RemoveCoupleIdTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) (*Member, error)
+	DeleteTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) error
 }
 
 type RepositoryDynamoDB struct {
@@ -148,6 +150,37 @@ func (repo *RepositoryDynamoDB) UpdateFcmToken(socialId string, provider string,
 		return nil, err
 	}
 	return result, nil
+}
+
+func (repo *RepositoryDynamoDB) RemoveCoupleIdTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) (*Member, error) {
+
+	cacheMember, err := repo.FindBySocialIdAndProvider(socialId, provider)
+	if err != nil {
+		return nil, err
+	}
+	transactionItem := &types.TransactWriteItem{
+		Update: &types.Update{
+			TableName:        aws.String(tableName),
+			Key:              repo.getKey(socialId, provider),
+			UpdateExpression: aws.String("REMOVE coupleId"),
+		},
+	}
+	transaction.AddTransaction(transactionItem)
+
+	cacheMember.CoupleId = nil
+	return cacheMember, nil
+}
+
+func (repo *RepositoryDynamoDB) DeleteTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) error {
+	transactionItem := &types.TransactWriteItem{
+		Delete: &types.Delete{
+			TableName: aws.String(tableName),
+			Key:       repo.getKey(socialId, provider),
+		},
+	}
+	transaction.AddTransaction(transactionItem)
+
+	return nil
 }
 
 func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*expression.Expression, error) {

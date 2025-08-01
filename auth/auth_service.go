@@ -46,6 +46,11 @@ func (svc *ServiceImpl) KakaoSignIn(kakaoToken *KakaoOAuthToken, fcmToken *strin
 		return nil, shared.BadRequestError{}
 	}
 
+	// social id 가 너무 길어서 aws event bridge scheduler 의 이름(max 64)에 담을 수 없는 문제로 처음 20글자만 사용
+	if len(payload.SocialId) > 20 {
+		payload.SocialId = payload.SocialId[:20]
+	}
+
 	res, svcError := svc.onSignInSuccess(payload, "kakao", fcmToken)
 	if svcError != nil {
 		return nil, svcError
@@ -74,6 +79,12 @@ func (svc *ServiceImpl) GoogleSignIn(googleToken *GoogleOAuthToken, fcmToken *st
 		log.Printf("failed to verify google token. idToken: %s, error: %s", googleToken.IdToken, err.Error())
 		return nil, shared.BadRequestError{}
 	}
+
+	// social id 가 너무 길어서 aws event bridge scheduler 의 이름(max 64)에 담을 수 없는 문제로 처음 20글자만 사용
+	if len(payload.SocialId) > 20 {
+		payload.SocialId = payload.SocialId[:20]
+	}
+
 	res, svcError := svc.onSignInSuccess(payload, "google", fcmToken)
 	if svcError != nil {
 		return nil, svcError
@@ -99,8 +110,10 @@ func (svc *ServiceImpl) AppleSignIn(token *AppleOAuthToken, fcmToken *string) (*
 		return nil, shared.BadRequestError{}
 	}
 
-	// apple social id 가 너무 길어서 aws event bridge scheduler 의 이름(max 64)에 담을 수 없는 문제로 처음 20글자만 사용
-	payload.SocialId = payload.SocialId[:20]
+	// social id 가 너무 길어서 aws event bridge scheduler 의 이름(max 64)에 담을 수 없는 문제로 처음 20글자만 사용
+	if len(payload.SocialId) > 20 {
+		payload.SocialId = payload.SocialId[:20]
+	}
 
 	res, svcError := svc.onSignInSuccess(payload, "apple", fcmToken)
 	if svcError != nil {

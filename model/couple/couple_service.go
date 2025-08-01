@@ -37,10 +37,11 @@ func (svc *ServiceImpl) Create(req *CreateCoupleReq, transaction *model.DynamoDB
 		coupleId = &id[0]
 	}
 	couple := &Couple{
-		Id:           coupleId,
-		RelationDate: &req.RelationDate,
-		Code:         svc.generateCoupleCode(),
-		Members:      req.Members,
+		Id:                 coupleId,
+		RelationDate:       &req.RelationDate,
+		Code:               svc.generateCoupleCode(),
+		Members:            req.Members,
+		ConnectedMemberIds: req.ConnectedMemberIds,
 	}
 
 	if transaction != nil {
@@ -130,7 +131,7 @@ func (svc *ServiceImpl) CreateWithId(id string, req *CreateCoupleReq, transactio
 }
 
 func (svc *ServiceImpl) GenerateUID() *string {
-	uuid := uuid2.New().String()
+	uuid := uuid2.New().String()[:32]
 	return &uuid
 }
 

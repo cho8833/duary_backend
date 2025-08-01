@@ -6,10 +6,11 @@ import (
 )
 
 type Couple struct {
-	Id           *string          `json:"id" dynamodbav:"id"`
-	RelationDate *time.Time       `json:"relationDate" dynamodbav:"relationDate"`
-	Members      []*member.Member `json:"members" dynamodbav:"members"`
-	Code         *string          `json:"code" dynamodbav:"code"`
+	Id                 *string         `json:"id" dynamodbav:"id"`
+	RelationDate       *time.Time      `json:"relationDate" dynamodbav:"relationDate"`
+	Members            []member.Member `json:"members" dynamodbav:"members"`
+	Code               *string         `json:"code" dynamodbav:"code"`
+	ConnectedMemberIds []string        `json:"-" dynamodbav:"connectedMemberIds"`
 }
 
 func (c *Couple) ApplyFrom(req UpdateCoupleReq) {
@@ -22,16 +23,21 @@ func (c *Couple) ApplyFrom(req UpdateCoupleReq) {
 	if req.Code != nil {
 		c.Code = req.Code
 	}
+	if req.ConnectedMemberIds != nil {
+		c.ConnectedMemberIds = req.ConnectedMemberIds
+	}
 }
 
 type CreateCoupleReq struct {
-	RelationDate time.Time        `json:"relationDate"`
-	Members      []*member.Member `json:"members"`
+	RelationDate       time.Time       `json:"relationDate"`
+	Members            []member.Member `json:"members"`
+	ConnectedMemberIds []string        `json:"-"`
 }
 
 type UpdateCoupleReq struct {
-	Id           *string          `json:"id" dynamodbav:"id,omitempty"`
-	Members      []*member.Member `json:"members" dynamodbav:"members,omitempty"`
-	RelationDate *time.Time       `json:"relationDate" dynamodbav:"relationDate,omitempty"`
-	Code         *string          `json:"code" dynamodbav:"code,omitempty"`
+	Id                 *string         `json:"id" dynamodbav:"id,omitempty"`
+	Members            []member.Member `json:"members" dynamodbav:"members,omitempty"`
+	RelationDate       *time.Time      `json:"relationDate" dynamodbav:"relationDate,omitempty"`
+	Code               *string         `json:"code" dynamodbav:"code,omitempty"`
+	ConnectedMemberIds []string        `json:"-" dynamodbav:"connectedMemberIds,omitempty"`
 }

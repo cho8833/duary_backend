@@ -12,7 +12,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/jwt_authorizer/main/main.go && chmod 755 bootstrap && zip  build/package/auth/jwt_authorizer.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/jwt_authorizer/main/main.go && chmod 755 bootstrap && zip  build/package/jwt_authorizer.zip bootstrap && rm bootstrap
 */
 func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayV2CustomAuthorizerIAMPolicyResponse, error) {
 	key := os.Getenv("secretKey")
@@ -29,6 +29,11 @@ func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (
 	}
 
 	loginMember := auth.FromSubject(jwtInfo.Sub)
+
+	if loginMember.SocialId == "" || loginMember.Provider == "" {
+		log.Printf("socialId or provider is empty. token: %s", token)
+		return denyResponse(), nil
+	}
 
 	log.Printf("authorized %#v", *jwtInfo)
 

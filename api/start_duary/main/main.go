@@ -15,7 +15,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/start_duary/main/main.go && chmod 755 bootstrap && zip  build/package/common/start_duary_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/start_duary/main/main.go && chmod 755 bootstrap && zip  build/package/start_duary.zip bootstrap && rm bootstrap
 */
 func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// init

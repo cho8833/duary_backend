@@ -13,16 +13,23 @@ import (
 type Service interface {
 	Save(req *SaveReq) (*VO, shared.ApplicationError)
 	GetBetweenStartAndEndDate(coupleId string, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
-	Update(coupleId string, id string, req *SaveReq) (*VO, shared.ApplicationError)
+	Update(coupleId string, id string, req *EditReq) (*VO, shared.ApplicationError)
 	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
 	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
+	DeleteEvent(coupleId string, id string) shared.ApplicationError
+	DeleteBirthdayTransaction(coupleId string, memberId string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
+	DeleteByCoupleIdAndTypeTransaction(coupleId string, eventType EventType, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
+	GenerateFirstMetDay(coupleId string, createdBy string, relationDate time.Time) *SaveReq
+	GenerateYearlyAnniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq
+	Generate100Anniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq
+	GenerateBirthday(coupleId string, memberId string, birthday time.Time) *SaveReq
 }
 
 type ServiceImpl struct {
 	repository Repository
 }
 
-func NewService(repository Repository) *ServiceImpl {
+func NewService(repository Repository) Service {
 	return &ServiceImpl{repository: repository}
 }
 
@@ -57,12 +64,12 @@ func (service *ServiceImpl) SaveTransaction(req *SaveReq, transaction *model.Dyn
 	return vo, nil
 }
 
-func (service *ServiceImpl) Update(coupleId string, id string, req EditReq) (*VO, shared.ApplicationError) {
+func (service *ServiceImpl) Update(coupleId string, id string, req *EditReq) (*VO, shared.ApplicationError) {
 	svcErr := req.Validate()
 	if svcErr != nil {
 		return nil, svcErr
 	}
-	vo, err := service.repository.Update(coupleId, id, req)
+	vo, err := service.repository.Update(coupleId, id, *req)
 
 	if err != nil {
 		log.Printf("update event error\nreq: %+v\nerror: %s", req, err)
@@ -85,6 +92,41 @@ func (service *ServiceImpl) DeleteEvent(coupleId string, id string) shared.Appli
 
 	if err != nil {
 		return shared.DBDeleteError{}
+	}
+	return nil
+}
+
+func (service *ServiceImpl) DeleteBirthdayTransaction(coupleId string, memberId string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {
+	events, err := service.repository.QueryByCoupleIdAndType(coupleId, Birthday, true)
+	if err != nil {
+		log.Printf("query event error")
+		return shared.DBDeleteError{}
+	}
+	for _, ev := range events {
+		if ev.CreatedBy == memberId {
+			err = service.repository.DeleteTransaction(ev.CoupleId, ev.Id, transaction)
+			if err != nil {
+				log.Printf("delete event transaction error\n error: %s", err.Error())
+				return shared.DBDeleteError{}
+			}
+		}
+	}
+	return nil
+}
+
+func (service *ServiceImpl) DeleteByCoupleIdAndTypeTransaction(coupleId string, eventType EventType, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {
+	events, err := service.repository.QueryByCoupleIdAndType(coupleId, eventType, false)
+	if err != nil {
+		log.Printf("query event error")
+		return shared.DBDeleteError{}
+	}
+
+	for _, ev := range events {
+		err = service.repository.DeleteTransaction(ev.CoupleId, ev.Id, transaction)
+		if err != nil {
+			log.Printf("delete event transaction error\nreq: %+v\nerror: %s", ev, err)
+			return shared.DBDeleteError{}
+		}
 	}
 	return nil
 }
@@ -129,6 +171,6 @@ func (service *ServiceImpl) GetBetweenStartAndEndDate(coupleId string, rangeStar
 }
 
 func (service *ServiceImpl) generateUID() *string {
-	uuid := uuid2.New().String()
+	uuid := uuid2.New().String()[:32]
 	return &uuid
 }

@@ -14,6 +14,8 @@ type Service interface {
 	FindById(socialId string, provider string) (*Member, shared.ApplicationError)
 	Save(request *SaveMemberReq) (*Member, shared.ApplicationError)
 	UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, shared.ApplicationError)
+	RemoveCoupleIdTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError)
+	DeleteTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
 }
 
 type ServiceImpl struct {
@@ -67,6 +69,15 @@ func (svc *ServiceImpl) UpdateTransaction(request *UpdateMemberReq, transaction 
 	return updatedMember, nil
 }
 
+func (svc *ServiceImpl) RemoveCoupleIdTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) (*Member, shared.ApplicationError) {
+	updatedMember, err := svc.repo.RemoveCoupleIdTransaction(socialId, provider, transaction)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, shared.DBUpdateError{}
+	}
+	return updatedMember, nil
+}
+
 func (svc *ServiceImpl) UpdateFcmToken(socialId string, provider string, fcmToken *string) (*Member, shared.ApplicationError) {
 	member, err := svc.repo.UpdateFcmToken(socialId, provider, fcmToken)
 	if err != nil {
@@ -74,4 +85,13 @@ func (svc *ServiceImpl) UpdateFcmToken(socialId string, provider string, fcmToke
 		return nil, shared.DBUpdateError{}
 	}
 	return member, nil
+}
+
+func (svc *ServiceImpl) DeleteTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {
+	err := svc.repo.DeleteTransaction(socialId, provider, transaction)
+	if err != nil {
+		log.Printf("failed to delete member. req: %+v, error: %s", transaction, err.Error())
+		return shared.DBDeleteError{}
+	}
+	return nil
 }

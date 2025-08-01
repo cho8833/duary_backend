@@ -227,3 +227,89 @@ func (service *ServiceImpl) lastDayOfMonth(t time.Time) int {
 func (service *ServiceImpl) isCrossOneDay(start time.Time, end time.Time) bool {
 	return end.Hour() < start.Hour() || (end.Hour() == start.Hour() && end.Minute() < start.Minute())
 }
+
+func (service *ServiceImpl) Generate100Anniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq {
+	day100RecurStartDate := relationDate.AddDate(0, 0, 100)
+	day100EndDateTime := relationDate.AddDate(0, 0, 1).Add(time.Minute * -1)
+	anniversary100DayReq := &SaveReq{
+		CoupleId:  coupleId,
+		CreatedBy: createdById,
+
+		StartDateTime:  relationDate,
+		EndDateTime:    day100EndDateTime,
+		RecurStartDate: &day100RecurStartDate,
+		Frequency:      Daily,
+		Daily: &DailyRecurrence{
+			Interval: 100,
+		},
+		Title:      "100days",
+		EventType:  Anniversary,
+		IsTogether: true,
+		IsAllDay:   true,
+	}
+
+	return anniversary100DayReq
+}
+
+func (service *ServiceImpl) GenerateYearlyAnniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq {
+	yearlyRecurStartDate := relationDate.AddDate(1, 0, 0)
+	yearlyEndDateTime := relationDate.AddDate(0, 0, 1).Add(time.Minute * -1) // 당일 23시 59분까지
+	anniversaryYearlyReq := &SaveReq{
+		CoupleId:  coupleId,
+		CreatedBy: createdById,
+
+		StartDateTime:  relationDate,
+		EndDateTime:    yearlyEndDateTime,
+		RecurStartDate: &yearlyRecurStartDate,
+		Frequency:      Yearly,
+		Yearly: &YearlyRecurrence{
+			Month: relationDate.Month(),
+			Day:   relationDate.Day(),
+		},
+		Title:      "year",
+		EventType:  Anniversary,
+		IsTogether: true,
+		IsAllDay:   true,
+	}
+
+	return anniversaryYearlyReq
+}
+
+func (service *ServiceImpl) GenerateBirthday(coupleId string, memberId string, birthday time.Time) *SaveReq {
+	birthdayEndDateTime := birthday.AddDate(0, 0, 1).Add(time.Minute * -1)
+	birthdayReq := &SaveReq{
+		CoupleId:  coupleId,
+		CreatedBy: memberId,
+
+		StartDateTime: birthday,
+		EndDateTime:   birthdayEndDateTime,
+
+		RecurStartDate: &birthday,
+		Frequency:      Yearly,
+		Yearly: &YearlyRecurrence{
+			Month: birthday.Month(),
+			Day:   birthday.Day(),
+		},
+		Title:      "birthday",
+		EventType:  Birthday,
+		IsTogether: false,
+		IsAllDay:   true,
+	}
+	return birthdayReq
+}
+
+func (service *ServiceImpl) GenerateFirstMetDay(coupleId string, createdBy string, relationDate time.Time) *SaveReq {
+	firstMetEndDate := relationDate.AddDate(0, 0, 1).Add(-1 * time.Minute)
+	firstMetDayReq := &SaveReq{
+		CoupleId:      coupleId,
+		CreatedBy:     createdBy,
+		StartDateTime: relationDate,
+		EndDateTime:   firstMetEndDate,
+		Title:         "처음 만난 날",
+		EventType:     Anniversary,
+		Frequency:     OneTime,
+		IsTogether:    true,
+		IsAllDay:      true,
+	}
+	return firstMetDayReq
+}

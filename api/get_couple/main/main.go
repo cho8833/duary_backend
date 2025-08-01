@@ -11,7 +11,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/get_couple/main/main.go && chmod 755 bootstrap && zip  build/package/get_couple_api.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/get_couple/main/main.go && chmod 755 bootstrap && zip  build/package/get_couple.zip bootstrap && rm bootstrap
 */
 func getCouple(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 

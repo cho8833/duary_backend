@@ -68,8 +68,11 @@ func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransact
 	// create Couple
 	coupleReq := &couple.CreateCoupleReq{
 		RelationDate: *request.RelationDate,
-		Members: []*member.Member{
-			updatedMember,
+		Members: []member.Member{
+			*updatedMember,
+		},
+		ConnectedMemberIds: []string{
+			updatedMember.GetId(),
 		},
 	}
 	newCouple, err := coupleSvc.CreateWithId(*newCoupleId, coupleReq, transaction)

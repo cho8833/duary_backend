@@ -1,12 +1,12 @@
 package connect_couple
 
 import (
-	"github.com/aws/smithy-go/ptr"
 	"github.com/cho8833/duary_lambda/appjwt"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
+	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 	"os"
@@ -22,12 +22,14 @@ type StartDuaryRes struct {
 	Token  *appjwt.ApplicationJWT `json:"token"`
 }
 
-func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service) (*StartDuaryRes, shared.ApplicationError) {
+func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper) (*StartDuaryRes, shared.ApplicationError) {
 	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
 		return nil, shared.BadRequestError{}
 	}
 
 	authContext := shared.GetAuthContext()
+
+	loginMemberId := *authContext.SocialId + "-" + *authContext.Provider
 
 	// findMember.coupleId == nil 은 startDuary 를 거치지 않았다는 의미 => bad request
 	if authContext.CoupleId == nil {
@@ -54,15 +56,29 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		return nil, shared.BadRequestError{}
 	}
 
+	// target Couple 이 이미 연결된 적이 있는 경우, target Couple 의 연결된 적 있는 Member 가 아니면 Bad Request
+	if len(targetCouple.ConnectedMemberIds) > 1 {
+		hasConnectedMember := false
+		for _, memberId := range targetCouple.ConnectedMemberIds {
+			if memberId == loginMemberId {
+				hasConnectedMember = true
+			}
+		}
+		if !hasConnectedMember {
+			log.Printf("couple has already connected")
+			return nil, shared.BadRequestError{}
+		}
+	}
+
 	transaction.BeginTransaction()
 
-	// 기존의 Couple 삭제
+	// 기존의 Couple 삭제 : 커플 연결 요청한 Member 의 Couple 삭제
 	svcErr := coupleSvc.Delete(*authContext.CoupleId, transaction)
 	if svcErr != nil {
 		return nil, shared.DBUpdateError{}
 	}
 
-	// Update Member
+	// Update Member : 커플 연결 요청한 Member 의 Couple Id 변경
 	updateReq := &member.UpdateMemberReq{
 		Provider: *authContext.Provider,
 		SocialId: *authContext.SocialId,
@@ -74,10 +90,11 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// Update Couple
+	connectedIds := append(targetCouple.ConnectedMemberIds, updatedMember.GetId()) // couple 의 Member 연결 기록에 추가
 	updateCoupleReq := &couple.UpdateCoupleReq{
-		Id:      targetCouple.Id,
-		Members: append(targetCouple.Members, updatedMember), // Member 추가
-		Code:    ptr.String(""),                              // 코드 삭제
+		Id:                 targetCouple.Id,
+		Members:            append(targetCouple.Members, *updatedMember), // Member 추가
+		ConnectedMemberIds: connectedIds,
 	}
 	updatedCouple, svcError := coupleSvc.Update(updateCoupleReq, transaction)
 	if svcError != nil {
@@ -85,61 +102,33 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// Create Anniversary Event
-	firstMetDayReq := &event.SaveReq{
-		CoupleId:      *targetCouple.Id,
-		CreatedBy:     updatedCouple.Members[0].GetId(),
-		StartDateTime: *updatedCouple.RelationDate,
-		EndDateTime:   *updatedCouple.RelationDate,
-		Title:         "처음 만난 날",
-		EventType:     event.Anniversary,
-		IsTogether:    true,
-		IsAllDay:      true,
-	}
-	day100RecurStartDate := updatedCouple.RelationDate.AddDate(0, 0, 100)
-	anniversary100DayReq := &event.SaveReq{
-		CoupleId:  *targetCouple.Id,
-		CreatedBy: updatedCouple.Members[0].GetId(),
+	firstMetDayReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 
-		StartDateTime:  *updatedCouple.RelationDate,
-		EndDateTime:    *updatedCouple.RelationDate,
-		RecurStartDate: &day100RecurStartDate,
-		Frequency:      event.Daily,
-		Daily: &event.DailyRecurrence{
-			Interval: 100,
-		},
-		Title:      "100days",
-		EventType:  event.Anniversary,
-		IsTogether: true,
-		IsAllDay:   true,
-	}
-	yearlyRecurStartDate := updatedCouple.RelationDate.AddDate(1, 0, 0)
-	anniversaryYearlyReq := &event.SaveReq{
-		CoupleId:  *targetCouple.Id,
-		CreatedBy: updatedCouple.Members[0].GetId(),
+	anniversary100DayReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+	yearlyAnniversaryReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 
-		StartDateTime:  *updatedCouple.RelationDate,
-		EndDateTime:    *updatedCouple.RelationDate,
-		RecurStartDate: &yearlyRecurStartDate,
-		Frequency:      event.Yearly,
-		Yearly: &event.YearlyRecurrence{
-			Month: updatedCouple.RelationDate.Month(),
-			Day:   updatedCouple.RelationDate.Day(),
-		},
-		Title:      "year",
-		EventType:  event.Anniversary,
-		IsTogether: true,
-		IsAllDay:   true,
+	birthdaySaveReqs := make(map[member.Member]event.SaveReq)
+	for _, m := range updatedCouple.Members {
+		birthdaySaveReqs[m] = *eventSvc.GenerateBirthday(*updatedCouple.Id, m.GetId(), *m.Birthday)
+	}
+	birthdays := make(map[member.Member]event.VO)
+	for m, rq := range birthdaySaveReqs {
+		birthday, svcErr := eventSvc.SaveTransaction(&rq, transaction)
+		if svcErr != nil {
+			return nil, svcErr
+		}
+		birthdays[m] = *birthday
 	}
 
 	_, svcErr = eventSvc.SaveTransaction(firstMetDayReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}
-	_, svcErr = eventSvc.SaveTransaction(anniversary100DayReq, transaction)
+	day100VO, svcErr := eventSvc.SaveTransaction(anniversary100DayReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}
-	_, svcErr = eventSvc.SaveTransaction(anniversaryYearlyReq, transaction)
+	yearlyVO, svcErr := eventSvc.SaveTransaction(yearlyAnniversaryReq, transaction)
 	if svcErr != nil {
 		return nil, svcErr
 	}
@@ -149,6 +138,16 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	if err != nil {
 		log.Println(err)
 		return nil, shared.DBUpdateError{}
+	}
+
+	// 기념일 알림 schedule 생성
+	// TODO: 오류 처리 필요. DB 작업이 성공해도 schedule 작업은 실패할 수 있음
+	_ = schedulerHelper.CreateAnniversarySchedule(*day100VO, updatedCouple.Members)
+
+	_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
+
+	for m, birthday := range birthdays {
+		_ = schedulerHelper.CreateAnniversarySchedule(birthday, []member.Member{m})
 	}
 
 	// generate new token with couple id
