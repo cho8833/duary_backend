@@ -7,8 +7,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/model"
 	"github.com/cho8833/duary_lambda/model/event"
-	"github.com/cho8833/duary_lambda/model/member"
-	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
 )
@@ -24,15 +22,6 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 	eventRepo := event.NewRepository(dynamodbClient)
 	eventSvc := event.NewService(eventRepo)
-	memberRepo := member.NewRepository(dynamodbClient)
-	memberSvc := member.NewService(memberRepo)
-
-	schedulerClient, err := scheduler.GetSchedulerClient()
-	if err != nil {
-		log.Println(err.Error())
-		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
-	}
-	scheduleHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
 	// get auth
 	authCtx := shared.NewAuthContext(request)
@@ -61,23 +50,10 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 	eventId := request.QueryStringParameters["id"]
 
-	// find member
-	tm, svcErr := memberSvc.FindById(*socialId, *provider)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(shared.UserNotFound{}), nil
-	}
-
 	// update event (dynamodb)
-	vo, svcError := eventSvc.Update(*coupleId, eventId, *updateEventReq)
+	vo, svcError := eventSvc.Update(*coupleId, eventId, updateEventReq)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
-	}
-
-	// update schedule
-	svcErr = scheduleHelper.UpdateEventSchedule(*vo, *tm)
-	if svcErr != nil {
-		// TODO: 에러 처리 필요
-		log.Println(svcErr.Error())
 	}
 
 	return shared.LambdaResponseWithData(vo), nil
