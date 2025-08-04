@@ -8,6 +8,7 @@ use (
 	./fcm
 	./scheduler
 	./test
+	./ws
 	./api/kakao_sign_in
 	./api/apple_sign_in
 	./api/get_oidc_public_key
@@ -30,4 +31,7 @@ use (
 	./api/disconnect_couple
 	./api/send_anniversary_fcm
 	./api/withdrawal
+	./ws_api/connect
+	./ws_api/disconnect
+	./ws_api/ws_authorizer
 )
