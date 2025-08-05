@@ -11,8 +11,10 @@ import (
 	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
+	"github.com/cho8833/duary_lambda/model/ws_connection"
 	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/ws"
 	"log"
 )
 
@@ -37,10 +39,16 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 	memberRepo := member.NewRepository(dynamodbClient)
 	coupleRepo := couple.NewRepository(dynamodbClient)
 	eventRepo := event.NewRepository(dynamodbClient)
+	wsRepo := ws_connection.NewRepository(dynamodbClient)
 
 	memberSvc := member.NewService(memberRepo)
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
+	wsSvc, err := ws.NewService(&wsRepo)
+	if err != nil {
+		log.Println(err)
+		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
+	}
 
 	connectCoupleReq := &connect_couple.ConnectCoupleReq{}
 	err = json.Unmarshal([]byte(request.Body), &connectCoupleReq)
@@ -51,7 +59,7 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 
 	shared.NewAuthContext(request)
 
-	res, svcError := connect_couple.ConnectCouple(connectCoupleReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper)
+	res, svcError := connect_couple.ConnectCouple(connectCoupleReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper, wsSvc)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(svcError), nil
 	}

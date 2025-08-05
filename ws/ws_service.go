@@ -20,7 +20,7 @@ type Data[T any] struct {
 }
 
 type Service interface {
-	Send(ctx context.Context, message *ws_connection.WSConnection) error
+	Send(socialId string, provider string, action Action, value interface{}) error
 }
 
 type ServiceImpl struct {

@@ -8,8 +8,10 @@ import (
 	"github.com/cho8833/duary_lambda/model/member"
 	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/ws"
 	"log"
 	"os"
+	"strings"
 )
 
 type ConnectCoupleReq struct {
@@ -22,7 +24,7 @@ type StartDuaryRes struct {
 	Token  *appjwt.ApplicationJWT `json:"token"`
 }
 
-func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper) (*StartDuaryRes, shared.ApplicationError) {
+func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper, wsSvc ws.Service) (*StartDuaryRes, shared.ApplicationError) {
 	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
 		return nil, shared.BadRequestError{}
 	}
@@ -90,7 +92,11 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// Update Couple
-	connectedIds := append(targetCouple.ConnectedMemberIds, updatedMember.GetId()) // couple 의 Member 연결 기록에 추가
+	connectedIds := targetCouple.ConnectedMemberIds
+	if len(targetCouple.ConnectedMemberIds) < 2 {
+		connectedIds = append(targetCouple.ConnectedMemberIds, updatedMember.GetId()) // couple 의 Member 연결 기록에 추가
+	}
+
 	updateCoupleReq := &couple.UpdateCoupleReq{
 		Id:                 targetCouple.Id,
 		Members:            append(targetCouple.Members, *updatedMember), // Member 추가
@@ -159,6 +165,19 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		Member: updatedMember,
 		Couple: updatedCouple,
 		Token:  newToken,
+	}
+
+	// 상대방에게 couple connected notify
+	var otherMemberId string
+	for _, memberId := range targetCouple.ConnectedMemberIds {
+		if memberId != loginMemberId {
+			otherMemberId = memberId
+		}
+	}
+	idSplit := strings.Split(otherMemberId, "-")
+	err = wsSvc.Send(idSplit[0], idSplit[1], ws.CoupleConnected, result)
+	if err != nil {
+		log.Println(err)
 	}
 
 	return result, nil
