@@ -16,7 +16,7 @@ type Service interface {
 	Update(coupleId string, id string, req *EditReq) (*VO, shared.ApplicationError)
 	SaveTransaction(req *SaveReq, transaction *model.DynamoDBWriteTransaction) (*VO, shared.ApplicationError)
 	GenerateOccurrence(vo VO, rangeStartDate time.Time, rangeEndDate time.Time) ([]VO, shared.ApplicationError)
-	DeleteEvent(coupleId string, id string) shared.ApplicationError
+	DeleteEvent(coupleId string, id string) (*VO, shared.ApplicationError)
 	DeleteBirthdayTransaction(coupleId string, memberId string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
 	DeleteByCoupleIdAndTypeTransaction(coupleId string, eventType EventType, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
 	GenerateFirstMetDay(coupleId string, createdBy string, relationDate time.Time) *SaveReq
@@ -79,21 +79,21 @@ func (service *ServiceImpl) Update(coupleId string, id string, req *EditReq) (*V
 	return vo, nil
 }
 
-func (service *ServiceImpl) DeleteEvent(coupleId string, id string) shared.ApplicationError {
+func (service *ServiceImpl) DeleteEvent(coupleId string, id string) (*VO, shared.ApplicationError) {
 
 	authContext := shared.GetAuthContext()
 
 	if coupleId != *authContext.CoupleId {
 		log.Printf("unauthorized request : coupleId not matched\n user coupleId: %s, request coupleId: %s", *authContext.CoupleId, coupleId)
-		return shared.BadRequestError{}
+		return nil, shared.BadRequestError{}
 	}
 
-	err := service.repository.Delete(coupleId, id)
+	deleted, err := service.repository.Delete(coupleId, id)
 
 	if err != nil {
-		return shared.DBDeleteError{}
+		return nil, shared.DBDeleteError{}
 	}
-	return nil
+	return deleted, nil
 }
 
 func (service *ServiceImpl) DeleteBirthdayTransaction(coupleId string, memberId string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError {

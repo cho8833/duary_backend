@@ -22,7 +22,7 @@ type Repository interface {
 	FindByCoupleIdAndStartDateBefore(coupleId string, startDate time.Time) ([]VO, error)
 	Save(event *Event) (*VO, error)
 	Update(coupleId string, id string, req EditReq) (*VO, error)
-	Delete(coupleId string, id string) error
+	Delete(coupleId string, id string) (*VO, error)
 	SaveTransaction(event *Event, transaction *model.DynamoDBWriteTransaction) (*VO, error)
 	DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error
 	QueryByCoupleIdAndType(coupleId string, eventType EventType, include bool) ([]VO, error)
@@ -215,7 +215,7 @@ func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req EditReq) 
 	}
 }
 
-func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) error {
+func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) (*VO, error) {
 
 	deleteInput := &dynamodb.DeleteItemInput{
 		TableName:    aws.String(tableName),
@@ -226,15 +226,24 @@ func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) error {
 
 	if err != nil {
 		log.Printf("failed to delete item. coupleId: %s, id: %s, error: %s", coupleId, id, err.Error())
-		return err
+		return nil, err
 	}
 	if response.Attributes == nil {
 		log.Printf("failed to delete item. item doesn't exist. coupleId: %s, id: %s", coupleId, id)
-		return shared.DBDeleteError{}
+		return nil, shared.DBDeleteError{}
 	}
 	log.Printf("deleted item. coupleId: %s, id: %s, response: %+v", coupleId, id, response)
 
-	return nil
+	var item *Event
+
+	err = attributevalue.UnmarshalMap(response.Attributes, &item)
+	if err != nil {
+		log.Printf(err.Error())
+		return nil, err
+	}
+
+	result := FromEvent(*item)
+	return &result, nil
 }
 
 func (repo *RepositoryDynamoDB) DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error {

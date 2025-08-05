@@ -169,7 +169,8 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 
 	// 상대방에게 couple connected notify
 	var otherMemberId string
-	for _, memberId := range targetCouple.ConnectedMemberIds {
+	for _, coupleMember := range targetCouple.Members {
+		memberId := coupleMember.GetId()
 		if memberId != loginMemberId {
 			otherMemberId = memberId
 		}
@@ -177,7 +178,7 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	idSplit := strings.Split(otherMemberId, "-")
 	err = wsSvc.Send(idSplit[0], idSplit[1], ws.CoupleConnected, result)
 	if err != nil {
-		log.Println(err)
+		log.Println("lover is not connected to ws", err)
 	}
 
 	return result, nil

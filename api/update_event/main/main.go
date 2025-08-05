@@ -6,9 +6,13 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/cho8833/duary_lambda/model"
+	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/event"
+	"github.com/cho8833/duary_lambda/model/ws_connection"
 	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/ws"
 	"log"
+	"strings"
 )
 
 /*
@@ -22,6 +26,8 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 	eventRepo := event.NewRepository(dynamodbClient)
 	eventSvc := event.NewService(eventRepo)
+	coupleRepo := couple.NewRepository(dynamodbClient)
+	coupleSvc := couple.NewService(coupleRepo)
 
 	// get auth
 	authCtx := shared.NewAuthContext(request)
@@ -56,6 +62,33 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
+	//----------------------------Send WS Message to lover-------------------------------//
+	wsRepo := ws_connection.NewRepository(dynamodbClient)
+	wsSvc, err := ws.NewService(&wsRepo)
+	if err == nil {
+		loginMemberId := *socialId + "-" + *provider
+		foundCouple, svcErr := coupleSvc.FindById(*coupleId)
+		if svcErr == nil {
+			if len(foundCouple.Members) > 1 {
+				var otherMemberId string
+				for _, coupleMember := range foundCouple.Members {
+					memberId := coupleMember.GetId()
+					if memberId != loginMemberId {
+						otherMemberId = memberId
+					}
+				}
+				idSplit := strings.Split(otherMemberId, "-")
+				err = wsSvc.Send(idSplit[0], idSplit[1], ws.EventUpdated, vo)
+				if err != nil {
+					log.Println("lover is not connected to ws", err)
+				}
+			} else {
+				log.Printf("couple is not connected, stop sending WS Message")
+			}
+		}
+	} else {
+		log.Printf(err.Error())
+	}
 	return shared.LambdaResponseWithData(vo), nil
 }
 

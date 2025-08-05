@@ -12,6 +12,10 @@ type Action string
 
 const (
 	CoupleConnected Action = "COUPLE_CONNECTED"
+	EventDeleted    Action = "EVENT_DELETED"
+	EventCreated    Action = "EVENT_CREATED"
+	EventUpdated    Action = "EVENT_UPDATED"
+	LoverUpdated    Action = "LOVER_UPDATED"
 )
 
 type Data[T any] struct {
