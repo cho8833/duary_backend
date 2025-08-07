@@ -108,6 +108,8 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// Create Anniversary Event
+	firstMetDayReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+
 	anniversary100DayReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 	yearlyAnniversaryReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 
@@ -122,6 +124,11 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 			return nil, svcErr
 		}
 		birthdays[m] = *birthday
+	}
+
+	_, svcErr = eventSvc.SaveTransaction(firstMetDayReq, transaction)
+	if svcErr != nil {
+		return nil, svcErr
 	}
 	day100VO, svcErr := eventSvc.SaveTransaction(anniversary100DayReq, transaction)
 	if svcErr != nil {

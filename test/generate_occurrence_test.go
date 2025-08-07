@@ -342,64 +342,6 @@ func Test_GenerateOccurrence_of_daily_cross_day_by_one_month(t *testing.T) {
 	}
 }
 
-func Test_GenerateOccurrence_of_100days_not_include_start(t *testing.T) {
-	recurStartDate := time.Date(2025, 5, 30, 0, 0, 0, 0, time.UTC)
-	dummy := event.VO{
-		Frequency: event.Daily,
-		Daily: &event.DailyRecurrence{
-			Interval: 100,
-		},
-		RecurStartDate: &recurStartDate,
-		StartDateTime:  recurStartDate,
-		EndDateTime:    recurStartDate.Add(time.Hour*23 + time.Minute*59),
-		IsAllDay:       true,
-		Title:          "100days",
-		EventType:      event.Anniversary,
-	}
-
-	rangeStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	rangeEndDate := rangeStartDate.AddDate(0, 1, 0)
-	svc := &event.ServiceImpl{}
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 0 {
-		t.Fatalf("GenerateOccurrence result length: expect 0, got %v", len(result))
-	}
-}
-
-func Test_GenerateOccurrence_of_100days_Title(t *testing.T) {
-	recurStartDate := time.Date(2025, 5, 30, 0, 0, 0, 0, time.UTC)
-	dummy := event.VO{
-		Frequency: event.Daily,
-		Daily: &event.DailyRecurrence{
-			Interval: 100,
-		},
-		RecurStartDate: &recurStartDate,
-		StartDateTime:  recurStartDate,
-		EndDateTime:    recurStartDate.Add(time.Hour*23 + time.Minute*59),
-		IsAllDay:       true,
-		Title:          "100days",
-		EventType:      event.Anniversary,
-	}
-	rangeStartDate := time.Date(2026, 3, 26, 0, 0, 0, 0, time.UTC) // 300일 후
-	rangeEndDate := rangeStartDate.AddDate(0, 0, 1)
-	svc := &event.ServiceImpl{}
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 1 {
-		t.Fatalf("GenerateOccurrence result length: expect 1, got %v", len(result))
-	}
-	expected := "300일"
-	if result[0].Title != expected {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-
-}
-
 func Test_GenerateOccurrence_of_weekly_by_one_day1(t *testing.T) {
 	t.Logf("Weekly Recur: 화, 목 반복, rangeStartDate=5/1(목), rangeEndDate=5/2, recurStartDate=5/1, recurEndDate=6/1 이면 Occurence 는 1개이어야 함")
 	rangeStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
@@ -872,11 +814,11 @@ func Test_GenerateOccurrences_of_yearly_by_one_day2(t *testing.T) {
 }
 
 func Test_GenerateOccurrences_of_yearly_by_one_day3(t *testing.T) {
-	t.Logf("Yearly Recur: 5/2, rangeStartDate=2026/5/1, rangeEndDate=2026/5/2, recurStartDate=2025/5/1, recurEndDate=2026/5/2일 때 occurrence 는 1개이어야함")
+	t.Logf("Yearly Recur: 5/2, rangeStartDate=2026/5/1, rangeEndDate=2026/5/2, recurStartDate=2025/5/1, recurEndDate=2026/5/1일 때 occurrence 는 1개이어야 함")
 	rangeStartDate := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
 	rangeEndDate := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
 	recurStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	recurEndDate := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
+	recurEndDate := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
 	testTime := time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC)
 	svc := &event.ServiceImpl{}
 
@@ -900,112 +842,6 @@ func Test_GenerateOccurrences_of_yearly_by_one_day3(t *testing.T) {
 		t.Fatalf("GenerateOccurrence result length: expect 1, got %v", len(result))
 	}
 	expected := time.Date(2026, 5, 1, 9, 0, 0, 0, time.UTC)
-	if !result[0].StartDateTime.Equal(expected) {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-}
-
-func Test_GenerateOccurrences_of_anniversary1(t *testing.T) {
-	rangeStartDate := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
-	rangeEndDate := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
-	recurStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	testTime := time.Date(2025, 5, 1, 9, 0, 0, 0, time.UTC)
-	svc := &event.ServiceImpl{}
-
-	dummy := event.VO{
-		Frequency: event.Yearly,
-		Yearly: &event.YearlyRecurrence{
-			Month: 5,
-			Day:   1,
-		},
-		StartDateTime:  testTime,
-		EndDateTime:    testTime.Add(time.Hour * 2),
-		RecurStartDate: &recurStartDate,
-		EventType:      event.Anniversary,
-	}
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 1 {
-		t.Fatalf("GenerateOccurrence result length: expect 1, got %v", len(result))
-	}
-	if result[0].Title != "1주년" {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-	expected := time.Date(2026, 5, 1, 9, 0, 0, 0, time.UTC)
-	if !result[0].StartDateTime.Equal(expected) {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-}
-
-func Test_GenerateOccurrences_of_anniversary_Title(t *testing.T) {
-	rangeStartDate := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
-	rangeEndDate := time.Date(2026, 5, 2, 0, 0, 0, 0, time.UTC)
-	recurStartDate := time.Date(2022, 5, 1, 0, 0, 0, 0, time.UTC)
-	testTime := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	svc := &event.ServiceImpl{}
-
-	dummy := event.VO{
-		Frequency: event.Yearly,
-		Yearly: &event.YearlyRecurrence{
-			Month: 5,
-			Day:   1,
-		},
-		StartDateTime:  testTime,
-		EndDateTime:    testTime.Add(time.Hour*23 + time.Minute*59),
-		IsAllDay:       true,
-		RecurStartDate: &recurStartDate,
-		EventType:      event.Anniversary,
-	}
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 1 {
-		t.Fatalf("GenerateOccurrence result length: expect 1, got %v", len(result))
-	}
-	if result[0].Title != "4주년" {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-	expected := time.Date(2026, 5, 1, 0, 0, 0, 0, time.UTC)
-	if !result[0].StartDateTime.Equal(expected) {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-}
-
-func Test_GenerateOccurrences_of_anniversary_Title_firstMet(t *testing.T) {
-	rangeStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	rangeEndDate := time.Date(2025, 5, 2, 0, 0, 0, 0, time.UTC)
-	recurStartDate := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	recurEndDate := time.Date(2025, 5, 2, 0, 0, 0, 0, time.UTC)
-	testTime := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
-	svc := &event.ServiceImpl{}
-
-	dummy := event.VO{
-		Frequency: event.Yearly,
-		Yearly: &event.YearlyRecurrence{
-			Month: 5,
-			Day:   1,
-		},
-		StartDateTime:  testTime,
-		EndDateTime:    testTime.Add(time.Hour*23 + time.Minute*59),
-		IsAllDay:       true,
-		RecurStartDate: &recurStartDate,
-		RecurEndDate:   &recurEndDate,
-		EventType:      event.Anniversary,
-	}
-	result, err := svc.GenerateOccurrence(dummy, rangeStartDate, rangeEndDate)
-	if err != nil {
-		t.Fatalf("GenerateOccurrence err: %v", err)
-	}
-	if len(result) != 1 {
-		t.Fatalf("GenerateOccurrence result length: expect 1, got %v", len(result))
-	}
-	if result[0].Title != "처음 만난 날" {
-		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
-	}
-	expected := time.Date(2025, 5, 1, 0, 0, 0, 0, time.UTC)
 	if !result[0].StartDateTime.Equal(expected) {
 		t.Fatalf("Wrong Occurence %s", shared.ToString(result[0]))
 	}

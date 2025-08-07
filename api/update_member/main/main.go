@@ -9,7 +9,6 @@ import (
 	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
-	"github.com/cho8833/duary_lambda/model/ws_connection"
 	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
 	"log"
@@ -40,7 +39,6 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 	coupleSvc := couple.NewService(coupleRepo)
 	eventRepo := event.NewRepository(dynamodbClient)
 	eventSvc := event.NewService(eventRepo)
-	wsRepo := ws_connection.NewRepository(dynamodbClient)
 
 	updateReq := &update_member.UpdateMemberReq{}
 	err = json.Unmarshal([]byte(request.Body), updateReq)
@@ -53,7 +51,7 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 
 	shared.NewAuthContext(request)
 
-	result, svcErr := update_member.UpdateMember(updateReq, transaction, coupleSvc, memberSvc, eventSvc, &wsRepo, *schedulerHelper)
+	result, svcErr := update_member.UpdateMember(updateReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper)
 
 	if svcErr != nil {
 		return shared.LambdaAppErrorResponse(svcErr), nil
