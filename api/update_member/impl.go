@@ -5,9 +5,12 @@ import (
 	"github.com/cho8833/duary_lambda/model/couple"
 	"github.com/cho8833/duary_lambda/model/event"
 	"github.com/cho8833/duary_lambda/model/member"
+	"github.com/cho8833/duary_lambda/model/ws_connection"
 	"github.com/cho8833/duary_lambda/scheduler"
 	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_lambda/ws"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -25,7 +28,7 @@ type UpdateMemberRes struct {
 	Couple *couple.Couple `json:"couple"`
 }
 
-func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper) (*UpdateMemberRes, shared.ApplicationError) {
+func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, wsRepo ws_connection.Repository, schedulerHelper scheduler.BridgeSchedulerHelper) (*UpdateMemberRes, shared.ApplicationError) {
 
 	authContext := shared.GetAuthContext()
 
@@ -100,10 +103,39 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 		}
 	}
 
-	return &UpdateMemberRes{
+	res := &UpdateMemberRes{
 		Member: updatedMember,
 		Couple: updatedCouple,
-	}, nil
+	}
+
+	// send updated lover ws message to lover
+	wsSvc, err := ws.NewService(wsRepo)
+	if err == nil {
+		loginMemberId := *authContext.SocialId + "-" + *authContext.Provider
+		foundCouple, svcErr := coupleSvc.FindById(*coupleId)
+		if svcErr == nil {
+			if len(foundCouple.Members) > 1 {
+				var otherMemberId string
+				for _, coupleMember := range foundCouple.Members {
+					memberId := coupleMember.GetId()
+					if memberId != loginMemberId {
+						otherMemberId = memberId
+					}
+				}
+				idSplit := strings.Split(otherMemberId, "-")
+				err = wsSvc.Send(idSplit[0], idSplit[1], ws.LoverUpdated, res)
+				if err != nil {
+					log.Println("lover is not connected to ws", err)
+				}
+			} else {
+				log.Printf("couple is not connected, stop sending WS Message")
+			}
+		}
+	} else {
+		log.Printf(err.Error())
+	}
+
+	return res, nil
 }
 
 func UpdateBirthday(coupleId string, targetMember member.Member, eventSvc event.Service, transaction *model.DynamoDBWriteTransaction) (*event.VO, shared.ApplicationError) {

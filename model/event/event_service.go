@@ -19,7 +19,6 @@ type Service interface {
 	DeleteEvent(coupleId string, id string) (*VO, shared.ApplicationError)
 	DeleteBirthdayTransaction(coupleId string, memberId string, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
 	DeleteByCoupleIdAndTypeTransaction(coupleId string, eventType EventType, transaction *model.DynamoDBWriteTransaction) shared.ApplicationError
-	GenerateFirstMetDay(coupleId string, createdBy string, relationDate time.Time) *SaveReq
 	GenerateYearlyAnniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq
 	Generate100Anniversary(coupleId string, createdById string, relationDate time.Time) *SaveReq
 	GenerateBirthday(coupleId string, memberId string, birthday time.Time) *SaveReq

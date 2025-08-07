@@ -3,7 +3,9 @@ package event
 import (
 	"cmp"
 	"github.com/cho8833/duary_lambda/shared"
+	"github.com/teambition/rrule-go"
 	"slices"
+	"strconv"
 	"time"
 )
 
@@ -27,23 +29,55 @@ func (service *ServiceImpl) GenerateOccurrence(vo VO, rangeStartDate time.Time, 
 	return occurrences, nil
 }
 
-func (service *ServiceImpl) dailyOccurrences(event VO, start time.Time, end time.Time) []VO {
+func (service *ServiceImpl) dailyOccurrences(data VO, start time.Time, end time.Time) []VO {
 	var result []VO
 
-	interval := event.Daily.Interval
+	interval := data.Daily.Interval
+	var until time.Time
+	if data.RecurEndDate != nil {
+		if data.RecurEndDate.Before(end) {
+			until = *data.RecurEndDate
+		} else {
+			until = end
+		}
+	} else {
+		until = end
+	}
+	until = until.Add(time.Second * -1)
+	r, _ := rrule.NewRRule(rrule.ROption{
+		Freq:     rrule.DAILY,
+		Dtstart:  time.Date(data.RecurStartDate.Year(), data.RecurStartDate.Month(), data.RecurStartDate.Day(), 0, 0, 0, 0, time.UTC),
+		Until:    until,
+		Interval: interval,
+	})
+
+	recurDates := r.All()
+	for count, date := range recurDates {
+		if date.Before(start) {
+			continue
+		}
+		occurrence := service.changeDate(data, date)
+		if data.EventType == Anniversary {
+			if count == 0 { // 100일 event 에서 처음 만난 날을 계산하지 않음 -> 주년 event 에서 계산
+				continue
+			}
+			occurrence.Title = strconv.Itoa(count) + "00일"
+		}
+		result = append(result, occurrence)
+	}
+	return result
 
 	// 반복이 끝나야 하는 최대 시점 계산
 	maxRepeatEnd := end
-	if event.RecurEndDate != nil && event.RecurEndDate.Before(end) {
-		maxRepeatEnd = *event.RecurEndDate
+	if data.RecurEndDate != nil && data.RecurEndDate.Before(end) {
+		maxRepeatEnd = *data.RecurEndDate
 	}
-	end = end.Add(time.Second * -1) // 조회 종료일자와 겹치는 경우 포함하지 않음
 
 	recurCount := 1
-	for d := *event.RecurStartDate; !d.After(maxRepeatEnd); d = d.AddDate(0, 0, interval) {
+	for d := *data.RecurStartDate; !d.After(maxRepeatEnd); d = d.AddDate(0, 0, interval) {
 		// range 내에 들어가는 날짜만 포함
 		if !d.Before(start) && !d.After(end) {
-			occurrence := service.changeDate(event, d)
+			occurrence := service.changeDate(data, d)
 			occurrence.RecurCount = recurCount
 			result = append(result, occurrence)
 			recurCount++
@@ -148,42 +182,47 @@ func (service *ServiceImpl) monthlyOccurrences(event VO, start time.Time, end ti
 	return result
 }
 
-func (service *ServiceImpl) yearlyOccurrences(event VO, start time.Time, end time.Time) []VO {
+func (service *ServiceImpl) yearlyOccurrences(data VO, start time.Time, end time.Time) []VO {
 	var result []VO
 
-	// 반복 종료일 계산
-	maxRepeatEnd := end
-	if event.RecurEndDate != nil && event.RecurEndDate.Before(end) {
-		maxRepeatEnd = *event.RecurEndDate
-	}
-	end = end.Add(time.Second * -1) // 조회 종료일자와 겹치는 경우 포함하지 않음
-
-	month := event.Yearly.Month
-	day := event.Yearly.Day
-
-	recurCount := 1
-
-	// 시작 연도부터 반복
-	for year := event.RecurStartDate.Year(); year <= maxRepeatEnd.Year(); year += 1 {
-		base := time.Date(year, month, 1, 0, 0, 0, 0, event.RecurStartDate.Location())
-		last := service.lastDayOfMonth(base)
-
-		d := day
-		if d > last {
-			d = last
+	var until time.Time
+	if data.RecurEndDate != nil {
+		if data.RecurEndDate.Before(end) {
+			until = *data.RecurEndDate
+		} else {
+			until = end
 		}
+	} else {
+		until = end
+	}
+	until = until.Add(time.Second * -1)
+	r, _ := rrule.NewRRule(
+		rrule.ROption{
+			Freq:    rrule.YEARLY,
+			Dtstart: time.Date(data.RecurStartDate.Year(), data.RecurStartDate.Month(), data.RecurStartDate.Day(), 0, 0, 0, 0, time.UTC),
+			Until:   until,
+			Bymonth: []int{
+				int(data.Yearly.Month),
+			},
+			Bymonthday: []int{
+				data.Yearly.Day,
+			},
+		})
 
-		date := time.Date(year, month, d, 0, 0, 0, 0, event.RecurStartDate.Location())
-
-		if date.Before(*event.RecurStartDate) || date.After(maxRepeatEnd) {
+	recurDates := r.All()
+	for count, date := range recurDates {
+		if date.Before(start) {
 			continue
 		}
-		if !date.Before(start) && !date.After(end) {
-			occurrence := service.changeDate(event, date)
-			occurrence.RecurCount = recurCount
-			result = append(result, occurrence)
-			recurCount++
+		occurrence := service.changeDate(data, date)
+		if data.EventType == Anniversary {
+			if count == 0 {
+				occurrence.Title = "처음 만난 날"
+			} else {
+				occurrence.Title = strconv.Itoa(count) + "주년"
+			}
 		}
+		result = append(result, occurrence)
 	}
 
 	return result
@@ -296,20 +335,4 @@ func (service *ServiceImpl) GenerateBirthday(coupleId string, memberId string, b
 		IsAllDay:   true,
 	}
 	return birthdayReq
-}
-
-func (service *ServiceImpl) GenerateFirstMetDay(coupleId string, createdBy string, relationDate time.Time) *SaveReq {
-	firstMetEndDate := relationDate.AddDate(0, 0, 1).Add(-1 * time.Minute)
-	firstMetDayReq := &SaveReq{
-		CoupleId:      coupleId,
-		CreatedBy:     createdBy,
-		StartDateTime: relationDate,
-		EndDateTime:   firstMetEndDate,
-		Title:         "처음 만난 날",
-		EventType:     Anniversary,
-		Frequency:     OneTime,
-		IsTogether:    true,
-		IsAllDay:      true,
-	}
-	return firstMetDayReq
 }
