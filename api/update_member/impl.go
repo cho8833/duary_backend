@@ -12,12 +12,13 @@ import (
 )
 
 type UpdateMemberReq struct {
-	Birthday   *time.Time         `json:"birthday"`
-	Name       *string            `json:"name"`
-	Character  *string            `json:"character"`
-	FcmToken   *string            `json:"fcmToken"`
-	MyAlarm    *event.AlarmOffset `json:"myAlarm"`
-	LoverAlarm *event.AlarmOffset `json:"loverAlarm"`
+	Birthday            *time.Time             `json:"birthday"`
+	Name                *string                `json:"name"`
+	Character           *string                `json:"character"`
+	FcmToken            *string                `json:"fcmToken"`
+	MyAlarm             *event.AlarmOffset     `json:"myAlarm"`
+	LoverAlarm          *event.AlarmOffset     `json:"loverAlarm"`
+	SyncedAppleCalendar []member.AppleCalendar `json:"syncedAppleCalendar"`
 }
 
 type UpdateMemberRes struct {
@@ -44,14 +45,15 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 
 	// update member
 	memberUpdateReq := &member.UpdateMemberReq{
-		SocialId:   *socialId,
-		Provider:   *provider,
-		Name:       req.Name,
-		Birthday:   req.Birthday,
-		Character:  req.Character,
-		FcmToken:   req.FcmToken,
-		MyAlarm:    req.MyAlarm,
-		LoverAlarm: req.LoverAlarm,
+		SocialId:            *socialId,
+		Provider:            *provider,
+		Name:                req.Name,
+		Birthday:            req.Birthday,
+		Character:           req.Character,
+		FcmToken:            req.FcmToken,
+		MyAlarm:             req.MyAlarm,
+		LoverAlarm:          req.LoverAlarm,
+		SyncedAppleCalendar: req.SyncedAppleCalendar,
 	}
 
 	updatedMember, svcErr := memberSvc.UpdateTransaction(memberUpdateReq, transaction)

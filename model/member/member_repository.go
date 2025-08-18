@@ -203,6 +203,9 @@ func (repo *RepositoryDynamoDB) updateMemberExpression(req *UpdateMemberReq) (*e
 	if req.Character != nil {
 		update = update.Set(expression.Name("character"), expression.Value(req.Character))
 	}
+	if req.SyncedAppleCalendar != nil {
+		update = update.Set(expression.Name("syncedAppleCalendar"), expression.Value(req.SyncedAppleCalendar))
+	}
 	if req.LoverAlarm != nil {
 		update = update.Set(expression.Name("loverAlarm"), expression.Value(req.LoverAlarm))
 	}

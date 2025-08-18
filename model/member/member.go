@@ -8,17 +8,18 @@ import (
 const DefaultAlarmOffset = event.Min15
 
 type Member struct {
-	Name        *string           `json:"name" dynamodbav:"name"`
-	Birthday    *time.Time        `json:"birthday" dynamodbav:"birthday"`
-	FcmToken    *string           `json:"fcmToken" dynamodbav:"fcmToken"`
-	AccessToken *string           `json:"accessToken" dynamodbav:"accessToken"`
-	Provider    string            `json:"provider" dynamodbav:"provider"`
-	SocialId    string            `json:"socialId" dynamodbav:"socialId"`
-	Email       *string           `json:"email" dynamodbav:"email"`
-	CoupleId    *string           `json:"coupleId" dynamodbav:"coupleId"`
-	Character   *string           `json:"character" dynamodbav:"character"`
-	LoverAlarm  event.AlarmOffset `json:"loverAlarm" dynamodbav:"loverAlarm"`
-	MyAlarm     event.AlarmOffset `json:"myAlarm" dynamodbav:"myAlarm"`
+	Name                *string           `json:"name" dynamodbav:"name"`
+	Birthday            *time.Time        `json:"birthday" dynamodbav:"birthday"`
+	FcmToken            *string           `json:"fcmToken" dynamodbav:"fcmToken"`
+	AccessToken         *string           `json:"accessToken" dynamodbav:"accessToken"`
+	Provider            string            `json:"provider" dynamodbav:"provider"`
+	SocialId            string            `json:"socialId" dynamodbav:"socialId"`
+	Email               *string           `json:"email" dynamodbav:"email"`
+	CoupleId            *string           `json:"coupleId" dynamodbav:"coupleId"`
+	Character           *string           `json:"character" dynamodbav:"character"`
+	SyncedAppleCalendar []AppleCalendar   `json:"syncedAppleCalendar" dynamodbav:"syncedAppleCalendar"`
+	LoverAlarm          event.AlarmOffset `json:"loverAlarm" dynamodbav:"loverAlarm"`
+	MyAlarm             event.AlarmOffset `json:"myAlarm" dynamodbav:"myAlarm"`
 }
 
 func (m *Member) ApplyFrom(req UpdateMemberReq) {
@@ -39,6 +40,9 @@ func (m *Member) ApplyFrom(req UpdateMemberReq) {
 	}
 	if req.Character != nil {
 		m.Character = req.Character
+	}
+	if req.SyncedAppleCalendar != nil {
+		m.SyncedAppleCalendar = req.SyncedAppleCalendar
 	}
 	if req.LoverAlarm != nil {
 		m.LoverAlarm = *req.LoverAlarm
@@ -68,16 +72,17 @@ func FromSaveMemberReq(req *SaveMemberReq) *Member {
 }
 
 type UpdateMemberReq struct {
-	Name        *string            `dynamodbav:"name"`
-	Birthday    *time.Time         `dynamodbav:"birthday"`
-	FcmToken    *string            `dynamodbav:"fcmToken"`
-	AccessToken *string            `dynamodbav:"accessToken"`
-	Provider    string             `dynamodbav:"provider"`
-	SocialId    string             `dynamodbav:"socialId"`
-	CoupleId    *string            `dynamodbav:"coupleId"`
-	Character   *string            `dynamodbav:"character"`
-	LoverAlarm  *event.AlarmOffset `dynamodbav:"loverAlarm"`
-	MyAlarm     *event.AlarmOffset `dynamodbav:"myAlarm"`
+	Name                *string            `dynamodbav:"name"`
+	Birthday            *time.Time         `dynamodbav:"birthday"`
+	FcmToken            *string            `dynamodbav:"fcmToken"`
+	AccessToken         *string            `dynamodbav:"accessToken"`
+	Provider            string             `dynamodbav:"provider"`
+	SocialId            string             `dynamodbav:"socialId"`
+	CoupleId            *string            `dynamodbav:"coupleId"`
+	Character           *string            `dynamodbav:"character"`
+	SyncedAppleCalendar []AppleCalendar    `dynamodbav:"syncedAppleCalendar"`
+	LoverAlarm          *event.AlarmOffset `dynamodbav:"loverAlarm"`
+	MyAlarm             *event.AlarmOffset `dynamodbav:"myAlarm"`
 }
 
 type SaveMemberReq struct {
@@ -92,3 +97,17 @@ type SaveMemberReq struct {
 	LoverAlarm  event.AlarmOffset `json:"loverAlarm"`
 	MyAlarm     event.AlarmOffset `json:"myAlarm"`
 }
+
+type AppleCalendar struct {
+	Id    string        `json:"id" dynamodbav:"id"`
+	Name  string        `json:"name" dynamodbav:"name"`
+	Owner CalendarOwner `json:"owner" dynamodbav:"owner"`
+}
+
+type CalendarOwner string
+
+const (
+	My       CalendarOwner = "MY"
+	Lover    CalendarOwner = "LOVER"
+	Together CalendarOwner = "TOGETHER"
+)
