@@ -50,7 +50,7 @@ func reissueTokenAPI(ctx context.Context, request events.APIGatewayProxyRequest)
 		return shared.LambdaAppErrorResponse(svcErr), nil
 	}
 
-	applicationJWT := jwtUtil.NewToken(loggedInMember.GetId(), jwtInfo.CoupleId, key)
+	applicationJWT := jwtUtil.NewToken(loggedInMember.GetId(), loggedInMember.CoupleId, key)
 	return shared.LambdaResponseWithDataAndHeader(applicationJWT, appjwt.ApplicationJWTToHeader(*applicationJWT)), nil
 }
 

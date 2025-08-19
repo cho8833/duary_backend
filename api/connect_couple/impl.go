@@ -113,11 +113,11 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	anniversary100DayReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 	yearlyAnniversaryReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 
-	birthdaySaveReqs := make(map[member.Member]event.SaveReq)
+	birthdaySaveReqs := make(map[string]event.SaveReq)
 	for _, m := range updatedCouple.Members {
-		birthdaySaveReqs[m] = *eventSvc.GenerateBirthday(*updatedCouple.Id, m.GetId(), *m.Birthday)
+		birthdaySaveReqs[m.GetId()] = *eventSvc.GenerateBirthday(*updatedCouple.Id, m.GetId(), *m.Birthday)
 	}
-	birthdays := make(map[member.Member]event.VO)
+	birthdays := make(map[string]event.VO)
 	for m, rq := range birthdaySaveReqs {
 		birthday, svcErr := eventSvc.SaveTransaction(&rq, transaction)
 		if svcErr != nil {
@@ -152,8 +152,12 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 
 	_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
 
-	for m, birthday := range birthdays {
-		_ = schedulerHelper.CreateAnniversarySchedule(birthday, []member.Member{m})
+	for mid, birthday := range birthdays {
+		for _, m := range updatedCouple.Members {
+			if m.GetId() == mid {
+				_ = schedulerHelper.CreateAnniversarySchedule(birthday, []member.Member{m})
+			}
+		}
 	}
 
 	// generate new token with couple id
