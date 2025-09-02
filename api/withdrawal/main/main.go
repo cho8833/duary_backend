@@ -59,20 +59,32 @@ func withdrawal(_ context.Context, request events.APIGatewayProxyRequest) (event
 		return shared.LambdaAppErrorResponse(svcErr), nil
 	}
 
-	// remove requested Member from couple
-	var remainMember []member.Member
-	for _, m := range targetCouple.Members {
-		if m.SocialId != *socialId {
-			remainMember = append(remainMember, m)
+	// delete couple if connectedMember is alone,
+	//else remove requested member from couple
+	if len(targetCouple.ConnectedMemberIds) == 1 {
+		svcErr = coupleSvc.Delete(*targetCouple.Id, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
 		}
-	}
-	updateCoupleReq := &couple.UpdateCoupleReq{
-		Id:      coupleId,
-		Members: remainMember,
-	}
-	_, svcErr = coupleSvc.Update(updateCoupleReq, transaction)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
+	} else {
+		// remove requested Member from couple
+		var remainMember []member.Member
+		for _, m := range targetCouple.Members {
+			if m.SocialId != *socialId {
+				remainMember = append(remainMember, m)
+			}
+		}
+		if len(remainMember) == 0 {
+			remainMember = make([]member.Member, 0)
+		}
+		updateCoupleReq := &couple.UpdateCoupleReq{
+			Id:      targetCouple.Id,
+			Members: remainMember,
+		}
+		_, svcErr = coupleSvc.Update(updateCoupleReq, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
+		}
 	}
 
 	// delete anniversary event

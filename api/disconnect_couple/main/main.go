@@ -85,7 +85,7 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 	}
 	updateCoupleReq := &couple.UpdateCoupleReq{
 		Id:      coupleId,
-		Members: remainMember,
+		Members: &remainMember,
 	}
 	_, svcErr = coupleSvc.Update(updateCoupleReq, transaction)
 	if svcErr != nil {
