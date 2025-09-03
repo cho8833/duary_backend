@@ -115,7 +115,9 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 
 	birthdaySaveReqs := make(map[string]event.SaveReq)
 	for _, m := range updatedCouple.Members {
-		birthdaySaveReqs[m.GetId()] = *eventSvc.GenerateBirthday(*updatedCouple.Id, m.GetId(), *m.Birthday)
+		if m.Birthday != nil { // Member 의 Birthday 는 nil 일 수 있음
+			birthdaySaveReqs[m.GetId()] = *eventSvc.GenerateBirthday(*updatedCouple.Id, m.GetId(), *m.Birthday)
+		}
 	}
 	birthdays := make(map[string]event.VO)
 	for m, rq := range birthdaySaveReqs {

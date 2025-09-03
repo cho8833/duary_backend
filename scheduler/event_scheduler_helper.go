@@ -35,6 +35,19 @@ func NewEventBridgeSchedulerHelper(schedulerClient *scheduler.Client) *BridgeSch
 	return &BridgeSchedulerHelper{schedulerClient: schedulerClient}
 }
 
+func (helper *BridgeSchedulerHelper) GetEventSchedule(scheduleName string) (*scheduler.GetScheduleOutput, shared.ApplicationError) {
+	input := scheduler.GetScheduleInput{
+		Name: &scheduleName,
+	}
+
+	output, err := helper.schedulerClient.GetSchedule(context.TODO(), &input)
+	if err != nil {
+		log.Printf("failed to get shcedule: %+v\n", err)
+		return nil, shared.InternalServerError{}
+	}
+	return output, nil
+}
+
 func (helper *BridgeSchedulerHelper) DeleteEventSchedule(scheduleName string) shared.ApplicationError {
 	input := scheduler.DeleteScheduleInput{
 		Name: &scheduleName,

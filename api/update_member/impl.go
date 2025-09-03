@@ -80,8 +80,9 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 	}
 
 	// update birthday event
+	// 커플이 연결된 상황에서만 Birthday Event 를 Update
 	var birthday *event.VO
-	if req.Birthday != nil {
+	if req.Birthday != nil && len(updatedCouple.Members) > 1 {
 		birthday, svcErr = UpdateBirthday(*coupleId, *updatedMember, eventSvc, transaction)
 		if svcErr != nil {
 			return nil, svcErr
@@ -95,10 +96,20 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 	}
 
 	// update birthday scheduler
-	if birthday != nil {
-		err = schedulerHelper.UpdateAnniversarySchedule(*birthday, []member.Member{*updatedMember})
+	// 커플이 연결된 상황에서만 Birthday Scheduler 를 Update
+	if birthday != nil && len(updatedCouple.Members) > 1 {
+		// 먼저 Schedule 을 찾은 후 있으면 Update, 없으면 Create
+		_, err := schedulerHelper.GetEventSchedule(schedulerHelper.GetBirthdayScheduleName(*coupleId, updatedMember.GetId()))
 		if err != nil {
-			log.Printf(err.Error())
+			err = schedulerHelper.CreateAnniversarySchedule(*birthday, []member.Member{*updatedMember})
+			if err != nil {
+				log.Printf(err.Error())
+			}
+		} else {
+			err = schedulerHelper.UpdateAnniversarySchedule(*birthday, []member.Member{*updatedMember})
+			if err != nil {
+				log.Printf(err.Error())
+			}
 		}
 	}
 
@@ -108,7 +119,12 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 	}, nil
 }
 
+// UpdateBirthday
+// 기존 Birthday Event 를 삭제하고 새 Birthday Event 를 생성
+// StartDateTime 이 바뀌기 때문에 SortKey 가 바뀌는 상황이고, Update 는 불가능하여 삭제하고 새로 생성
 func UpdateBirthday(coupleId string, targetMember member.Member, eventSvc event.Service, transaction *model.DynamoDBWriteTransaction) (*event.VO, shared.ApplicationError) {
+	// target member 의 Birthday 가 nil 이면 Birthday Event 도 생성되어 있지 않을 가능성이 높은데,
+	// 삭제 대상이 없어도 Transaction 이 실패하지 않으니 따로 검사할 필요 없음
 	err := eventSvc.DeleteBirthdayTransaction(coupleId, targetMember.GetId(), transaction)
 	if err != nil {
 		log.Printf(err.Error())

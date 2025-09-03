@@ -26,7 +26,8 @@ type StartDuaryRes struct {
 
 func StartDuary(request *StartDuaryReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service) (*StartDuaryRes, shared.ApplicationError) {
 	// validate request
-	if request.Name == nil || request.Birthday == nil || request.MyCharacter == nil || request.RelationDate == nil {
+	// Birthday 는 nil 일 수 있음
+	if request.Name == nil || request.MyCharacter == nil || request.RelationDate == nil {
 		log.Printf("invalid request. request %+v", request)
 		return nil, shared.BadRequestError{}
 	}
