@@ -74,29 +74,36 @@ func updateCoupleRelationDate(_ context.Context, request events.APIGatewayProxyR
 		return shared.LambdaAppErrorResponse(svcErr), nil
 	}
 
-	// 기념일 제거 후 재생성
-	eventType := event.Anniversary
-	svcErr = eventSvc.DeleteByCoupleIdAndTypeTransaction(*coupleId, eventType, transaction)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
-	}
-	loginMemberId := *socialId + "-" + *provider
+	// 커플이 연결된 경우에만 Event 를 재생성함
+	var yearlyVO *event.VO
+	var day100VO *event.VO
+	if len(updatedCouple.Members) > 1 {
+		// 기념일 제거
+		// 기념일 Event 는 DB 에 없을 수도 있지만, 삭제 대상 Resource 가 없다고 해서 Error 가 발생하지 않음
+		eventType := event.Anniversary
+		svcErr = eventSvc.DeleteByCoupleIdAndTypeTransaction(*coupleId, eventType, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
+		}
+		loginMemberId := *socialId + "-" + *provider
 
-	firstMetDaySaveReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
-	yearlyAnniversarySaveReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
-	day100AnniversarySaveReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
+		// 기념일 재생성
+		firstMetDaySaveReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
+		yearlyAnniversarySaveReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
+		day100AnniversarySaveReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, loginMemberId, *updatedCouple.RelationDate)
 
-	yearlyVO, svcErr := eventSvc.SaveTransaction(yearlyAnniversarySaveReq, transaction)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
-	}
-	day100VO, svcErr := eventSvc.SaveTransaction(day100AnniversarySaveReq, transaction)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
-	}
-	_, svcErr = eventSvc.SaveTransaction(firstMetDaySaveReq, transaction)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
+		yearlyVO, svcErr = eventSvc.SaveTransaction(yearlyAnniversarySaveReq, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
+		}
+		day100VO, svcErr = eventSvc.SaveTransaction(day100AnniversarySaveReq, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
+		}
+		_, svcErr = eventSvc.SaveTransaction(firstMetDaySaveReq, transaction)
+		if svcErr != nil {
+			return shared.LambdaAppErrorResponse(svcErr), nil
+		}
 	}
 
 	output, err := transaction.Execute()
@@ -107,13 +114,11 @@ func updateCoupleRelationDate(_ context.Context, request events.APIGatewayProxyR
 	}
 
 	// 기념일 알림 schedule 업데이트
-	svcErr = schedulerHelper.UpdateAnniversarySchedule(*day100VO, updatedCouple.Members)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
+	if day100VO != nil {
+		_ = schedulerHelper.UpdateAnniversarySchedule(*day100VO, updatedCouple.Members)
 	}
-	svcErr = schedulerHelper.UpdateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
-	if svcErr != nil {
-		return shared.LambdaAppErrorResponse(svcErr), nil
+	if yearlyVO != nil {
+		_ = schedulerHelper.UpdateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
 	}
 
 	return shared.LambdaResponseWithData(updatedCouple), nil

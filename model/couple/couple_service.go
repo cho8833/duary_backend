@@ -38,7 +38,7 @@ func (svc *ServiceImpl) Create(req *CreateCoupleReq, transaction *model.DynamoDB
 	}
 	couple := &Couple{
 		Id:                 coupleId,
-		RelationDate:       &req.RelationDate,
+		RelationDate:       req.RelationDate,
 		Code:               svc.generateCoupleCode(),
 		Members:            req.Members,
 		ConnectedMemberIds: req.ConnectedMemberIds,

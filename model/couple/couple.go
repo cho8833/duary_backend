@@ -29,7 +29,7 @@ func (c *Couple) ApplyFrom(req UpdateCoupleReq) {
 }
 
 type CreateCoupleReq struct {
-	RelationDate       time.Time       `json:"relationDate"`
+	RelationDate       *time.Time      `json:"relationDate"`
 	Members            []member.Member `json:"members"`
 	ConnectedMemberIds []string        `json:"-"`
 }

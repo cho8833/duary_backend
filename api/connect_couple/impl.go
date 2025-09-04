@@ -11,7 +11,6 @@ import (
 	"github.com/cho8833/duary_lambda/ws"
 	"log"
 	"os"
-	"strings"
 )
 
 type ConnectCoupleReq struct {
@@ -25,6 +24,8 @@ type StartDuaryRes struct {
 }
 
 func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper, wsSvc ws.Service) (*StartDuaryRes, shared.ApplicationError) {
+
+	// *********** Validate ***************
 	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
 		return nil, shared.BadRequestError{}
 	}
@@ -72,6 +73,7 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		}
 	}
 
+	// *********** Start DB Transaction ***************
 	transaction.BeginTransaction()
 
 	// 기존의 Couple 삭제 : 커플 연결 요청한 Member 의 Couple 삭제
@@ -107,11 +109,29 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		return nil, svcError
 	}
 
-	// Create Anniversary Event
-	firstMetDayReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+	// Save Couple Anniversary Events
+	var day100VO *event.VO
+	var yearlyVO *event.VO
+	if updatedCouple.RelationDate != nil {
+		// Create Anniversary Event
+		firstMetDayReq := eventSvc.GenerateFirstMetDay(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
 
-	anniversary100DayReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
-	yearlyAnniversaryReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+		anniversary100DayReq := eventSvc.Generate100Anniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+		yearlyAnniversaryReq := eventSvc.GenerateYearlyAnniversary(*updatedCouple.Id, updatedCouple.Members[0].GetId(), *updatedCouple.RelationDate)
+
+		_, svcErr = eventSvc.SaveTransaction(firstMetDayReq, transaction)
+		if svcErr != nil {
+			return nil, svcErr
+		}
+		day100VO, svcErr = eventSvc.SaveTransaction(anniversary100DayReq, transaction)
+		if svcErr != nil {
+			return nil, svcErr
+		}
+		yearlyVO, svcErr = eventSvc.SaveTransaction(yearlyAnniversaryReq, transaction)
+		if svcErr != nil {
+			return nil, svcErr
+		}
+	}
 
 	birthdaySaveReqs := make(map[string]event.SaveReq)
 	for _, m := range updatedCouple.Members {
@@ -128,19 +148,6 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 		birthdays[m] = *birthday
 	}
 
-	_, svcErr = eventSvc.SaveTransaction(firstMetDayReq, transaction)
-	if svcErr != nil {
-		return nil, svcErr
-	}
-	day100VO, svcErr := eventSvc.SaveTransaction(anniversary100DayReq, transaction)
-	if svcErr != nil {
-		return nil, svcErr
-	}
-	yearlyVO, svcErr := eventSvc.SaveTransaction(yearlyAnniversaryReq, transaction)
-	if svcErr != nil {
-		return nil, svcErr
-	}
-
 	// execute transaction
 	_, err := transaction.Execute()
 	if err != nil {
@@ -150,9 +157,12 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 
 	// 기념일 알림 schedule 생성
 	// TODO: 오류 처리 필요. DB 작업이 성공해도 schedule 작업은 실패할 수 있음
-	_ = schedulerHelper.CreateAnniversarySchedule(*day100VO, updatedCouple.Members)
-
-	_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
+	if day100VO != nil {
+		_ = schedulerHelper.CreateAnniversarySchedule(*day100VO, updatedCouple.Members)
+	}
+	if yearlyVO != nil {
+		_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
+	}
 
 	for mid, birthday := range birthdays {
 		for _, m := range updatedCouple.Members {
@@ -174,17 +184,18 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	}
 
 	// 상대방에게 couple connected notify
-	var otherMemberId string
+	var otherMember *member.Member
 	for _, coupleMember := range targetCouple.Members {
 		memberId := coupleMember.GetId()
 		if memberId != loginMemberId {
-			otherMemberId = memberId
+			otherMember = &coupleMember
 		}
 	}
-	idSplit := strings.Split(otherMemberId, "-")
-	err = wsSvc.Send(idSplit[0], idSplit[1], ws.CoupleConnected, result)
-	if err != nil {
-		log.Println("lover is not connected to ws", err)
+	if otherMember != nil {
+		err = wsSvc.Send(otherMember.SocialId, otherMember.Provider, ws.CoupleConnected, result)
+		if err != nil {
+			log.Println("lover is not connected to ws", err)
+		}
 	}
 
 	return result, nil
