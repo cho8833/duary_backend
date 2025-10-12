@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "dynamodb_event_crud_policy" {
+data "aws_iam_policy_document" "dynamodb_dev_event_crud_policy" {
     statement {
         sid = "AllowCRUDDevEventTable"
         effect = "Allow"
@@ -20,5 +20,5 @@ data "aws_iam_policy_document" "dynamodb_event_crud_policy" {
 
 resource "aws_iam_policy" "dynamodb_event_crud_policy" {
     name = "dev-dynamodb-event-crud-policy"
-    policy = data.aws_iam_policy_document.dynamodb_event_crud_policy.json
+    policy = data.aws_iam_policy_document.dynamodb_dev_event_crud_policy.json
 }
