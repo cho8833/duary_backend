@@ -5,7 +5,7 @@ output "http_apigw_id" {
 
 output "http_jwt_authorizer_id" {
     description = "ID of HTTP jwt authorizer"
-    value = module.http_jwt_authorizer.id
+    value = module.http_jwt_authorizer.function_id
 }
 
 output "ws_apigw_id" {
