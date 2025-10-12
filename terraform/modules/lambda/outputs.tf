@@ -12,3 +12,8 @@ output "function_invoke_arn" {
     description = "invoke arn of lambda function"
     value = aws_lambda_function.this.invoke_arn
 }
+
+output "function_id" {
+    description = "ID of lambda function"
+    value = aws_lambda_function.this.id
+}

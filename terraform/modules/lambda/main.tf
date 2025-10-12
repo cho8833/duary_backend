@@ -116,3 +116,7 @@ resource "aws_lambda_function" "this" {
         variables = var.env_vars
     }
 }
+
+resource "aws_cloudwatch_log_group" "this" {
+  name = "/aws/lambda/${var.function_name}"
+}
