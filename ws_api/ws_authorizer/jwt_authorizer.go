@@ -59,7 +59,7 @@ func jwtAuthorizer(_ context.Context, request events.APIGatewayWebsocketProxyReq
 					Action: []string{"execute-api:Invoke"},
 					Effect: "Allow",
 					Resource: []string{
-						"arn:aws:execute-api:ap-northeast-2:922001515124:xgbo7rm9jk/*",
+						"arn:aws:execute-api:ap-northeast-2:922001515124:1l6msjtzce/*",
 					},
 				},
 			},
