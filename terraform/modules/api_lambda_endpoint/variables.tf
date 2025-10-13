@@ -16,11 +16,6 @@ variable "file_path" {
   type = string
 }
 
-variable "route_key" {
-  type = string
-  description = "route key of api, ex) PUT /example"
-}
-
 variable "attach_policy_arns_map" {
   description = "lambda additinal policy arns, key is logical name, value is arn"
   type = map(string)

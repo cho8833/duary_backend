@@ -21,4 +21,6 @@ module "apigw_integration" {
   http_path = var.http_path
   http_method = var.http_method
   ws_route_key = var.ws_route_key
+
+  authorizer_id = var.authorizer_id
 }
