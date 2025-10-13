@@ -14,10 +14,10 @@ import (
 )
 
 /*
-GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_couple_relation_date/main/main.go && chmod 755 bootstrap && zip build/package/update_couple_relation_date.zip bootstrap && rm bootstrap
+GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/update_couple/main/main.go && chmod 755 bootstrap && zip build/package/update_couple.zip bootstrap && rm bootstrap
 */
 
-func updateCoupleRelationDate(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func updateCouple(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	authContext := shared.NewAuthContext(request)
 	coupleId := authContext.CoupleId
@@ -125,5 +125,5 @@ func updateCoupleRelationDate(_ context.Context, request events.APIGatewayProxyR
 }
 
 func main() {
-	lambda.Start(updateCoupleRelationDate)
+	lambda.Start(updateCouple)
 }

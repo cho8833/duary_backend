@@ -16,10 +16,10 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/save_event/main/main.go && chmod 755 bootstrap && zip  build/package/save_event.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/create_event/main/main.go && chmod 755 bootstrap && zip  build/package/create_event.zip bootstrap && rm bootstrap
 */
 
-func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	//----------------------------init----------------------------------------//
 	dynamoDBClient, err := model.GetDynamoDBClient()
@@ -100,5 +100,5 @@ func saveEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.API
 }
 
 func main() {
-	lambda.Start(saveEvent)
+	lambda.Start(createEvent)
 }
