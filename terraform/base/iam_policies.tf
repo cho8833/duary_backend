@@ -42,3 +42,27 @@ resource "aws_iam_policy" "allow_crud_event_bridge_scheduler" {
   policy = data.aws_iam_policy_document.allow_crud_event_bridge_scheduler_doc.json
   name = "full-access-event-bridge-scheduler"
 }
+
+data "aws_iam_policy_document" "allow_execute_ws_api_doc" {
+  statement {
+    sid = "AllowExecuteWSAPI"
+    effect = "Allow"
+    actions = [
+      "apigateway:*",
+      "lambda:InvokeFunction",
+      "lambda:InvokeFunctionUrl",
+      "execute-api:Invoke",
+      "execute-api:ManageConnections"
+    ]
+    resources = [
+      "*"
+    ]
+  }
+
+  version = "2012-10-17"
+}
+
+resource "aws_iam_policy" "allow_execute_ws_api" {
+  name = "AllowExecuteWSAPI"
+  policy = data.aws_iam_policy_document.allow_execute_ws_api_doc.json
+}
