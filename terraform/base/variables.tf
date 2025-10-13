@@ -28,3 +28,7 @@ variable "gcp_ios_client_id" {
   description = "ios client id of google cloud platform"
 }
 
+variable "google_application_credentials" {
+  type = string
+  description = "google application credential path for FCM"
+}
