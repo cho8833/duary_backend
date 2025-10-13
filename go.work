@@ -17,13 +17,13 @@ use (
 	./api/connect_couple
 	./api/start_duary
 	./api/update_member
-	./api/send_notification
+	./api/send_fcm
 	./api/delete_event
-	./api/save_event
+	./api/create_event
 	./api/get_event
 	./api/update_event
 	./api/dummy_sign_in
-	./api/update_couple_relation_date
+	./api/update_couple
 	./api/token_sign_in
 	./api/sign_out
 	./api/get_couple
