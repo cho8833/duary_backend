@@ -132,3 +132,27 @@ module "token_sign_in_api" {
     "prod_member_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_member_crud_policy_arn
   }
 }
+
+module "withdrawal_api" {
+  source = "../modules/api_lambda_endpoint"
+
+  function_name = "withdrawal_api"
+  file_path = "../../build/package/withdrawal.zip"
+
+  api_type = "HTTP"
+  apigw_id = aws_apigatewayv2_api.duary_apigw.id
+  http_method = "POST"
+  http_path = "/auth/withdrawal"
+
+  authorizer_id = aws_apigatewayv2_authorizer.http_jwt_authorizer.id
+
+  attach_policy_arns_map = {
+    "dev_couple_table_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_couple_crud_policy_arn
+    "dev_member_table_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_member_crud_policy_arn
+    "dev_event_table_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_event_crud_policy_arn
+    "prod_couple_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_couple_crud_policy_arn
+    "prod_member_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_member_crud_policy_arn
+    "prod_event_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_event_crud_policy_arn
+    "event_bridge_scheduler_crud" = aws_iam_policy.allow_crud_event_bridge_scheduler.arn
+  }
+}
