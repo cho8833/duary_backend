@@ -15,11 +15,6 @@ data "aws_iam_policy_document" "dynamodb_dev_event_crud_policy_doc" {
             values(module.dev_event_table.lsi_arns)
         )
 
-        condition {
-            test     = "StringEquals"
-            values = ["dev"]
-            variable = "apigateway:stage"
-        }
     }
     version = "2012-10-17"
 }
@@ -46,11 +41,6 @@ data "aws_iam_policy_document" "dynamodb_dev_cert_crud_policy_doc" {
             module.dev_cert_table.arn
         ]
 
-        condition {
-            test     = "StringEquals"
-            values = ["dev"]
-            variable = "apigateway:stage"
-        }
     }
 
     version = "2012-10-17"
@@ -78,11 +68,6 @@ data "aws_iam_policy_document" "dynamodb_dev_couple_crud_policy_doc" {
             module.dev_couple_table.arn
         ]
 
-        condition {
-            test     = "StringEquals"
-            values = ["dev"]
-            variable = "apigateway:stage"
-        }
     }
 
     version = "2012-10-17"
@@ -110,11 +95,6 @@ data "aws_iam_policy_document" "dynamodb_dev_member_crud_policy_doc" {
             module.dev_member_table.arn
         ]
 
-        condition {
-            test     = "StringEquals"
-            values = ["dev"]
-            variable = "apigateway:stage"
-        }
     }
 
     version = "2012-10-17"
@@ -142,11 +122,6 @@ data "aws_iam_policy_document" "dynamodb_dev_ws_connection_crud_policy_doc" {
             module.dev_ws_conneciton_table.arn
         ]
 
-        condition {
-            test     = "StringEquals"
-            values = ["dev"]
-            variable = "apigateway:stage"
-        }
     }
 
     version = "2012-10-17"

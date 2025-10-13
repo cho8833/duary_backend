@@ -17,12 +17,6 @@ data "aws_iam_policy_document" "dynamodb_prod_event_crud_policy_doc" {
       [module.prod_event_table.arn],
       values(module.prod_event_table.lsi_arns)
     )
-
-    condition {
-      test     = "StringEquals"
-      values = ["dev", "prod"]
-      variable = "apigateway:stage"
-    }
   }
   version = "2012-10-17"
 }
@@ -46,12 +40,6 @@ data "aws_iam_policy_document" "dynamodb_prod_cert_crud_policy_doc" {
     ]
 
     resources = [module.prod_cert_table.arn]
-
-    condition {
-      test     = "StringEquals"
-      values = ["dev", "prod"]
-      variable = "apigateway:stage"
-    }
   }
   version = "2012-10-17"
 }
@@ -76,11 +64,6 @@ data "aws_iam_policy_document" "dynamodb_prod_member_crud_policy_doc" {
 
     resources = [module.prod_member_table.arn]
 
-    condition {
-      test     = "StringEquals"
-      values = ["dev", "prod"]
-      variable = "apigateway:stage"
-    }
   }
   version = "2012-10-17"
 }
@@ -105,11 +88,6 @@ data "aws_iam_policy_document" "dynamodb_prod_couple_crud_policy_doc" {
 
     resources = [module.prod_couple_table.arn]
 
-    condition {
-      test     = "StringEquals"
-      values = ["dev", "prod"]
-      variable = "apigateway:stage"
-    }
   }
   version = "2012-10-17"
 }
@@ -134,11 +112,6 @@ data "aws_iam_policy_document" "dynamodb_prod_ws_connection_crud_policy_doc" {
 
     resources = [module.prod_ws_connection_table.arn]
 
-    condition {
-      test     = "StringEquals"
-      values = ["dev", "prod"]
-      variable = "apigateway:stage"
-    }
   }
   version = "2012-10-17"
 }
