@@ -5,7 +5,7 @@ data "aws_region" "current" {}
 locals {
     route_key = var.api_type == "HTTP" ? "${var.http_method} ${var.http_path}" : var.ws_route_key
 
-    source_arn_path = var.api_type == "HTTP" ? "/*/*${var.http_path}" : "/*${var.ws_route_key}"
+    source_arn_path = var.api_type == "HTTP" ? "/*/*${var.http_path}" : "/*/${var.ws_route_key}"
 }
 
 resource "aws_apigatewayv2_route" "this" {
@@ -22,7 +22,7 @@ resource "aws_apigatewayv2_integration" "this" {
     integration_type = "AWS_PROXY"
     connection_type = "INTERNET"
     integration_method = "POST"
-    payload_format_version = "2.0"
+    payload_format_version = var.api_type == "HTTP" ? "2.0" : null
     integration_uri = var.lambda_invoke_arn
 }
 
