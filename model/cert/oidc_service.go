@@ -1,4 +1,4 @@
-package appjwt
+package cert
 
 import (
 	"fmt"
