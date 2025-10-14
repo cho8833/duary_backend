@@ -4,8 +4,8 @@ import (
 	"context"
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/messaging"
-	"github.com/cho8833/duary_lambda/model/event"
-	"github.com/cho8833/duary_lambda/model/member"
+	"github.com/cho8833/duary_backend/model/event"
+	"github.com/cho8833/duary_backend/model/member"
 	"log"
 	"strings"
 )
