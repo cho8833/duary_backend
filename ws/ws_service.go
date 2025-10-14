@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi"
-	"github.com/cho8833/duary_lambda/model/ws_connection"
+	"github.com/cho8833/duary_backend/model/ws_connection"
 	"log"
 )
 
