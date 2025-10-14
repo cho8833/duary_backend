@@ -1,7 +1,7 @@
 package member
 
 import (
-	"github.com/cho8833/duary_lambda/model/event"
+	"github.com/cho8833/duary_backend/model/event"
 	"time"
 )
 

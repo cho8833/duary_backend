@@ -2,7 +2,7 @@ package event
 
 import (
 	"cmp"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_backend/shared"
 	"github.com/teambition/rrule-go"
 	"slices"
 	"strconv"

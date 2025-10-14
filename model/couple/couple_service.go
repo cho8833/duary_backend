@@ -3,8 +3,8 @@ package couple
 import (
 	"errors"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/cho8833/duary_lambda/model"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_backend/model"
+	"github.com/cho8833/duary_backend/shared"
 	uuid2 "github.com/google/uuid"
 	"log"
 	"math/rand"

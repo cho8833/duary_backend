@@ -1,4 +1,4 @@
-module github.com/cho8833/duary_lambda/model
+module github.com/cho8833/duary_backend/model
 
 go 1.22.1
 
@@ -7,11 +7,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue v1.19.0
 	github.com/aws/aws-sdk-go-v2/feature/dynamodb/expression v1.7.82
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.43.1
-	github.com/cho8833/duary_lambda/shared v0.0.0
+	github.com/cho8833/duary_backend/shared v1.0.0
 )
 
 require (
-	github.com/aws/aws-lambda-go v1.48.0 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.67 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
@@ -25,6 +24,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/teambition/rrule-go v1.8.2 // indirect
 )
-
-replace github.com/cho8833/duary_lambda/shared => ../shared

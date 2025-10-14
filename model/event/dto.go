@@ -1,7 +1,7 @@
 package event
 
 import (
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_backend/shared"
 	"time"
 )
 

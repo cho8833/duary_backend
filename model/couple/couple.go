@@ -1,7 +1,7 @@
 package couple
 
 import (
-	"github.com/cho8833/duary_lambda/model/member"
+	"github.com/cho8833/duary_backend/model/member"
 	"time"
 )
 
