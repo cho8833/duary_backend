@@ -1,4 +1,4 @@
-module github.com/cho8833/duary_lambda/shared
+module github.com/cho8833/duary_backend/shared
 
 go 1.22.1
 
