@@ -9,23 +9,12 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_backend/model/cert"
+	"github.com/cho8833/duary_backend/shared"
 	"github.com/golang-jwt/jwt/v5"
 	"math/big"
 	"time"
 )
-
-type JWK struct {
-	Alg string `json:"alg"`
-	Crv string `json:"crv"`
-	Kid string `json:"kid"`
-	Kty string `json:"kty"`
-	Use string `json:"use"`
-	E   string `json:"e"`
-	N   string `json:"n"`
-	X   string `json:"x"`
-	Y   string `json:"y"`
-}
 
 type GetPublicKeyReq struct {
 	Url      string `json:"url"`
@@ -154,7 +143,7 @@ func decode(s string) ([]byte, error) {
 	return base64.RawURLEncoding.DecodeString(s)
 }
 
-func getPublicKey(kid string, url string, provider string) (*JWK, error) {
+func getPublicKey(kid string, url string, provider string) (*cert.JWK, error) {
 	payload, err := json.Marshal(&GetPublicKeyReq{
 		Url:      url,
 		Provider: provider,
@@ -180,7 +169,7 @@ func getPublicKey(kid string, url string, provider string) (*JWK, error) {
 	if invokeOutput.StatusCode != 200 {
 		return nil, fmt.Errorf("%+v", invokeOutput.Payload)
 	}
-	jwkResponse := &shared.ServerResponse[JWK]{}
+	jwkResponse := &shared.ServerResponse[cert.JWK]{}
 	err = json.Unmarshal(invokeOutput.Payload, jwkResponse)
 	if err != nil {
 		return nil, err
