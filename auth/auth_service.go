@@ -3,10 +3,10 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"github.com/cho8833/duary_lambda/appjwt"
-	"github.com/cho8833/duary_lambda/model/couple"
-	"github.com/cho8833/duary_lambda/model/member"
-	"github.com/cho8833/duary_lambda/shared"
+	"github.com/cho8833/duary_backend/appjwt"
+	"github.com/cho8833/duary_backend/model/couple"
+	"github.com/cho8833/duary_backend/model/member"
+	"github.com/cho8833/duary_backend/shared"
 	"log"
 	"os"
 )
