@@ -5,8 +5,7 @@ module "get_oidc_public_key" {
   function_name = "get_oidc_public_key"
 
   attach_policy_arns_map = {
-    "dynamodb_dev_cert_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_cert_crud_policy_arn
-    "dynamodb_prod_cert_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_cert_crud_policy_arn
+    "dynamodb_cert_crud" = aws_iam_policy.dynamodb_cert_crud_policy.arn
   }
 }
 

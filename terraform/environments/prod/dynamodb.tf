@@ -72,21 +72,6 @@ module "prod_ws_connection_table" {
   ]
 }
 
-module "prod_cert_table" {
-  source = "../../modules/dynamodb"
-
-  name = "Cert"
-
-  hash_key = "provider"
-
-  attributes = [
-    {
-      name = "provider"
-      type = "S"
-    }
-  ]
-}
-
 module "prod_couple_table" {
   source = "../../modules/dynamodb"
 

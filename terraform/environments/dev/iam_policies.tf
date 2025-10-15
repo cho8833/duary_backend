@@ -24,33 +24,6 @@ resource "aws_iam_policy" "dynamodb_dev_event_crud_policy" {
     policy = data.aws_iam_policy_document.dynamodb_dev_event_crud_policy_doc.json
 }
 
-data "aws_iam_policy_document" "dynamodb_dev_cert_crud_policy_doc" {
-    statement {
-        sid = "AllowCRUDDevCertTable"
-        effect = "Allow"
-        actions = [
-            "dynamodb:GetItem",
-            "dynamodb:Scan",
-            "dynamodb:Query",
-            "dynamodb:PutItem",
-            "dynamodb:UpdateItem",
-            "dynamodb:DeleteItem"
-        ]
-
-        resources = [
-            module.dev_cert_table.arn
-        ]
-
-    }
-
-    version = "2012-10-17"
-}
-
-resource "aws_iam_policy" "dynamodb_dev_cert_crud_policy" {
-    name = "dev-dynamodb-cert-crud-policy"
-    policy = data.aws_iam_policy_document.dynamodb_dev_cert_crud_policy_doc.json
-}
-
 data "aws_iam_policy_document" "dynamodb_dev_couple_crud_policy_doc" {
     statement {
         sid = "AllowCRUDDevCoupleTable"

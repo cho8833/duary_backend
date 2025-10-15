@@ -1,3 +1,26 @@
+data "aws_iam_policy_document" "dynamodb_cert_crud_policy_doc" {
+  statement {
+    sid    = "AllowCRUDProdCertTable"
+    effect = "Allow"
+    actions = [
+      "dynamodb:GetItem",
+      "dynamodb:Scan",
+      "dynamodb:Query",
+      "dynamodb:PutItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem"
+    ]
+
+    resources = [module.cert_table.arn]
+  }
+  version = "2012-10-17"
+}
+
+resource "aws_iam_policy" "dynamodb_cert_crud_policy" {
+  name = "dynamodb-cert-crud-policy"
+  policy = data.aws_iam_policy_document.dynamodb_cert_crud_policy_doc.json
+}
+
 data "aws_iam_policy_document" "allow_invoke_lambda_get_oidc_public_key_policy_doc" {
   statement {
     sid ="AllowInvokeLambdaGetOidcPublicKey"
