@@ -39,9 +39,11 @@ func startDuaryAPI(_ context.Context, req events.APIGatewayProxyRequest) (events
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := req.StageVariables["stage"]
+
 	transaction := model.NewWriteTransaction(dynamoDBClient)
-	coupleRepo := couple.NewRepository(dynamoDBClient)
-	memberRepo := member.NewRepository(dynamoDBClient)
+	coupleRepo := couple.NewRepository(dynamoDBClient, stage)
+	memberRepo := member.NewRepository(dynamoDBClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 	memberSvc := member.NewService(memberRepo)
 

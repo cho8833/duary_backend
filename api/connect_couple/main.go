@@ -46,16 +46,18 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 
 	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
+	stage := request.StageVariables["stage"]
+
 	transaction := model.NewWriteTransaction(dynamodbClient)
-	memberRepo := member.NewRepository(dynamodbClient)
-	coupleRepo := couple.NewRepository(dynamodbClient)
-	eventRepo := event.NewRepository(dynamodbClient)
-	wsRepo := ws_connection.NewRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient, stage)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
+	eventRepo := event.NewRepository(dynamodbClient, stage)
+	wsRepo := ws_connection.NewRepository(dynamodbClient, stage)
 
 	memberSvc := member.NewService(memberRepo)
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
-	wsSvc, err := ws.NewService(&wsRepo)
+	wsSvc, err := ws.NewService(&wsRepo, stage)
 	if err != nil {
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
@@ -70,7 +72,7 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 
 	shared.NewAuthContext(request)
 
-	res, svcError := ConnectCouple(connectCoupleReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper, wsSvc)
+	res, svcError := ConnectCouple(connectCoupleReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper, wsSvc, stage)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(svcError), nil
 	}
@@ -78,7 +80,7 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 	return shared.LambdaResponseWithDataAndHeader(res, appjwt.ApplicationJWTToHeader(*res.Token)), nil
 }
 
-func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper, wsSvc ws.Service) (*StartDuaryRes, shared.ApplicationError) {
+func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper, wsSvc ws.Service, stage string) (*StartDuaryRes, shared.ApplicationError) {
 
 	// *********** Validate ***************
 	if req.CoupleCode == nil || len(*req.CoupleCode) == 0 {
@@ -213,16 +215,16 @@ func ConnectCouple(req *ConnectCoupleReq, transaction *model.DynamoDBWriteTransa
 	// 기념일 알림 schedule 생성
 	// TODO: 오류 처리 필요. DB 작업이 성공해도 schedule 작업은 실패할 수 있음
 	if day100VO != nil {
-		_ = schedulerHelper.CreateAnniversarySchedule(*day100VO, updatedCouple.Members)
+		_ = schedulerHelper.CreateAnniversarySchedule(*day100VO, updatedCouple.Members, stage)
 	}
 	if yearlyVO != nil {
-		_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
+		_ = schedulerHelper.CreateAnniversarySchedule(*yearlyVO, updatedCouple.Members, stage)
 	}
 
 	for mid, birthday := range birthdays {
 		for _, m := range updatedCouple.Members {
 			if m.GetId() == mid {
-				_ = schedulerHelper.CreateAnniversarySchedule(birthday, []member.Member{m})
+				_ = schedulerHelper.CreateAnniversarySchedule(birthday, []member.Member{m}, stage)
 			}
 		}
 	}

@@ -43,7 +43,10 @@ func reissueTokenAPI(ctx context.Context, request events.APIGatewayProxyRequest)
 	if err != nil {
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	memberRepo := member.NewRepository(dbClient)
+
+	stage := request.StageVariables["stage"]
+
+	memberRepo := member.NewRepository(dbClient, stage)
 	memberSvc := member.NewService(memberRepo)
 	loggedInMember, svcErr := memberSvc.FindById(subSplit[0], subSplit[1])
 	if svcErr != nil {

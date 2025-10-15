@@ -27,8 +27,9 @@ func getCouple(_ context.Context, request events.APIGatewayProxyRequest) (events
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := request.StageVariables["stage"]
 
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 
 	data, svcErr := coupleSvc.FindById(*authContext.CoupleId)

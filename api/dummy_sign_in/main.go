@@ -27,9 +27,10 @@ type DummySignInReq struct {
 
 func dummySignIn(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	dynamodbClient, _ := model.GetDynamoDBClient()
+	stage := request.StageVariables["stage"]
 
-	memberRepo := member.NewRepository(dynamodbClient)
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient, stage)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 
 	memberSvc := member.NewService(memberRepo)
 	coupleSvc := couple.NewService(coupleRepo)

@@ -25,9 +25,10 @@ func googleSignIn(ctx context.Context, request events.APIGatewayProxyRequest) (e
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := request.StageVariables["stage"]
 
-	memberRepository := member.NewRepository(dynamoDBClient)
-	coupleRepository := couple.NewRepository(dynamoDBClient)
+	memberRepository := member.NewRepository(dynamoDBClient, stage)
+	coupleRepository := couple.NewRepository(dynamoDBClient, stage)
 
 	memberSvc := member.NewService(memberRepository)
 	coupleSvc := couple.NewService(coupleRepository)

@@ -26,9 +26,10 @@ func tokenSignIn(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 		log.Printf("failed to get DynamoDB client: %s", err.Error())
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := req.StageVariables["stage"]
 
-	memberRepo := member.NewRepository(dynamodbClient)
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	memberRepo := member.NewRepository(dynamodbClient, stage)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 
 	memberSvc := member.NewService(memberRepo)
 	coupleSvc := couple.NewService(coupleRepo)

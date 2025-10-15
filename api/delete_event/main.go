@@ -40,9 +40,10 @@ func deleteEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	if err != nil {
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
+	stage := request.StageVariables["stage"]
 
-	eventRepo := event.NewRepository(dynamodbClient)
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient, stage)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
 
@@ -61,8 +62,8 @@ func deleteEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 
 	//----------------------------Send WS Message to lover-------------------------------//
-	wsRepo := ws_connection.NewRepository(dynamodbClient)
-	wsSvc, err := ws.NewService(&wsRepo)
+	wsRepo := ws_connection.NewRepository(dynamodbClient, stage)
+	wsSvc, err := ws.NewService(&wsRepo, stage)
 	if err == nil {
 		loginMemberId := *authContext.SocialId + "-" + *authContext.Provider
 		foundCouple, svcErr := coupleSvc.FindById(*coupleId)

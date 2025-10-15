@@ -49,11 +49,13 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 
 	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
-	memberRepo := member.NewRepository(dynamodbClient)
+	stage := request.StageVariables["stage"]
+
+	memberRepo := member.NewRepository(dynamodbClient, stage)
 	memberSvc := member.NewService(memberRepo)
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
-	eventRepo := event.NewRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient, stage)
 	eventSvc := event.NewService(eventRepo)
 
 	updateReq := &UpdateMemberReq{}
@@ -67,7 +69,7 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 
 	shared.NewAuthContext(request)
 
-	result, svcErr := UpdateMember(updateReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper)
+	result, svcErr := UpdateMember(updateReq, transaction, coupleSvc, memberSvc, eventSvc, *schedulerHelper, stage)
 
 	if svcErr != nil {
 		return shared.LambdaAppErrorResponse(svcErr), nil
@@ -75,7 +77,7 @@ func updateMember(_ context.Context, request events.APIGatewayProxyRequest) (eve
 	return shared.LambdaResponseWithData(result), nil
 }
 
-func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper) (*UpdateMemberRes, shared.ApplicationError) {
+func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransaction, coupleSvc couple.Service, memberSvc member.Service, eventSvc event.Service, schedulerHelper scheduler.BridgeSchedulerHelper, stage string) (*UpdateMemberRes, shared.ApplicationError) {
 
 	authContext := shared.GetAuthContext()
 
@@ -150,12 +152,12 @@ func UpdateMember(req *UpdateMemberReq, transaction *model.DynamoDBWriteTransact
 		// 먼저 Schedule 을 찾은 후 있으면 Update, 없으면 Create
 		_, err := schedulerHelper.GetEventSchedule(schedulerHelper.GetBirthdayScheduleName(*coupleId, updatedMember.GetId()))
 		if err != nil {
-			err = schedulerHelper.CreateAnniversarySchedule(*birthday, []member.Member{*updatedMember})
+			err = schedulerHelper.CreateAnniversarySchedule(*birthday, []member.Member{*updatedMember}, stage)
 			if err != nil {
 				log.Printf(err.Error())
 			}
 		} else {
-			err = schedulerHelper.UpdateAnniversarySchedule(*birthday, []member.Member{*updatedMember})
+			err = schedulerHelper.UpdateAnniversarySchedule(*birthday, []member.Member{*updatedMember}, stage)
 			if err != nil {
 				log.Printf(err.Error())
 			}

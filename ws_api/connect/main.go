@@ -32,8 +32,9 @@ func connect(_ context.Context, req events.APIGatewayWebsocketProxyRequest) (eve
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), err
 	}
+	stage := req.StageVariables["stage"]
 
-	wsRepo := ws_connection.NewRepository(dbClient)
+	wsRepo := ws_connection.NewRepository(dbClient, stage)
 
 	_, err = wsRepo.Create(*socialId, *provider, req.RequestContext.ConnectionID)
 	if err != nil {

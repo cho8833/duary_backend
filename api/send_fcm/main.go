@@ -26,15 +26,15 @@ func sendNotification(ctx context.Context, event json.RawMessage) (events.APIGat
 		log.Printf("failed to get DynamoDBClient: %+v\n", err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	memberRepo := member.NewRepository(dynamodbClient)
-	memberSvc := member.NewService(memberRepo)
-
 	fcmReq := &fcm.SendReq{}
 	err = json.Unmarshal(event, fcmReq)
 	if err != nil {
 		log.Printf("failed to get req body: %+v\n\n", err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+
+	memberRepo := member.NewRepository(dynamodbClient, fcmReq.Stage)
+	memberSvc := member.NewService(memberRepo)
 
 	fcmService := fcm.NewService(fcmClient, memberSvc)
 

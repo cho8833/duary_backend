@@ -20,7 +20,9 @@ func signOut(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	memberRepo := member.NewRepository(dynamodbClient)
+	stage := request.StageVariables["stage"]
+
+	memberRepo := member.NewRepository(dynamodbClient, stage)
 	memberSvc := member.NewService(memberRepo)
 
 	authContext := shared.NewAuthContext(request)

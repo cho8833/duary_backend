@@ -32,8 +32,9 @@ func disconnect(_ context.Context, req events.APIGatewayWebsocketProxyRequest) (
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), err
 	}
+	stage := req.StageVariables["stage"]
 
-	wsRepo := ws_connection.NewRepository(dbClient)
+	wsRepo := ws_connection.NewRepository(dbClient, stage)
 
 	err = wsRepo.DeleteBySocialIdAndProvider(*socialId, *provider)
 	if err != nil {

@@ -27,6 +27,7 @@ func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := req.StageVariables["stage"]
 
 	// get auth
 	authCtx := shared.NewAuthContext(req)
@@ -46,8 +47,8 @@ func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 		return shared.LambdaAppErrorResponse(shared.BadRequestError{}), nil
 	}
 
-	eventRepo := event.NewRepository(dynamoDBClient)
-	coupleRepo := couple.NewRepository(dynamoDBClient)
+	eventRepo := event.NewRepository(dynamoDBClient, stage)
+	coupleRepo := couple.NewRepository(dynamoDBClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
 
@@ -69,8 +70,8 @@ func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 	}
 
 	//----------------------------Send WS Message to lover-------------------------------//
-	wsRepo := ws_connection.NewRepository(dynamoDBClient)
-	wsSvc, err := ws.NewService(&wsRepo)
+	wsRepo := ws_connection.NewRepository(dynamoDBClient, stage)
+	wsSvc, err := ws.NewService(&wsRepo, stage)
 	if err == nil {
 		loginMemberId := *authContext.SocialId + "-" + *authContext.Provider
 		foundCouple, svcErr := coupleSvc.FindById(*coupleId)

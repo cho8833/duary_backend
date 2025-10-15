@@ -35,11 +35,13 @@ func withdrawal(_ context.Context, request events.APIGatewayProxyRequest) (event
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
 
-	memberRepo := member.NewRepository(dbClient)
+	stage := request.StageVariables["stage"]
+
+	memberRepo := member.NewRepository(dbClient, stage)
 	memberSvc := member.NewService(memberRepo)
-	coupleRepo := couple.NewRepository(dbClient)
+	coupleRepo := couple.NewRepository(dbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
-	eventRepo := event.NewRepository(dbClient)
+	eventRepo := event.NewRepository(dbClient, stage)
 	eventSvc := event.NewService(eventRepo)
 
 	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)

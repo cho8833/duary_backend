@@ -21,6 +21,13 @@ GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -
 */
 
 func sendAnniversaryFCM(ctx context.Context, jsonMsg json.RawMessage) (events.APIGatewayProxyResponse, error) {
+	fcmReq := &fcm.SendAnniversaryReq{}
+	err := json.Unmarshal(jsonMsg, fcmReq)
+	if err != nil {
+		log.Printf("failed to get req body: %+v\n\n", err)
+		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
+	}
+
 	fcmClient, err := fcm.GetFCMClient()
 	if err != nil {
 		log.Printf("failed to get fcmClient: %+v\n", err)
@@ -31,15 +38,9 @@ func sendAnniversaryFCM(ctx context.Context, jsonMsg json.RawMessage) (events.AP
 		log.Printf("failed to get DynamoDBClient: %+v\n", err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	memberRepo := member.NewRepository(dynamodbClient)
-	memberSvc := member.NewService(memberRepo)
 
-	fcmReq := &fcm.SendAnniversaryReq{}
-	err = json.Unmarshal(jsonMsg, fcmReq)
-	if err != nil {
-		log.Printf("failed to get req body: %+v\n\n", err)
-		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
-	}
+	memberRepo := member.NewRepository(dynamodbClient, fcmReq.Stage)
+	memberSvc := member.NewService(memberRepo)
 
 	var content string
 	var title string

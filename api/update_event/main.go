@@ -24,9 +24,12 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	if err != nil {
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	eventRepo := event.NewRepository(dynamodbClient)
+
+	stage := request.StageVariables["stage"]
+
+	eventRepo := event.NewRepository(dynamodbClient, stage)
 	eventSvc := event.NewService(eventRepo)
-	coupleRepo := couple.NewRepository(dynamodbClient)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 
 	// get auth
@@ -63,8 +66,8 @@ func updateEvent(_ context.Context, request events.APIGatewayProxyRequest) (even
 	}
 
 	//----------------------------Send WS Message to lover-------------------------------//
-	wsRepo := ws_connection.NewRepository(dynamodbClient)
-	wsSvc, err := ws.NewService(&wsRepo)
+	wsRepo := ws_connection.NewRepository(dynamodbClient, stage)
+	wsSvc, err := ws.NewService(&wsRepo, stage)
 	if err == nil {
 		loginMemberId := *socialId + "-" + *provider
 		foundCouple, svcErr := coupleSvc.FindById(*coupleId)

@@ -58,9 +58,11 @@ func handler(_ context.Context, request events.APIGatewayProxyRequest) (events.A
 
 	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
-	memberRepo := member.NewRepository(dynamodbClient)
-	coupleRepo := couple.NewRepository(dynamodbClient)
-	eventRepo := event.NewRepository(dynamodbClient)
+	stage := request.StageVariables["stage"]
+
+	memberRepo := member.NewRepository(dynamodbClient, stage)
+	coupleRepo := couple.NewRepository(dynamodbClient, stage)
+	eventRepo := event.NewRepository(dynamodbClient, stage)
 
 	memberSvc := member.NewService(memberRepo)
 	coupleSvc := couple.NewService(coupleRepo)

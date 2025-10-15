@@ -21,8 +21,9 @@ func getEvent(_ context.Context, request events.APIGatewayProxyRequest) (events.
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.DBError{}), nil
 	}
+	stage := request.StageVariables["stage"]
 
-	eventRepo := event.NewRepository(dynamodbClient)
+	eventRepo := event.NewRepository(dynamodbClient, stage)
 
 	eventSvc := event.NewService(eventRepo)
 

@@ -24,8 +24,10 @@ func kakaoSignInAPI(ctx context.Context, request events.APIGatewayProxyRequest) 
 		log.Printf(err.Error())
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
-	memberRepository := member.NewRepository(dynamoDBClient)
-	coupleRepository := couple.NewRepository(dynamoDBClient)
+	stage := request.StageVariables["stage"]
+
+	memberRepository := member.NewRepository(dynamoDBClient, stage)
+	coupleRepository := couple.NewRepository(dynamoDBClient, stage)
 
 	coupleSvc := couple.NewService(coupleRepository)
 	memberSvc := member.NewService(memberRepository)

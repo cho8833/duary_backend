@@ -46,11 +46,12 @@ func updateCouple(_ context.Context, request events.APIGatewayProxyRequest) (eve
 		log.Println(err)
 		return shared.LambdaAppErrorResponse(shared.InternalServerError{}), nil
 	}
+	stage := request.QueryStringParameters["stage"]
 
 	schedulerHelper := scheduler.NewEventBridgeSchedulerHelper(schedulerClient)
 
-	coupleRepo := couple.NewRepository(dbClient)
-	eventRepo := event.NewRepository(dbClient)
+	coupleRepo := couple.NewRepository(dbClient, stage)
+	eventRepo := event.NewRepository(dbClient, stage)
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
 
@@ -115,10 +116,10 @@ func updateCouple(_ context.Context, request events.APIGatewayProxyRequest) (eve
 
 	// 기념일 알림 schedule 업데이트
 	if day100VO != nil {
-		_ = schedulerHelper.UpdateAnniversarySchedule(*day100VO, updatedCouple.Members)
+		_ = schedulerHelper.UpdateAnniversarySchedule(*day100VO, updatedCouple.Members, stage)
 	}
 	if yearlyVO != nil {
-		_ = schedulerHelper.UpdateAnniversarySchedule(*yearlyVO, updatedCouple.Members)
+		_ = schedulerHelper.UpdateAnniversarySchedule(*yearlyVO, updatedCouple.Members, stage)
 	}
 
 	return shared.LambdaResponseWithData(updatedCouple), nil
