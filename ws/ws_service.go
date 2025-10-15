@@ -32,8 +32,8 @@ type ServiceImpl struct {
 	apigwClient apigatewaymanagementapi.Client
 }
 
-func NewService(repo ws_connection.Repository) (*ServiceImpl, error) {
-	apigwClient, err := GetApiGwClient()
+func NewService(repo ws_connection.Repository, stage string) (*ServiceImpl, error) {
+	apigwClient, err := GetApiGwClient(stage)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
