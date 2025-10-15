@@ -78,8 +78,6 @@ resource "aws_lambda_function" "this" {
 
     package_type = "Zip"
 
-    region = "ap-northeast-2"
-
     reserved_concurrent_executions = "-1"
 
     skip_destroy = "false"
