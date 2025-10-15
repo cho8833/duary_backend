@@ -16,15 +16,10 @@ import (
 	"time"
 )
 
-type SendFCMReq struct {
-	Title          string   `json:"title"`
-	Body           string   `json:"body"`
-	TargetMemberId []string `json:"target_member_id"`
-}
-
 type SendAnniversaryReq struct {
 	EventData      event.VO
 	TargetMemberId []string
+	Stage          string
 }
 
 type BridgeSchedulerHelper struct {
@@ -63,7 +58,7 @@ func (helper *BridgeSchedulerHelper) DeleteEventSchedule(scheduleName string) sh
 	}
 }
 
-func (helper *BridgeSchedulerHelper) CreateAnniversarySchedule(ev event.VO, members []member.Member) shared.ApplicationError {
+func (helper *BridgeSchedulerHelper) CreateAnniversarySchedule(ev event.VO, members []member.Member, stage string) shared.ApplicationError {
 	var input scheduler.CreateScheduleInput
 
 	var targetMemberIds []string
@@ -73,6 +68,7 @@ func (helper *BridgeSchedulerHelper) CreateAnniversarySchedule(ev event.VO, memb
 	fcmReq := SendAnniversaryReq{
 		EventData:      ev,
 		TargetMemberId: targetMemberIds,
+		Stage:          stage,
 	}
 	encoded, err := json.Marshal(fcmReq)
 	if err != nil {
@@ -146,7 +142,7 @@ func (helper *BridgeSchedulerHelper) CreateAnniversarySchedule(ev event.VO, memb
 	return nil
 }
 
-func (helper *BridgeSchedulerHelper) UpdateAnniversarySchedule(ev event.VO, members []member.Member) shared.ApplicationError {
+func (helper *BridgeSchedulerHelper) UpdateAnniversarySchedule(ev event.VO, members []member.Member, stage string) shared.ApplicationError {
 	var input scheduler.UpdateScheduleInput
 
 	var targetMemberIds []string
@@ -156,6 +152,7 @@ func (helper *BridgeSchedulerHelper) UpdateAnniversarySchedule(ev event.VO, memb
 	fcmReq := SendAnniversaryReq{
 		EventData:      ev,
 		TargetMemberId: targetMemberIds,
+		Stage:          stage,
 	}
 	encoded, err := json.Marshal(fcmReq)
 	if err != nil {
