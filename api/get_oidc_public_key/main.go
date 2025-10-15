@@ -1,0 +1,45 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cho8833/duary_backend/appjwt"
+	"github.com/cho8833/duary_backend/model"
+	"github.com/cho8833/duary_backend/model/cert"
+	"github.com/cho8833/duary_backend/shared"
+)
+
+/*
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/get_oidc_public_key/main.go && chmod 755 bootstrap && zip  build/package/get_oidc_public_key.zip bootstrap && rm bootstrap
+*/
+func getOIDCPublicKeyAPI(ctx context.Context, request *appjwt.GetPublicKeyReq) (*shared.ServerResponse[any], error) {
+	// check Req
+	if request.Url == "" || request.Provider == "" || request.Kid == "" {
+		return shared.ResponseFromError(fmt.Errorf("Bad Request"), 400), nil
+	}
+
+	// load client
+	httpClient, err := appjwt.GetHttpClient()
+	if err != nil {
+		return shared.ResponseFromError(err, 500), nil
+	}
+	dynamodbClient, err := model.GetDynamoDBClient()
+	if err != nil {
+		return shared.ResponseFromError(err, 500), nil
+	}
+
+	// init service
+	var repo cert.OIDCPublicKeyRepository = cert.NewOIDCPublicKeyRepository(httpClient, dynamodbClient)
+	svc := cert.NewOIDCService(&repo)
+
+	res, err := svc.GetPublicKey(request.Url, request.Provider, request.Kid)
+	if err != nil {
+		return shared.ResponseFromError(err, 400), nil
+	}
+	return shared.ResponseWithData(res), nil
+}
+
+func main() {
+	lambda.Start(getOIDCPublicKeyAPI)
+}

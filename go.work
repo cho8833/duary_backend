@@ -7,12 +7,12 @@ use (
 	./model
 	./fcm
 	./scheduler
-	./test
+	//./test
 	./ws
 	./api/kakao_sign_in
 	./api/apple_sign_in
 	./api/get_oidc_public_key
-	./api/jwt_authorizer
+	./api/http_jwt_authorizer
 	./api/reissue_token
 	./api/connect_couple
 	./api/start_duary
@@ -33,5 +33,5 @@ use (
 	./api/withdrawal
 	./ws_api/connect
 	./ws_api/disconnect
-	./ws_api/ws_authorizer
+	./ws_api/ws_jwt_authorizer
 )
