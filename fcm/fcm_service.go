@@ -31,11 +31,13 @@ type SendReq struct {
 	Title          string   `json:"title"`
 	Body           string   `json:"body"`
 	TargetMemberId []string `json:"target_member_id"`
+	Stage          string   `json:"stage"`
 }
 
 type SendAnniversaryReq struct {
 	EventData      event.VO
 	TargetMemberId []string
+	Stage          string
 }
 
 type Service struct {
