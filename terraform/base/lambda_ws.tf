@@ -4,7 +4,7 @@ module "ws_connect" {
   api_type      = "WEBSOCKET"
   apigw_id      = aws_apigatewayv2_api.duary_ws_apigw.id
 
-  file_path     = "../../build/package/ws_connect.zip"
+  file_path     = "${var.root_path}/build/package/ws_connect.zip"
   function_name = "ws_connect_api"
   ws_route_key = "$connect"
 
@@ -20,7 +20,7 @@ module "ws_disconnect" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "ws_disconnect_api"
-  file_path = "../../build/package/ws_disconnect.zip"
+  file_path = "${var.root_path}/build/package/ws_disconnect.zip"
   ws_route_key = "$disconnect"
 
   api_type = "WEBSOCKET"

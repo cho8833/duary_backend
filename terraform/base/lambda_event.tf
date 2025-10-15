@@ -2,13 +2,17 @@ module "delete_event_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "delete_event_api"
-  file_path     = "../../build/package/delete_event.zip"
+  file_path     = "${var.root_path}/build/package/delete_event.zip"
 
   api_type      = "HTTP"
   apigw_id      = aws_apigatewayv2_api.duary_apigw.id
   http_method = "DELETE"
   http_path = "/event"
 
+  env_vars = {
+    DEV_WEBSOCKET_URL = local.dev_websocket_post_url
+    PROD_WEBSOCKET_URL = local.prod_websocket_post_url
+  }
   authorizer_id = aws_apigatewayv2_authorizer.http_jwt_authorizer.id
 
   attach_policy_arns_map = {
@@ -26,12 +30,17 @@ module "create_event_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "create_event_api"
-  file_path = "../../build/package/create_event.zip"
+  file_path = "${var.root_path}/build/package/create_event.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
   http_method = "POST"
   http_path = "/event"
+
+  env_vars = {
+    DEV_WEBSOCKET_URL = local.dev_websocket_post_url
+    PROD_WEBSOCKET_URL = local.prod_websocket_post_url
+  }
 
   authorizer_id = aws_apigatewayv2_authorizer.http_jwt_authorizer.id
 
@@ -50,12 +59,17 @@ module "update_event_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "update_event_api"
-  file_path = "../../build/package/update_event.zip"
+  file_path = "${var.root_path}/build/package/update_event.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
   http_method = "PUT"
   http_path = "/event"
+
+  env_vars = {
+    DEV_WEBSOCKET_URL = local.dev_websocket_post_url
+    PROD_WEBSOCKET_URL = local.prod_websocket_post_url
+  }
 
   authorizer_id = aws_apigatewayv2_authorizer.http_jwt_authorizer.id
 
@@ -74,7 +88,7 @@ module "get_event_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "get_event_api"
-  file_path = "../../build/package/get_event.zip"
+  file_path = "${var.root_path}/build/package/get_event.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id

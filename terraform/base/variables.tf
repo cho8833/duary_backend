@@ -32,3 +32,8 @@ variable "google_application_credentials" {
   type = string
   description = "google application credential path for FCM"
 }
+
+variable "root_path" {
+  type = string
+  description = "root path of backend project"
+}

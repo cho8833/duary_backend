@@ -1,7 +1,7 @@
 module "update_member_api" {
   source = "../modules/api_lambda_endpoint"
 
-  file_path = "../../build/package/update_member.zip"
+  file_path = "${var.root_path}/build/package/update_member.zip"
   function_name = "update_member_api"
 
   api_type = "HTTP"
@@ -29,7 +29,7 @@ module "start_duary_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "start_duary_api"
-  file_path = "../../build/package/start_duary.zip"
+  file_path = "${var.root_path}/build/package/start_duary.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id

@@ -2,7 +2,7 @@ module "send_fcm" {
   source = "../modules/lambda"
 
 
-  file_path     = "../../build/package/send_fcm.zip"
+  file_path     = "${var.root_path}/build/package/send_fcm.zip"
   function_name = "send_fcm"
 
   env_vars = {
@@ -18,7 +18,7 @@ module "send_fcm" {
 module "send_anniversary_fcm" {
   source = "../modules/lambda"
 
-  file_path = "../../build/package/send_anniversary_fcm.zip"
+  file_path = "${var.root_path}/build/package/send_anniversary_fcm.zip"
   function_name = "send_anniversary_fcm"
 
   env_vars = {

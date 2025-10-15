@@ -1,6 +1,6 @@
 module "http_jwt_authorizer" {
     source = "../modules/lambda"
-    file_path = "../../build/package/jwt_authorizer.zip"
+    file_path = "${var.root_path}/build/package/http_jwt_authorizer.zip"
     function_name = "http_jwt_authorizer"
 
     env_vars = {
@@ -10,7 +10,7 @@ module "http_jwt_authorizer" {
 
 module "ws_jwt_authorizer" {
     source = "../modules/lambda"
-    file_path = "../../build/package/ws_authorizer.zip"
+    file_path = "${var.root_path}/build/package/ws_jwt_authorizer.zip"
     function_name = "ws_jwt_authorizer"
 
     env_vars = {

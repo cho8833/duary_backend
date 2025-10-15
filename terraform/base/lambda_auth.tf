@@ -1,7 +1,7 @@
 module "get_oidc_public_key" {
   source = "../modules/lambda"
 
-  file_path = "../../build/package/get_oidc_public_key.zip"
+  file_path = "${var.root_path}/build/package/get_oidc_public_key.zip"
   function_name = "get_oidc_public_key"
 
   attach_policy_arns_map = {
@@ -13,7 +13,7 @@ module "get_oidc_public_key" {
 module "kakao_sign_in_api" {
   source = "../modules/api_lambda_endpoint"
 
-  file_path     = "../../build/package/kakao_sign_in.zip"
+  file_path     = "${var.root_path}/build/package/kakao_sign_in.zip"
   function_name = "kakao_sign_in_api"
 
   env_vars = {
@@ -40,7 +40,7 @@ module "google_sign_in_api" {
   source ="../modules/api_lambda_endpoint"
 
   function_name = "google_sign_in_api"
-  file_path     = "../../build/package/google_sign_in.zip"
+  file_path     = "${var.root_path}/build/package/google_sign_in.zip"
 
   api_type      = "HTTP"
   apigw_id      = aws_apigatewayv2_api.duary_apigw.id
@@ -68,7 +68,7 @@ module "apple_sign_in_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "apple_sign_in_api"
-  file_path = "../../build/package/apple_sign_in.zip"
+  file_path = "${var.root_path}/build/package/apple_sign_in.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
@@ -93,7 +93,7 @@ module "sign_out_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "sign_out_api"
-  file_path = "../../build/package/sign_out.zip"
+  file_path = "${var.root_path}/build/package/sign_out.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
@@ -112,7 +112,7 @@ module "token_sign_in_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "token_sign_in_api"
-  file_path = "../../build/package/token_sign_in.zip"
+  file_path = "${var.root_path}/build/package/token_sign_in.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
@@ -133,11 +133,33 @@ module "token_sign_in_api" {
   }
 }
 
+module "reissue_token_api" {
+  source = "../modules/api_lambda_endpoint"
+
+  function_name = "reissue_token_api"
+  file_path     = "${var.root_path}/build/package/reissue_token.zip"
+
+  api_type      = "HTTP"
+  apigw_id      = aws_apigatewayv2_api.duary_apigw.id
+  http_method = "POST"
+  http_path = "/auth/token"
+
+  env_vars = {
+    secretKey = var.jwt_secret_key
+  }
+
+  attach_policy_arns_map = {
+    "dev_member_table_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_member_crud_policy_arn
+    "prod_member_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_member_crud_policy_arn
+  }
+
+}
+
 module "withdrawal_api" {
   source = "../modules/api_lambda_endpoint"
 
   function_name = "withdrawal_api"
-  file_path = "../../build/package/withdrawal.zip"
+  file_path = "${var.root_path}/build/package/withdrawal.zip"
 
   api_type = "HTTP"
   apigw_id = aws_apigatewayv2_api.duary_apigw.id
