@@ -15,7 +15,6 @@ import (
 	"time"
 )
 
-const tableName = "Event"
 const typeIndexName = "eventType-index"
 
 type Repository interface {
@@ -29,11 +28,18 @@ type Repository interface {
 }
 
 type RepositoryDynamoDB struct {
-	client *dynamodb.Client
+	client    *dynamodb.Client
+	tableName string
 }
 
-func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
-	return &RepositoryDynamoDB{client: client}
+func NewRepository(client *dynamodb.Client, stage string) *RepositoryDynamoDB {
+	var table string
+	if stage == "dev" {
+		table = "dev_Event"
+	} else {
+		table = "Event"
+	}
+	return &RepositoryDynamoDB{client: client, tableName: table}
 }
 
 func (repo *RepositoryDynamoDB) Save(event *Event) (*VO, error) {
@@ -65,7 +71,7 @@ func (repo *RepositoryDynamoDB) SaveTransaction(event *Event, transaction *model
 	}
 	transactionItem := &types.TransactWriteItem{
 		Put: &types.Put{
-			TableName: aws.String(tableName),
+			TableName: aws.String(repo.tableName),
 			Item:      item,
 		}}
 	transaction.AddTransaction(transactionItem)
@@ -83,7 +89,7 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 		return nil, err
 	}
 	output, err := repo.client.Query(context.TODO(), &dynamodb.QueryInput{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repo.tableName),
 		KeyConditionExpression:    expr.KeyCondition(),
 		ExpressionAttributeValues: expr.Values(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -108,7 +114,7 @@ func (repo *RepositoryDynamoDB) FindByCoupleIdAndStartDateBefore(coupleId string
 
 func (repo *RepositoryDynamoDB) findById(coupleId string, id string) (*Event, error) {
 	output, err := repo.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repo.tableName),
 		Key:       repo.getKey(coupleId, id),
 	})
 	if err != nil {
@@ -193,7 +199,7 @@ func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req EditReq) 
 		}
 
 		response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-			TableName:                 aws.String(tableName),
+			TableName:                 aws.String(repo.tableName),
 			Key:                       repo.getKey(coupleId, id),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
@@ -218,7 +224,7 @@ func (repo *RepositoryDynamoDB) Update(coupleId string, id string, req EditReq) 
 func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) (*VO, error) {
 
 	deleteInput := &dynamodb.DeleteItemInput{
-		TableName:    aws.String(tableName),
+		TableName:    aws.String(repo.tableName),
 		Key:          repo.getKey(coupleId, id),
 		ReturnValues: types.ReturnValueAllOld,
 	}
@@ -249,7 +255,7 @@ func (repo *RepositoryDynamoDB) Delete(coupleId string, id string) (*VO, error) 
 func (repo *RepositoryDynamoDB) DeleteTransaction(coupleId string, id string, transaction *model.DynamoDBWriteTransaction) error {
 	transactionItem := &types.TransactWriteItem{
 		Delete: &types.Delete{
-			TableName: aws.String(tableName),
+			TableName: aws.String(repo.tableName),
 			Key:       repo.getKey(coupleId, id),
 		},
 	}
@@ -276,7 +282,7 @@ func (repo *RepositoryDynamoDB) QueryByCoupleIdAndType(coupleId string, eventTyp
 		return nil, err
 	}
 	input := &dynamodb.QueryInput{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repo.tableName),
 		IndexName:                 aws.String(typeIndexName),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),

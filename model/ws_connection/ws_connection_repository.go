@@ -10,8 +10,6 @@ import (
 	"log"
 )
 
-const tableName = "WSConnection"
-
 type Repository interface {
 	DeleteBySocialIdAndProvider(socialId string, provider string) error
 	FindBySocialIdAndProvider(socialId string, provider string) (*WSConnection, error)
@@ -19,16 +17,23 @@ type Repository interface {
 }
 
 type RepositoryDynamoDB struct {
-	client dynamodb.Client
+	client    dynamodb.Client
+	tableName string
 }
 
-func NewRepository(client *dynamodb.Client) RepositoryDynamoDB {
-	return RepositoryDynamoDB{client: *client}
+func NewRepository(client *dynamodb.Client, stage string) RepositoryDynamoDB {
+	var table string
+	if stage == "dev" {
+		table = "dev_WSConnection"
+	} else {
+		table = "WSConnection"
+	}
+	return RepositoryDynamoDB{client: *client, tableName: table}
 }
 
 func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provider string) (*WSConnection, error) {
 	result, err := repo.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repo.tableName),
 		Key:       repo.getKey(socialId, provider),
 	})
 	if err != nil {
@@ -51,7 +56,7 @@ func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provi
 
 func (repo *RepositoryDynamoDB) DeleteBySocialIdAndProvider(socialId string, provider string) error {
 	input := &dynamodb.DeleteItemInput{
-		TableName:    aws.String(tableName),
+		TableName:    aws.String(repo.tableName),
 		Key:          repo.getKey(socialId, provider),
 		ReturnValues: types.ReturnValueNone,
 	}
@@ -78,7 +83,7 @@ func (repo *RepositoryDynamoDB) Create(socialId string, provider string, connect
 	}
 
 	input := &dynamodb.PutItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repo.tableName),
 		Item:      item,
 	}
 

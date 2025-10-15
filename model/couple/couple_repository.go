@@ -11,8 +11,6 @@ import (
 	"log"
 )
 
-const tableName = "Couple"
-
 type Repository interface {
 	Save(couple *Couple) (*Couple, error)
 	SaveTransaction(couple *Couple) (*types.TransactWriteItem, error)
@@ -25,11 +23,18 @@ type Repository interface {
 
 type RepositoryDynamoDB struct {
 	*model.DynamoDBRepository[Couple]
-	client *dynamodb.Client
+	client    *dynamodb.Client
+	tableName string
 }
 
-func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
-	return &RepositoryDynamoDB{client: client, DynamoDBRepository: model.NewBaseDynamoRepository[Couple](client, tableName)}
+func NewRepository(client *dynamodb.Client, stage string) *RepositoryDynamoDB {
+	var table string
+	if stage == "dev" {
+		table = "dev_Couple"
+	} else {
+		table = "Couple"
+	}
+	return &RepositoryDynamoDB{client: client, DynamoDBRepository: model.NewBaseDynamoRepository[Couple](client, table), tableName: table}
 }
 
 func (repository *RepositoryDynamoDB) Save(couple *Couple) (*Couple, error) {
@@ -39,7 +44,7 @@ func (repository *RepositoryDynamoDB) Save(couple *Couple) (*Couple, error) {
 	}
 
 	_, err = repository.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String("Couple"),
+		TableName: aws.String(repository.tableName),
 		Item:      item,
 	})
 
@@ -62,7 +67,7 @@ func (repository *RepositoryDynamoDB) FindByCoupleCode(coupleCode *string) ([]Co
 		return nil, err
 	}
 	result, err := repository.client.Scan(context.TODO(), &dynamodb.ScanInput{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repository.tableName),
 		ExpressionAttributeNames:  expr.Names(),
 		ExpressionAttributeValues: expr.Values(),
 		FilterExpression:          expr.Filter(),
@@ -98,7 +103,7 @@ func (repository *RepositoryDynamoDB) SaveTransaction(couple *Couple) (*types.Tr
 		return nil, err
 	}
 	transaction := &types.TransactWriteItem{Put: &types.Put{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repository.tableName),
 		Item:      item,
 	}}
 
@@ -109,7 +114,7 @@ func (repository *RepositoryDynamoDB) SaveTransaction(couple *Couple) (*types.Tr
 func (repository *RepositoryDynamoDB) DeleteTransaction(id string) (*types.TransactWriteItem, error) {
 	transaction := &types.TransactWriteItem{
 		Delete: &types.Delete{
-			TableName: aws.String(tableName),
+			TableName: aws.String(repository.tableName),
 			Key:       repository.getKey(id),
 		}}
 
@@ -140,7 +145,7 @@ func (repository *RepositoryDynamoDB) Update(couple *UpdateCoupleReq) (*Couple, 
 	}
 
 	response, err := repository.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repository.tableName),
 		Key:                       repository.getKey(partitionKey),
 		ExpressionAttributeValues: expr.Values(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -189,7 +194,7 @@ func (repository *RepositoryDynamoDB) UpdateTransaction(req *UpdateCoupleReq, tr
 
 	transactionItem := &types.TransactWriteItem{
 		Update: &types.Update{
-			TableName:                 aws.String(tableName),
+			TableName:                 aws.String(repository.tableName),
 			Key:                       repository.getKey(partitionKey),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),

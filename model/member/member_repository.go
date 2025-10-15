@@ -12,8 +12,6 @@ import (
 	"log"
 )
 
-const tableName = "Member"
-
 type Repository interface {
 	FindBySocialIdAndProvider(socialId string, provider string) (*Member, error)
 	Save(member *Member) (*Member, error)
@@ -25,17 +23,24 @@ type Repository interface {
 }
 
 type RepositoryDynamoDB struct {
-	client dynamodb.Client
+	client    dynamodb.Client
+	tableName string
 }
 
-func NewRepository(client *dynamodb.Client) *RepositoryDynamoDB {
-	return &RepositoryDynamoDB{client: *client}
+func NewRepository(client *dynamodb.Client, stage string) *RepositoryDynamoDB {
+	var table string
+	if stage == "dev" {
+		table = "dev_Member"
+	} else {
+		table = "Member"
+	}
+	return &RepositoryDynamoDB{client: *client, tableName: table}
 }
 
 func (repo *RepositoryDynamoDB) FindBySocialIdAndProvider(socialId string, provider string) (*Member, error) {
 
 	result, err := repo.client.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repo.tableName),
 		Key:       repo.getKey(socialId, provider),
 	})
 	if err != nil {
@@ -60,7 +65,7 @@ func (repo *RepositoryDynamoDB) Save(member *Member) (*Member, error) {
 		return nil, err
 	}
 	_, err = repo.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(repo.tableName),
 		Item:      item,
 	})
 	if err != nil {
@@ -76,7 +81,7 @@ func (repo *RepositoryDynamoDB) UpdateNonNil(member *UpdateMemberReq) (*Member, 
 	}
 
 	response, err := repo.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repo.tableName),
 		Key:                       repo.getKey(member.SocialId, member.Provider),
 		ExpressionAttributeValues: expr.Values(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -107,7 +112,7 @@ func (repo *RepositoryDynamoDB) UpdateNonNilTransaction(req *UpdateMemberReq, tr
 		return nil, err
 	}
 	transactionItem := &types.TransactWriteItem{Update: &types.Update{
-		TableName:                 aws.String(tableName),
+		TableName:                 aws.String(repo.tableName),
 		Key:                       repo.getKey(req.SocialId, req.Provider),
 		ExpressionAttributeValues: expr.Values(),
 		ExpressionAttributeNames:  expr.Names(),
@@ -122,7 +127,7 @@ func (repo *RepositoryDynamoDB) UpdateFcmToken(socialId string, provider string,
 	var input *dynamodb.UpdateItemInput
 	if fcmToken != nil {
 		input = &dynamodb.UpdateItemInput{
-			TableName:        aws.String(tableName),
+			TableName:        aws.String(repo.tableName),
 			Key:              repo.getKey(socialId, provider),
 			UpdateExpression: aws.String("SET fcmToken = :fcmToken"),
 			ExpressionAttributeValues: map[string]types.AttributeValue{
@@ -132,7 +137,7 @@ func (repo *RepositoryDynamoDB) UpdateFcmToken(socialId string, provider string,
 		}
 	} else {
 		input = &dynamodb.UpdateItemInput{
-			TableName:        aws.String(tableName),
+			TableName:        aws.String(repo.tableName),
 			Key:              repo.getKey(socialId, provider),
 			UpdateExpression: aws.String("REMOVE fcmToken"),
 			ReturnValues:     types.ReturnValueAllNew,
@@ -160,7 +165,7 @@ func (repo *RepositoryDynamoDB) RemoveCoupleIdTransaction(socialId string, provi
 	}
 	transactionItem := &types.TransactWriteItem{
 		Update: &types.Update{
-			TableName:        aws.String(tableName),
+			TableName:        aws.String(repo.tableName),
 			Key:              repo.getKey(socialId, provider),
 			UpdateExpression: aws.String("REMOVE coupleId"),
 		},
@@ -174,7 +179,7 @@ func (repo *RepositoryDynamoDB) RemoveCoupleIdTransaction(socialId string, provi
 func (repo *RepositoryDynamoDB) DeleteTransaction(socialId string, provider string, transaction *model.DynamoDBWriteTransaction) error {
 	transactionItem := &types.TransactWriteItem{
 		Delete: &types.Delete{
-			TableName: aws.String(tableName),
+			TableName: aws.String(repo.tableName),
 			Key:       repo.getKey(socialId, provider),
 		},
 	}

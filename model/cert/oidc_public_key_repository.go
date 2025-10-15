@@ -26,15 +26,16 @@ type OIDCPublicKey struct {
 type OIDCPublicKeyRepositoryImpl struct {
 	httpClient     *http.Client
 	dynamoDBClient *dynamodb.Client
+	tableName      string
 }
 
 func NewOIDCPublicKeyRepository(httpClient *http.Client, dynamodbClient *dynamodb.Client) *OIDCPublicKeyRepositoryImpl {
-	return &OIDCPublicKeyRepositoryImpl{httpClient: httpClient, dynamoDBClient: dynamodbClient}
+	return &OIDCPublicKeyRepositoryImpl{httpClient: httpClient, dynamoDBClient: dynamodbClient, tableName: "Cert"}
 }
 
 func (repository *OIDCPublicKeyRepositoryImpl) FindPublicKeyInDB(provider string) (*CertResponse, error) {
 	result, err := repository.dynamoDBClient.GetItem(context.TODO(), &dynamodb.GetItemInput{
-		TableName: aws.String("Cert"),
+		TableName: aws.String(repository.tableName),
 		Key: map[string]types.AttributeValue{
 			"provider": &types.AttributeValueMemberS{Value: provider},
 		},
@@ -91,7 +92,7 @@ func (repository *OIDCPublicKeyRepositoryImpl) SaveJWK(provider string, jwks []J
 	}
 
 	_, err := repository.dynamoDBClient.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String("Cert"),
+		TableName: aws.String(repository.tableName),
 		Item: map[string]types.AttributeValue{
 			"provider": &types.AttributeValueMemberS{Value: provider},
 			"keys": &types.AttributeValueMemberL{
