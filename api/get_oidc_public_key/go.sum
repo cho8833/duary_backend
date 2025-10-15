@@ -42,6 +42,7 @@ github.com/cho8833/duary_backend/appjwt v1.0.0 h1:Ih6PqGDB/UlbgQlGy9iLYd3BLGBJP2
 github.com/cho8833/duary_backend/appjwt v1.0.0/go.mod h1:51GIQhdoJarWlnHNlApyz7KOH5ry0sOLwxDJrrjyBSs=
 github.com/cho8833/duary_backend/model v1.0.1 h1:LBguPWPdd/HBZ7/Il8F9vct3dT0dAcLRgZyGx0T42cE=
 github.com/cho8833/duary_backend/model v1.0.1/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
+github.com/cho8833/duary_backend/model v1.0.2/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
 github.com/cho8833/duary_backend/shared v1.0.0 h1:dxxUT7zjACh0YOfqGPBRUV/chg8FCZQ5bax/E/RWqZs=
 github.com/cho8833/duary_backend/shared v1.0.0/go.mod h1:oMx1+AWe0c0xpT+OYpVZHIBep+9BZ61mZht2ArWiFQw=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
