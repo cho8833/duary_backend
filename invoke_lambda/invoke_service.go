@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/lambda/types"
 	"github.com/cho8833/duary_backend/model/event"
 	"log"
-	"os"
 	"time"
 )
 
@@ -47,7 +46,7 @@ func (s *ServiceImpl) SendEventFCM(context context.Context, stage string, vo *ev
 		return err
 	}
 	invokeInput := lambda.InvokeInput{
-		FunctionName: aws.String(os.Getenv("send_fcm")),
+		FunctionName: aws.String("send_fcm"),
 		Payload:      payload,
 		LogType:      types.LogTypeTail,
 	}
