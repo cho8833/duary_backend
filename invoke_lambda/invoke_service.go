@@ -9,10 +9,11 @@ import (
 	"github.com/cho8833/duary_backend/model/event"
 	"log"
 	"os"
+	"time"
 )
 
 type Service interface {
-	SendEventFCM(context context.Context, vo *event.VO) error
+	SendEventFCM(context context.Context, stage string, vo *event.VO, targetMemberId string, action EventAction) error
 }
 
 type ServiceImpl struct {
@@ -33,8 +34,14 @@ func NewService(client *lambda.Client) Service {
 	return &ServiceImpl{client: *client}
 }
 
-func (s *ServiceImpl) SendEventFCM(context context.Context, vo *event.VO) error {
-	payload, err := json.Marshal(vo)
+func (s *ServiceImpl) SendEventFCM(context context.Context, stage string, vo *event.VO, targetMemberId string, action EventAction) error {
+	payload, err := json.Marshal(&SendEventReq{
+		Title:          vo.Title,
+		TargetMemberId: []string{targetMemberId},
+		Body:           s.formatTime(vo.StartDateTime),
+		Stage:          stage,
+	})
+
 	if err != nil {
 		log.Printf("SendEventFCM - json marshal err: %v", err)
 		return err
@@ -52,4 +59,8 @@ func (s *ServiceImpl) SendEventFCM(context context.Context, vo *event.VO) error 
 
 	log.Printf("SendEventFCM - invokeOutput: %v", string(invokeOutput.Payload))
 	return nil
+}
+
+func (s *ServiceImpl) formatTime(date time.Time) string {
+	return date.Format("2006년 01월 02일 15시 04분")
 }
