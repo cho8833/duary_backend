@@ -20,6 +20,7 @@ resource "aws_apigatewayv2_stage" "duary_apigw_dev_stage" {
     stage_variables = {
         stage = "dev"
     }
+    auto_deploy = true
 }
 
 resource "aws_apigatewayv2_stage" "duary_apigw_prod_stage" {
@@ -38,11 +39,21 @@ resource "aws_apigatewayv2_stage" "duary_ws_apigw_dev_stage" {
     stage_variables = {
         stage = "dev"
     }
+    default_route_settings {
+        throttling_burst_limit = 500
+        throttling_rate_limit = 1000
+    }
+    auto_deploy = true
 }
 
 resource "aws_apigatewayv2_stage" "duary_ws_apigw_prod_stage" {
     api_id = aws_apigatewayv2_api.duary_ws_apigw.id
     name = "prod"
+
+    default_route_settings {
+        throttling_burst_limit = 500
+        throttling_rate_limit = 1000
+    }
 
     stage_variables = {
         stage = "prod"
