@@ -2,8 +2,6 @@ module github.com/cho8833/duary_backend/invoke_lambda
 
 go 1.23
 
-toolchain go1.24.10
-
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.2
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.83.1

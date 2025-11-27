@@ -12,13 +12,15 @@ import (
 )
 
 type Service interface {
-	sendEventFCM(context context.Context, vo *event.VO) error
+	SendEventFCM(context context.Context, vo *event.VO) error
 }
 
 type ServiceImpl struct {
 	client lambda.Client
 }
 
+// NewService returns invoke lambda service
+// if client is nil, create new default lambda client
 func NewService(client *lambda.Client) Service {
 	if client == nil {
 		newClient, err := GetLambdaClient()
@@ -31,10 +33,10 @@ func NewService(client *lambda.Client) Service {
 	return &ServiceImpl{client: *client}
 }
 
-func (s *ServiceImpl) sendEventFCM(context context.Context, vo *event.VO) error {
+func (s *ServiceImpl) SendEventFCM(context context.Context, vo *event.VO) error {
 	payload, err := json.Marshal(vo)
 	if err != nil {
-		log.Printf("sendEventFCM - json marshal err: %v", err)
+		log.Printf("SendEventFCM - json marshal err: %v", err)
 		return err
 	}
 	invokeInput := lambda.InvokeInput{
@@ -44,10 +46,10 @@ func (s *ServiceImpl) sendEventFCM(context context.Context, vo *event.VO) error 
 	}
 	invokeOutput, err := s.client.Invoke(context, &invokeInput)
 	if err != nil {
-		log.Printf("sendEventFCM - invoke err: %v", err)
+		log.Printf("SendEventFCM - invoke err: %v", err)
 		return err
 	}
 
-	log.Printf("sendEventFCM - invokeOutput: %v", string(invokeOutput.Payload))
+	log.Printf("SendEventFCM - invokeOutput: %v", string(invokeOutput.Payload))
 	return nil
 }
