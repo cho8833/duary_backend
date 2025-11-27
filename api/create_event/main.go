@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/cho8833/duary_backend/invoke_lambda"
 	"github.com/cho8833/duary_backend/model"
 	"github.com/cho8833/duary_backend/model/couple"
 	"github.com/cho8833/duary_backend/model/event"
@@ -19,7 +20,7 @@ import (
 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/create_event/main.go && chmod 755 bootstrap && zip  build/package/create_event.zip bootstrap && rm bootstrap
 */
 
-func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func createEvent(context context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
 	//----------------------------init----------------------------------------//
 	dynamoDBClient, err := model.GetDynamoDBClient()
@@ -52,7 +53,6 @@ func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 	coupleSvc := couple.NewService(coupleRepo)
 	eventSvc := event.NewService(eventRepo)
 
-	authContext := shared.NewAuthContext(req)
 	saveEventReq := &event.SaveReq{}
 	err = json.Unmarshal([]byte(req.Body), &saveEventReq)
 	if err != nil {
@@ -63,38 +63,50 @@ func createEvent(_ context.Context, req events.APIGatewayProxyRequest) (events.A
 	saveEventReq.CoupleId = *coupleId
 	saveEventReq.CreatedBy = loginMemberId
 
-	//----------------------------Save Event(DynamoDB)-------------------------------//
+	//----------------------------Save Event(DynamoDB)-----------------------------------//
 	vo, svcError := eventSvc.Save(saveEventReq)
 	if svcError != nil {
 		return shared.LambdaAppErrorResponse(svcError), nil
 	}
 
-	//----------------------------Send WS Message to lover-------------------------------//
-	wsRepo := ws_connection.NewRepository(dynamoDBClient, stage)
-	wsSvc, err := ws.NewService(&wsRepo, stage)
-	if err == nil {
-		loginMemberId := *authContext.SocialId + "-" + *authContext.Provider
-		foundCouple, svcErr := coupleSvc.FindById(*coupleId)
-		if svcErr == nil {
-			if len(foundCouple.Members) > 1 {
-				var otherMemberId string
-				for _, coupleMember := range foundCouple.Members {
-					memberId := coupleMember.GetId()
-					if memberId != loginMemberId {
-						otherMemberId = memberId
-					}
+	//------------------if save completed, try sending WS, FCM to lover-----------------//
+	// find couple
+	foundCouple, svcErr := coupleSvc.FindById(*coupleId)
+	if svcErr == nil {
+		if len(foundCouple.Members) > 1 {
+			var loverId string
+			for _, coupleMember := range foundCouple.Members {
+				memberId := coupleMember.GetId()
+				if memberId != loginMemberId {
+					loverId = memberId
 				}
-				idSplit := strings.Split(otherMemberId, "-")
+			}
+			idSplit := strings.Split(loverId, "-")
+
+			//----------------------------Invoke Send FCM to lover Lambda--------------------------------------//
+			lambdaService := invoke_lambda.NewService(nil)
+			err = lambdaService.SendEventFCM(context, stage, vo, loverId, invoke_lambda.EventCreated)
+			if err != nil {
+				log.Printf("failed to send fcm : " + err.Error())
+			}
+
+			//----------------------------Send WS Message to lover--------------------------------------//
+			wsRepo := ws_connection.NewRepository(dynamoDBClient, stage)
+			wsSvc, err := ws.NewService(&wsRepo, stage)
+			if err == nil {
 				err = wsSvc.Send(idSplit[0], idSplit[1], ws.EventCreated, vo)
 				if err != nil {
-					log.Println("lover is not connected to ws", err)
+					log.Printf("failed to send ws : " + err.Error())
 				}
 			} else {
-				log.Printf("couple is not connected, stop sending WS Message")
+				log.Printf("failed to create WS client : " + err.Error())
 			}
+
+		} else {
+			log.Printf("couple is not connected, stop sending WS Message")
 		}
 	} else {
-		log.Printf(err.Error())
+		log.Printf("faeild to find couple : " + svcErr.Error())
 	}
 
 	return shared.LambdaResponseWithData(vo), nil
