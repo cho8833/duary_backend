@@ -50,7 +50,7 @@ func (repo *RepositoryDynamoDB) Save(event *Event) (*VO, error) {
 	}
 
 	_, err = repo.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String("Event"),
+		TableName: aws.String(repo.tableName),
 		Item:      item,
 	})
 
