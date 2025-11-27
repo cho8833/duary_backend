@@ -89,3 +89,23 @@ resource "aws_iam_policy" "allow_execute_ws_api" {
   name = "AllowExecuteWSAPI"
   policy = data.aws_iam_policy_document.allow_execute_ws_api_doc.json
 }
+
+data "aws_iam_policy_document" "allow_execute_send_fcm_doc" {
+  statement {
+    sid = "AllowExecuteSendFCMAPI"
+    effect = "Allow"
+    actions = [
+      "lambda:InvokeFunction"
+    ]
+
+    resources = [
+      module.send_fcm.function_arn
+    ]
+  }
+  version = "2012-10-17"
+}
+
+resource "aws_iam_policy" "allow_execute_send_fcm" {
+  name = "AllowExecuteSendFCM"
+  policy = data.aws_iam_policy_document.allow_execute_send_fcm_doc.json
+}

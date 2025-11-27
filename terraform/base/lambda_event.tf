@@ -52,6 +52,7 @@ module "create_event_api" {
     "dev_event_table_crud" = data.terraform_remote_state.dev.outputs.dynamodb_dev_event_crud_policy_arn
     "prod_event_table_crud" = data.terraform_remote_state.prod.outputs.dynamodb_prod_event_crud_policy_arn
     "execute_ws_api" = aws_iam_policy.allow_execute_ws_api.arn
+    "execute_send_fcm" = aws_iam_policy.allow_execute_send_fcm.arn
   }
 }
 
