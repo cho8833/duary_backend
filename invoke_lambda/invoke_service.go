@@ -46,9 +46,10 @@ func (s *ServiceImpl) SendEventFCM(context context.Context, stage string, vo *ev
 		return err
 	}
 	invokeInput := lambda.InvokeInput{
-		FunctionName: aws.String("send_fcm"),
-		Payload:      payload,
-		LogType:      types.LogTypeTail,
+		InvocationType: types.InvocationTypeEvent,
+		FunctionName:   aws.String("send_fcm"),
+		Payload:        payload,
+		LogType:        types.LogTypeTail,
 	}
 	invokeOutput, err := s.client.Invoke(context, &invokeInput)
 	if err != nil {
