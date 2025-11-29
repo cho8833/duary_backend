@@ -17,13 +17,13 @@ data "aws_iam_policy_document" "dynamodb_cert_crud_policy_doc" {
 }
 
 resource "aws_iam_policy" "dynamodb_cert_crud_policy" {
-  name = "dynamodb-cert-crud-policy"
+  name   = "dynamodb-cert-crud-policy"
   policy = data.aws_iam_policy_document.dynamodb_cert_crud_policy_doc.json
 }
 
 data "aws_iam_policy_document" "allow_invoke_lambda_get_oidc_public_key_policy_doc" {
   statement {
-    sid ="AllowInvokeLambdaGetOidcPublicKey"
+    sid    = "AllowInvokeLambdaGetOidcPublicKey"
     effect = "Allow"
     actions = [
       "lambda:InvokeFunction"
@@ -39,12 +39,12 @@ data "aws_iam_policy_document" "allow_invoke_lambda_get_oidc_public_key_policy_d
 
 resource "aws_iam_policy" "allow_invoke_lambda_get_oidc_public_key_policy" {
   policy = data.aws_iam_policy_document.allow_invoke_lambda_get_oidc_public_key_policy_doc.json
-  name = "invoke-lambda-get-oidc-public-key-policy"
+  name   = "invoke-lambda-get-oidc-public-key-policy"
 }
 
 data "aws_iam_policy_document" "allow_crud_event_bridge_scheduler_doc" {
   statement {
-    sid = "AllowCRUDEventBridgeScheduler"
+    sid    = "AllowCRUDEventBridgeScheduler"
     effect = "Allow"
     actions = [
       "scheduler:GetSchedule",
@@ -58,17 +58,33 @@ data "aws_iam_policy_document" "allow_crud_event_bridge_scheduler_doc" {
     ]
   }
 
+  statement {
+    sid    = "AllowPassRole"
+    effect = "Allow"
+    actions = [
+      "iam:PassRole"
+    ]
+    resources = [
+      "arn:aws:iam::*:role/*"
+    ]
+    condition {
+      test     = "StringLike"
+      values = ["scheduler.amazonaws.com"]
+      variable = "iam:PassedToService"
+    }
+  }
+
   version = "2012-10-17"
 }
 
 resource "aws_iam_policy" "allow_crud_event_bridge_scheduler" {
   policy = data.aws_iam_policy_document.allow_crud_event_bridge_scheduler_doc.json
-  name = "full-access-event-bridge-scheduler"
+  name   = "full-access-event-bridge-scheduler"
 }
 
 data "aws_iam_policy_document" "allow_execute_ws_api_doc" {
   statement {
-    sid = "AllowExecuteWSAPI"
+    sid    = "AllowExecuteWSAPI"
     effect = "Allow"
     actions = [
       "apigateway:*",
@@ -86,13 +102,13 @@ data "aws_iam_policy_document" "allow_execute_ws_api_doc" {
 }
 
 resource "aws_iam_policy" "allow_execute_ws_api" {
-  name = "AllowExecuteWSAPI"
+  name   = "AllowExecuteWSAPI"
   policy = data.aws_iam_policy_document.allow_execute_ws_api_doc.json
 }
 
 data "aws_iam_policy_document" "allow_execute_send_fcm_doc" {
   statement {
-    sid = "AllowExecuteSendFCMAPI"
+    sid    = "AllowExecuteSendFCMAPI"
     effect = "Allow"
     actions = [
       "lambda:InvokeFunction"
@@ -106,6 +122,6 @@ data "aws_iam_policy_document" "allow_execute_send_fcm_doc" {
 }
 
 resource "aws_iam_policy" "allow_execute_send_fcm" {
-  name = "AllowExecuteSendFCM"
+  name   = "AllowExecuteSendFCM"
   policy = data.aws_iam_policy_document.allow_execute_send_fcm_doc.json
 }
