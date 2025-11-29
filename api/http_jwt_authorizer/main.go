@@ -12,7 +12,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/http_jwt_authorizer/main.go && chmod 755 bootstrap && zip  build/package/http_jwt_authorizer.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip  ../../build/package/http_jwt_authorizer.zip bootstrap && rm bootstrap
 */
 func jwtAuthorizer(ctx context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayV2CustomAuthorizerIAMPolicyResponse, error) {
 	key := os.Getenv("secretKey")

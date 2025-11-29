@@ -14,7 +14,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/withdrawal/main.go && chmod 755 bootstrap && zip  build/package/withdrawal.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip  ../../build/package/withdrawal.zip bootstrap && rm bootstrap
 */
 // TODO: 소셜 로그인 연결 해제 필요
 func withdrawal(_ context.Context, request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {

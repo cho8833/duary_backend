@@ -4,9 +4,9 @@ go 1.22.1
 
 require (
 	github.com/aws/aws-lambda-go v1.48.0
-	github.com/cho8833/duary_backend/model v1.0.2
+	github.com/cho8833/duary_backend/model v1.0.3
 	github.com/cho8833/duary_backend/shared v1.0.0
-	github.com/cho8833/duary_backend/ws v1.0.1
+	github.com/cho8833/duary_backend/ws v1.0.2
 )
 
 require (

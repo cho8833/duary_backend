@@ -13,7 +13,7 @@ import (
 )
 
 /*
-GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/send_fcm/main.go && chmod 755 bootstrap && zip build/package/send_fcm.zip bootstrap duary-8c5b2-firebase-adminsdk-9d1a5-e86abbedfc.json && rm bootstrap
+GCO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip ../../build/package/send_fcm.zip bootstrap duary-8c5b2-firebase-adminsdk-9d1a5-e86abbedfc.json && rm bootstrap
 */
 func sendNotification(ctx context.Context, event json.RawMessage) (events.APIGatewayProxyResponse, error) {
 	fcmClient, err := fcm.GetFCMClient()

@@ -4,8 +4,8 @@ go 1.22.1
 
 require (
 	github.com/aws/aws-lambda-go v1.50.0
-	github.com/cho8833/duary_backend/appjwt v1.0.0
-	github.com/cho8833/duary_backend/auth v1.0.0
+	github.com/cho8833/duary_backend/appjwt v1.0.1
+	github.com/cho8833/duary_backend/auth v1.0.1
 )
 
 require (
@@ -29,7 +29,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
-	github.com/cho8833/duary_backend/model v1.0.1 // indirect
+	github.com/cho8833/duary_backend/model v1.0.3 // indirect
 	github.com/cho8833/duary_backend/shared v1.0.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect

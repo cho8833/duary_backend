@@ -15,7 +15,7 @@ func main() {
 }
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap ws_api/disconnect/main.go && chmod 755 bootstrap && zip  build/package/ws_disconnect.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip  ../../build/package/ws_disconnect.zip bootstrap && rm bootstrap
 */
 func disconnect(_ context.Context, req events.APIGatewayWebsocketProxyRequest) (events.APIGatewayProxyResponse, error) {
 

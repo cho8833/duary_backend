@@ -19,7 +19,7 @@ import (
 )
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap api/connect_couple/main.go && chmod 755 bootstrap && zip  build/package/connect_couple.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip  ../../build/package/connect_couple.zip bootstrap && rm bootstrap
 */
 
 type ConnectCoupleReq struct {

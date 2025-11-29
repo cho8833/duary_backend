@@ -16,7 +16,7 @@ func main() {
 }
 
 /*
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap ws_api/ws_jwt_authorizer/main.go && chmod 755 bootstrap && zip  build/package/ws_jwt_authorizer.zip bootstrap && rm bootstrap
+GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -trimpath -tags lambda.norpc -o bootstrap main.go && chmod 755 bootstrap && zip  ../../build/package/ws_jwt_authorizer.zip bootstrap && rm bootstrap
 */
 func jwtAuthorizer(_ context.Context, request events.APIGatewayWebsocketProxyRequest) (events.APIGatewayV2CustomAuthorizerIAMPolicyResponse, error) {
 	key := os.Getenv("secretKey")
