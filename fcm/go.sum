@@ -76,8 +76,8 @@ github.com/census-instrumentation/opencensus-proto v0.4.1 h1:iKLQ0xPNFxR/2hzXZMr
 github.com/census-instrumentation/opencensus-proto v0.4.1/go.mod h1:4T9NM4+4Vw91VeyqjLS6ao50K5bOcLKN6Q42XnYaRYw=
 github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
-github.com/cho8833/duary_backend/model v1.0.1 h1:LBguPWPdd/HBZ7/Il8F9vct3dT0dAcLRgZyGx0T42cE=
-github.com/cho8833/duary_backend/model v1.0.1/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
+github.com/cho8833/duary_backend/model v1.0.3 h1:DcvN8vg7wiBrpbfyExs1sr+m1V7Zz059f2XxZgN9l2U=
+github.com/cho8833/duary_backend/model v1.0.3/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
 github.com/cho8833/duary_backend/shared v1.0.0 h1:dxxUT7zjACh0YOfqGPBRUV/chg8FCZQ5bax/E/RWqZs=
 github.com/cho8833/duary_backend/shared v1.0.0/go.mod h1:oMx1+AWe0c0xpT+OYpVZHIBep+9BZ61mZht2ArWiFQw=
 github.com/cncf/xds/go v0.0.0-20240905190251-b4127c9b8d78 h1:QVw89YDxXxEe+l8gU8ETbOasdwEV+avkR75ZzsVV9WI=

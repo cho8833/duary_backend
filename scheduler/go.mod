@@ -6,7 +6,8 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.13.4
-	github.com/cho8833/duary_backend/model v1.0.0
+	github.com/cho8833/duary_backend/model v1.0.3
+	github.com/cho8833/duary_backend/shared v1.0.0
 )
 
 require (
@@ -27,6 +28,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
-	github.com/cho8833/duary_backend/shared v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
+	github.com/teambition/rrule-go v1.8.2 // indirect
 )

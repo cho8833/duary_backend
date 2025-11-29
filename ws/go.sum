@@ -34,5 +34,5 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.33.19 h1:1XuUZ8mYJw9B6lzAkXhqHlJd/Xv
 github.com/aws/aws-sdk-go-v2/service/sts v1.33.19/go.mod h1:cQnB8CUnxbMU82JvlqjKR2HBOm3fe9pWorWBza6MBJ4=
 github.com/aws/smithy-go v1.22.5 h1:P9ATCXPMb2mPjYBgueqJNCA5S9UfktsW0tTxi+a7eqw=
 github.com/aws/smithy-go v1.22.5/go.mod h1:t1ufH5HMublsJYulve2RKmHDC15xu1f26kHCp/HgceI=
-github.com/cho8833/duary_backend/model v1.0.1 h1:LBguPWPdd/HBZ7/Il8F9vct3dT0dAcLRgZyGx0T42cE=
-github.com/cho8833/duary_backend/model v1.0.1/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
+github.com/cho8833/duary_backend/model v1.0.3 h1:DcvN8vg7wiBrpbfyExs1sr+m1V7Zz059f2XxZgN9l2U=
+github.com/cho8833/duary_backend/model v1.0.3/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=

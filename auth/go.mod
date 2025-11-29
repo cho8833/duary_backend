@@ -5,11 +5,12 @@ go 1.22.1
 require (
 	github.com/aws/aws-lambda-go v1.48.0
 	github.com/cho8833/duary_backend/appjwt v1.0.0
-	github.com/cho8833/duary_backend/model v1.0.1
+	github.com/cho8833/duary_backend/model v1.0.3
 	github.com/cho8833/duary_backend/shared v1.0.0
 )
 
 require (
+	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
 	github.com/aws/aws-sdk-go-v2/config v1.29.14 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.67 // indirect

@@ -6,7 +6,7 @@ toolchain go1.24.10
 
 require (
 	github.com/aws/aws-lambda-go v1.50.0
-	github.com/cho8833/duary_backend/invoke_lambda v1.0.3
+	github.com/cho8833/duary_backend/invoke_lambda v1.0.4
 	github.com/cho8833/duary_backend/model v1.0.3
 	github.com/cho8833/duary_backend/shared v1.0.0
 	github.com/cho8833/duary_backend/ws v1.0.1

@@ -42,8 +42,8 @@ github.com/aws/aws-sdk-go-v2/service/sts v1.41.2 h1:a5UTtD4mHBU3t0o6aHQZFJTNKVfx
 github.com/aws/aws-sdk-go-v2/service/sts v1.41.2/go.mod h1:6TxbXoDSgBQ225Qd8Q+MbxUxUh6TtNKwbRt/EPS9xso=
 github.com/aws/smithy-go v1.23.2 h1:Crv0eatJUQhaManss33hS5r40CG3ZFH+21XSkqMrIUM=
 github.com/aws/smithy-go v1.23.2/go.mod h1:LEj2LM3rBRQJxPZTB4KuzZkaZYnZPnvgIhb4pu07mx0=
-github.com/cho8833/duary_backend/model v1.0.2 h1:ZzOnQnd18gfsttYwGUSsQNNVTy4uzPtDif+I6KTaNwQ=
-github.com/cho8833/duary_backend/model v1.0.2/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
+github.com/cho8833/duary_backend/model v1.0.3 h1:DcvN8vg7wiBrpbfyExs1sr+m1V7Zz059f2XxZgN9l2U=
+github.com/cho8833/duary_backend/model v1.0.3/go.mod h1:9tW8Kny3sX4uozhmcT8cXUZYqyxzB/LyB4/QIvKycmM=
 github.com/cho8833/duary_backend/shared v1.0.0 h1:dxxUT7zjACh0YOfqGPBRUV/chg8FCZQ5bax/E/RWqZs=
 github.com/cho8833/duary_backend/shared v1.0.0/go.mod h1:oMx1+AWe0c0xpT+OYpVZHIBep+9BZ61mZht2ArWiFQw=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=

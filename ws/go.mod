@@ -5,7 +5,7 @@ go 1.22.1
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
 	github.com/aws/aws-sdk-go-v2/service/apigatewaymanagementapi v1.25.1
-	github.com/cho8833/duary_backend/model v1.0.1
+	github.com/cho8833/duary_backend/model v1.0.3
 )
 
 require (
